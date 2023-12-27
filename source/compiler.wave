@@ -1,0 +1,32 @@
+[
+    Files Required:
+    - standard.wave
+    - lex.wave
+]
+
+[
+    Main
+]
+main()() = {
+    [ get file name ]
+    wave.get_console_input()(file_path.start file_path.end)
+
+    [ load file ]
+    wave.file_to_buffer(file_path.start file_path.end)(file.start file.end error)
+
+    [ print file ]
+    wave.print.number(error)()
+    string.print.new_line()()
+    string.print(file.start file.end)()
+
+    [ lex file ]
+    compiler.lex(file.start file.end)(lexlings.start lexlings.end error)
+
+    [ print lexlings ]
+    compiler.lex.lexlings.print(lexlings.start lexlings.end)(error)
+
+    [ clean up ]
+    wave.return_memory(lexlings.start lexlings.end)()
+    wave.return_memory(file.start file.end)()
+    wave.return_memory(file_path.start file_path.end)()
+}

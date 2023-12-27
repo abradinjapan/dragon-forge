@@ -1,0 +1,426 @@
+[
+    Required Files:
+    - standard.wave
+]
+
+[
+    Lexer
+]
+
+compiler.lex.lexling.type.size()(byte_size) = {
+    wave.set(wave.integer.1)(byte_size)
+}
+
+compiler.lex.lexling.start.size()(byte_size) = {
+    general.address.size()(byte_size)
+}
+
+compiler.lex.lexling.end.size()(byte_size) = {
+    general.address.size()(byte_size)
+}
+
+compiler.lex.lexling.size()(byte_size) = {
+    [ get sizes ]
+    compiler.lex.lexling.type.size()(type.size)
+    compiler.lex.lexling.start.size()(start.size)
+    compiler.lex.lexling.end.size()(end.size)
+
+    [ calculate size ]
+    wave.integer.add(type.size start.size)(byte_size)
+    wave.integer.add(byte_size end.size)(byte_size)
+}
+
+compiler.lex.lexling.no_lexling_ID()(ID) = {
+    wave.set(wave.integer.0)(ID)
+}
+
+compiler.lex.lexling.left_parenthesis_lexling_ID()(ID) = {
+    wave.set(wave.integer.1)(ID)
+}
+
+compiler.lex.lexling.right_parenthesis_lexling_ID()(ID) = {
+    wave.set(wave.integer.2)(ID)
+}
+
+compiler.lex.lexling.left_curly_bracket_lexling_ID()(ID) = {
+    wave.set(wave.integer.3)(ID)
+}
+
+compiler.lex.lexling.right_curly_bracket_lexling_ID()(ID) = {
+    wave.set(wave.integer.4)(ID)
+}
+
+compiler.lex.lexling.equals_lexling_ID()(ID) = {
+    wave.set(wave.integer.5)(ID)
+}
+
+compiler.lex.lexling.name_lexling_ID()(ID) = {
+    wave.set(wave.integer.6)(ID)
+}
+
+compiler.lex.lexlings.read_lexling(current)(lexling.type lexling.start lexling.end new.current error) = {
+    [ setup sizes ]
+    compiler.lex.lexling.type.size()(type.size)
+    compiler.lex.lexling.start.size()(start.size)
+    compiler.lex.lexling.end.size()(end.size)
+
+    [ read type ]
+    wave.address_to_cell(current type.size)(lexling.type error)
+    wave.integer.add(current type.size)(current)
+
+    [ read start ]
+    wave.address_to_cell(current start.size)(lexling.start error)
+    wave.integer.add(current start.size)(current)
+
+    [ read end ]
+    wave.address_to_cell(current end.size)(lexling.end error)
+    wave.integer.add(current end.size)(current)
+
+    [ setup new current ]
+    wave.copy(current)(new.current)
+}
+
+compiler.lex.lexling.print(lexling.type lexling.start lexling.end)() = {
+    [ print data ]
+    wave.print.number(lexling.type)()
+    string.print.space()()
+    wave.print.number(lexling.start)()
+    string.print.space()()
+    wave.print.number(lexling.end)()
+    string.print.space()()
+
+    [ print string ]
+    string.print(lexling.start lexling.end)()
+}
+
+compiler.lex.lexlings.print(lexlings.start lexlings.end)(error) = {
+    [ setup variables ]
+    wave.set(wave.integer.1)(adjust)
+    wave.set(wave.boolean.true)(always)
+
+    [ get list information ]
+    list.get.buffer_address_start(lexlings.start)(data.start)
+    list.get.buffer_filled_index(lexlings.start)(data.index)
+
+    [ calculate buffer filled end ]
+    wave.integer.add(data.start data.index)(data.filled_end)
+    wave.integer.subtract(data.filled_end adjust)(data.filled_end)
+
+    [ setup current ]
+    wave.copy(data.start)(current)
+
+    [ setup print loop start ]
+    @loop.start
+
+    [ check to see if at end of buffer ]
+    wave.integer.within_range(data.start current data.filled_end)(in_range)
+    wave.boolean.not(in_range)(out_of_range)
+    wave.jump(out_of_range @exit)()
+
+    [ read lexling ]
+    compiler.lex.lexlings.read_lexling(current)(lexling.type lexling.start lexling.end current error)
+
+    [ print lexling ]
+    compiler.lex.lexling.print(lexling.type lexling.start lexling.end)()
+
+    [ go to start of loop ]
+    wave.jump(always @loop.start)()
+
+    [ setup exit offset ]
+    @exit
+}
+
+compiler.lex.add_lexling(lexlings.start type start end)(error) = {
+    [ setup write sizes ]
+    compiler.lex.lexling.type.size()(type.size)
+    compiler.lex.lexling.start.size()(start.size)
+    compiler.lex.lexling.end.size()(end.size)
+
+    [ write data ]
+    list.append(lexlings.start type type.size)(error)
+    list.append(lexlings.start start start.size)(error)
+    list.append(lexlings.start end end.size)(error)
+}
+
+compiler.lex.skip.whitespace(user_code.start user_code.current user_code.end)(user_code.new_current) = {
+    [ setup variables ]
+    wave.set(wave.integer.0)(whitespace.start)
+    wave.set(wave.integer.32)(whitespace.end)
+    wave.set(wave.integer.1)(always)
+    general.character.size()(character.size)
+
+    [ search for whitespace and skip it ]
+    @find_whitespace_character
+
+    [ check to see if at the end of the buffer ]
+    wave.integer.within_range(user_code.start user_code.current user_code.end)(get_next_character)
+    wave.boolean.not(get_next_character)(quit)
+    wave.jump(quit @exit)()
+
+    [ get character ]
+    wave.address_to_cell(user_code.current character.size)(character error)
+
+    [ check space character ]
+    wave.integer.within_range(whitespace.start character whitespace.end)(get_next_character)
+
+    [ exit loop if whitespace not found ]
+    wave.boolean.not(get_next_character)(whitespace_not_found)
+    wave.jump(whitespace_not_found @exit)()
+
+    [ increment to next character ]
+    wave.integer.add(user_code.current character.size)(user_code.current)
+
+    [ jump to next character ]
+    wave.jump(always @find_whitespace_character)()
+
+    [ exit ]
+    @exit
+
+    [ setup outputs ]
+    wave.copy(user_code.current)(user_code.new_current)
+}
+
+compiler.lex.scan.name.character(character)(current_adjust valid) = {
+    [ variables ]
+    wave.set(wave.boolean.true)(always)
+    wave.set(wave.integer.97)(a)
+    wave.set(wave.integer.122)(z)
+    wave.set(wave.integer.65)(A)
+    wave.set(wave.integer.90)(Z)
+    wave.set(wave.integer.48)(0)
+    wave.set(wave.integer.57)(9)
+    wave.set(wave.integer.46)(period)
+    wave.set(wave.integer.95)(underscore)
+    general.character.size()(character.size)
+
+    [ check for valid character ]
+    wave.integer.within_range(a character z)(found_character)
+    wave.jump(found_character @found_character)()
+    wave.integer.within_range(A character Z)(found_character)
+    wave.jump(found_character @found_character)()
+    wave.integer.within_range(0 character 9)(found_character)
+    wave.jump(found_character @found_character)()
+    wave.integer.within_range(period character period)(found_character)
+    wave.jump(found_character @found_character)()
+    wave.integer.within_range(underscore character underscore)(found_character)
+    wave.jump(found_character @found_character)()
+
+    [ character was not found ]
+    wave.set(wave.integer.0)(current_adjust)
+    wave.set(wave.boolean.false)(valid)
+    wave.jump(always @return)()
+
+    [ character was found ]
+    @found_character
+    wave.set(wave.boolean.true)(valid)
+
+    [ increment next ]
+    wave.copy(character.size)(current_adjust)
+
+    @return
+}
+
+compiler.lex.check.name.character(user_code.start user_code.current user_code.end)(found_character) = {
+    [ setup variables ]
+    general.character.size()(character.size)
+
+    [ check for end of buffer ]
+    wave.integer.within_range(user_code.start user_code.current user_code.end)(in_buffer_range)
+
+    [ get character ]
+    wave.address_to_cell(user_code.current character.size)(character error)
+
+    [ check for character ]
+    compiler.lex.scan.name.character(character)(current_adjust found_character)
+}
+
+compiler.lex.scan.name(user_code.start user_code.current user_code.end)(lexling.type lexling.start lexling.end user_code.new_current found_lexling) = {
+    [ setup variables ]
+    wave.set(wave.boolean.true)(always)
+    wave.set(wave.boolean.false)(false)
+    wave.set(wave.boolean.true)(true)
+    wave.set(wave.integer.1)(decrement)
+    wave.copy(user_code.current)(user_code.lexling_start)
+    general.character.size()(character.size)
+
+    [ setup blank outputs ]
+    compiler.lex.lexling.no_lexling_ID()(lexling.type)
+    wave.set(wave.integer.0)(lexling.start)
+    wave.set(wave.integer.0)(lexling.end)
+    wave.copy(user_code.current)(user_code.new_current)
+    wave.copy(false)(found_lexling)
+
+    [ setup loop start ]
+    @scan_loop
+
+    [ check for end of buffer ]
+    wave.integer.within_range(user_code.start user_code.current user_code.end)(in_buffer_range)
+    wave.boolean.not(in_buffer_range)(return)
+    wave.jump(return @return)()
+
+    [ get character ]
+    wave.address_to_cell(user_code.current character.size)(character error)
+
+    [ determine validity of character ]
+    compiler.lex.scan.name.character(character)(current_adjust valid_character)
+
+    [ next character ]
+    wave.integer.add(user_code.current current_adjust)(user_code.current)
+
+    [ check character not found ]
+    wave.boolean.not(valid_character)(invalid_character)
+    wave.jump(invalid_character @return)()
+
+    [ adjust output ]
+    compiler.lex.lexling.name_lexling_ID()(lexling.type)
+    wave.copy(user_code.lexling_start)(lexling.start)
+    wave.integer.subtract(user_code.current decrement)(lexling.end)
+    wave.copy(user_code.current)(user_code.new_current)
+    wave.copy(true)(found_lexling)
+
+    [ search next character ]
+    wave.jump(always @scan_loop)()
+
+    [ return ]
+    @return
+}
+
+compiler.lex.scan.single_character(expected_character user_code.start user_code.current user_code.end)(lexling.start lexling.end user_code.new_current found_lexling) = {
+    [ setup variables ]
+    wave.set(wave.integer.1)(always)
+    wave.set(wave.boolean.false)(false)
+    general.character.size()(character.size)
+    
+    [ setup empty lexling ]
+    wave.set(wave.integer.0)(lexling.start)
+    wave.set(wave.integer.0)(lexling.end)
+    wave.copy(user_code.current)(user_code.new_current)
+    wave.copy(false)(found_lexling)
+
+    [ ensure current is still in range ]
+    wave.integer.within_range(user_code.start user_code.current user_code.end)(in_buffer_range)
+    wave.boolean.not(in_buffer_range)(outside_buffer_range)
+    wave.jump(outside_buffer_range @return)()
+
+    [ fetch character ]
+    wave.address_to_cell(user_code.current character.size)(character buffer_error)
+
+    [ check for character and jump ]
+    wave.integer.within_range(expected_character character expected_character)(found_character)
+    wave.jump(found_character @found_character)()
+
+    [ othewise jump to character not found ]
+    wave.jump(always @return)()
+
+    @found_character
+
+    [ setup outputs ]
+    wave.copy(user_code.current)(lexling.start)
+    wave.copy(user_code.current)(lexling.end)
+    wave.integer.add(user_code.current character.size)(user_code.new_current)
+    wave.set(wave.integer.1)(found_lexling)
+
+    [ exit function ]
+    @return
+}
+
+compiler.lex.scan.characters(user_code.start user_code.current user_code.end)(lexling.type lexling.start lexling.end user_code.new_current found_lexling) = {
+    [ setup characters ]
+    wave.set(wave.integer.40)(left_parenthesis)
+    wave.set(wave.integer.41)(right_parenthesis)
+    wave.set(wave.integer.123)(left_curly_bracket)
+    wave.set(wave.integer.125)(right_curly_bracket)
+    wave.set(wave.integer.61)(equals)
+
+    [ check for left parenthesis ]
+    compiler.lex.scan.single_character(left_parenthesis user_code.start user_code.current user_code.end)(lexling.start lexling.end user_code.new_current found_lexling)
+    compiler.lex.lexling.left_parenthesis_lexling_ID()(lexling.type)
+    wave.jump(found_lexling @return)()
+
+    [ check for right parenthesis ]
+    compiler.lex.scan.single_character(right_parenthesis user_code.start user_code.current user_code.end)(lexling.start lexling.end user_code.new_current found_lexling)
+    compiler.lex.lexling.right_parenthesis_lexling_ID()(lexling.type)
+    wave.jump(found_lexling @return)()
+
+    [ check for left curly bracket ]
+    compiler.lex.scan.single_character(left_curly_bracket user_code.start user_code.current user_code.end)(lexling.start lexling.end user_code.new_current found_lexling)
+    compiler.lex.lexling.left_curly_bracket_lexling_ID()(lexling.type)
+    wave.jump(found_lexling @return)()
+
+    [ check for right curly bracket ]
+    compiler.lex.scan.single_character(right_curly_bracket user_code.start user_code.current user_code.end)(lexling.start lexling.end user_code.new_current found_lexling)
+    compiler.lex.lexling.right_curly_bracket_lexling_ID()(lexling.type)
+    wave.jump(found_lexling @return)()
+
+    [ check for equals ]
+    compiler.lex.scan.single_character(equals user_code.start user_code.current user_code.end)(lexling.start lexling.end user_code.new_current found_lexling)
+    compiler.lex.lexling.equals_lexling_ID()(lexling.type)
+    wave.jump(found_lexling @return)()
+
+    [ check for name ]
+    compiler.lex.scan.name(user_code.start user_code.current user_code.end)(lexling.type lexling.start lexling.end user_code.new_current found_lexling)
+    wave.jump(found_lexling @return)()
+    
+    @return
+}
+
+compiler.lex(user_code.start user_code.end)(lexlings.start lexlings.end error) = {
+    [ setup variables ]
+    wave.set(wave.boolean.true)(always)
+    wave.set(wave.integer.1)(increment)
+    wave.set(wave.integer.0)(lexling.count)
+
+    [ calculate lexlings buffer increase ]
+    compiler.lex.lexling.size()(lexling.size)
+    wave.set(wave.integer.64)(lexlings.increase)
+    wave.integer.multiply(lexling.size lexlings.increase)(increase)
+
+    [ initialize lexlings ]
+    list.create(increase)(lexlings.start lexlings.end error)
+
+    [ quit if unable to create lexlings ]
+    wave.jump(error @exit)()
+
+    [ setup current ]
+    wave.copy(user_code.start)(user_code.current)
+
+    [ setup loop offset ]
+    @loop.start
+
+    [ check if at the end of the buffer ]
+    wave.integer.within_range(user_code.start user_code.current user_code.end)(in_range)
+    wave.boolean.not(in_range)(out_of_range)
+    wave.jump(out_of_range @exit)()
+
+    [ skip over whitespace ]
+    compiler.lex.skip.whitespace(user_code.start user_code.current user_code.end)(user_code.current)
+
+    [ find lexling ]
+    compiler.lex.scan.characters(user_code.start user_code.current user_code.end)(lexling.type lexling.start lexling.end user_code.current found_lexling)
+    wave.jump(found_lexling @add_lexling)()
+
+    [ no lexling was found ]
+    wave.set(wave.integer.1)(error)
+    wave.jump(always @exit)()
+
+    [ add lexling offset ]
+    @add_lexling
+
+    [ append lexling ]
+    compiler.lex.add_lexling(lexlings.start lexling.type lexling.start lexling.end)(error)
+
+    [ quit if error ]
+    wave.jump(error @exit)()
+
+    [ print lexling ]
+    [ compiler.lex.lexling.print(lexling.type lexling.start lexling.end)() ]
+
+    [ increment ]
+    wave.integer.add(lexling.count increment)(lexling.count)
+
+    [ find next lexling ]
+    wave.jump(always @loop.start)()
+
+    [ exit ]
+    @exit
+}
