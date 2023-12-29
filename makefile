@@ -1,2 +1,2 @@
 debug:
-	./../../wave-project/wave/binary/wave.elf "./source/compiler.wave" "./source/lex.wave" "../../wave-project/wave-standard/standard.wave"
+	g++ ./source/main.cpp -g -fsanitize=address -Wall -Wextra -o ./binary/dragon.elf
