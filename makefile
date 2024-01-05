@@ -1,2 +1,2 @@
 debug:
-	g++ ./source/main.cpp -g -fsanitize=address -Wall -Wextra -o ./binary/dragon.elf
+	../../wave-project/wave.elf source/main.wave ../../wave-project/wave-standard/standard.wave
