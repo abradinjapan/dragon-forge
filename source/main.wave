@@ -1,5 +1,0 @@
-main()() = {
-    wave.copy.string("'Starting Dragon...'")(hello.start hello.end error)
-    string.print(hello.start hello.end)()
-    wave.return_memory(hello.start hello.end)()
-}
