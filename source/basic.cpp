@@ -18,6 +18,11 @@ namespace basic {
 
     typedef u8 character;
 
+    // defines
+    typedef enum define {
+        null_address = 0,
+    } define;
+
     // buffer type
     typedef struct buffer {
         address start;
@@ -38,6 +43,6 @@ namespace basic {
     // create a null buffer
     buffer create_null_buffer() {
         // return empty
-        return create_buffer(0, 0);
+        return create_buffer((address)define::null_address, (address)define::null_address);
     }
 }
