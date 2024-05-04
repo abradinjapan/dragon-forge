@@ -1,0 +1,4 @@
+main()() = {
+    forge.set("Hear the dragon roar!%0A;")(message.start message.end)
+    forge.print.buffer_as_string(message.start message.end)()
+}

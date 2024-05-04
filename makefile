@@ -1,2 +1,2 @@
-debug:
-	g++ ./source/main.cpp -g -Wall -Wextra -fsanitize=address -o ../dragon.elf
+release:
+	../../forge-project/forge.elf source/main.forge
