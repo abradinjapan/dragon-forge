@@ -1,5 +1,5 @@
-#ifndef FORGE__anvil
-#define FORGE__anvil
+#ifndef DRAGON__anvil
+#define DRAGON__anvil
 
 /* Include */
 // C
@@ -3555,6 +3555,7 @@ typedef enum ANVIL__lt {
     ANVIL__lt__left_curly_bracket,
     ANVIL__lt__right_curly_bracket,
     ANVIL__lt__name,
+    ANVIL__lt__period,
     ANVIL__lt__at,
     ANVIL__lt__hashtag,
     ANVIL__lt__equals,
@@ -3659,7 +3660,7 @@ ANVIL__bt ANVIL__calculate__valid_character_range(ANVIL__current current, ANVIL_
 
 // check one character for a name character
 ANVIL__bt ANVIL__calculate__valid_name_character(ANVIL__current current) {
-    return (ANVIL__calculate__valid_character_range(current, 'a', 'z') || ANVIL__calculate__valid_character_range(current, 'A', 'Z') || ANVIL__calculate__valid_character_range(current, '0', '9') || ANVIL__calculate__valid_character_range(current, '_', '_') || ANVIL__calculate__valid_character_range(current, '.', '.'));
+    return (ANVIL__calculate__valid_character_range(current, 'a', 'z') || ANVIL__calculate__valid_character_range(current, 'A', 'Z') || ANVIL__calculate__valid_character_range(current, '0', '9') || ANVIL__calculate__valid_character_range(current, '_', '_'));
 }
 
 // calculate character index
@@ -3787,6 +3788,12 @@ ANVIL__lexlings ANVIL__compile__lex(ANVIL__buffer user_code, ANVIL__file_index f
 
             // record lexling
             ANVIL__append__lexling(&output, ANVIL__create__lexling(ANVIL__lt__name, ANVIL__create__buffer(temp_start, temp_end), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, ANVIL__create__buffer(temp_start, temp_end)))), error);
+        } else if (ANVIL__calculate__valid_character_range(current, '.', '.')) {
+            // add lexling
+            ANVIL__append__lexling(&output, ANVIL__create__lexling(ANVIL__lt__period, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
+
+            // next character
+            current.start += sizeof(ANVIL__character);
         } else if (ANVIL__calculate__valid_character_range(current, '@', '@')) {
             // add lexling
             ANVIL__append__lexling(&output, ANVIL__create__lexling(ANVIL__lt__at, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
