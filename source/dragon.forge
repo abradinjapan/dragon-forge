@@ -1,0 +1,7 @@
+[ main ]
+main()() = {
+    [ print starting message ]
+    forge.set("Hear the dragon roar!")(message.start message.end)
+    forge.print.buffer_as_string(message.start message.end)()
+    forge.print.new_line()()
+}

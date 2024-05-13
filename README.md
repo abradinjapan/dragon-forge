@@ -1,6 +1,6 @@
 # Dragon Project
 
-A simple programming language written in C.
+A simple programming language written in forge.
 
 ## Build
 

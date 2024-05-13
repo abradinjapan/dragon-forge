@@ -1,5 +1,5 @@
-debug:
-	gcc ./source/main.c -Wall -Wextra -fsanitize=address -g -o ./../dragon.elf
-
 release:
-	gcc ./source/main.c -Wall -Wextra -o ./../dragon.elf
+	../../forge-project/forge.elf ../../forge-project/forge-standard/standard.forge source/dragon.forge
+
+debug:
+	../../forge-project/forge.elf --debug ../../forge-project/forge-standard/standard.forge source/dragon.forge
