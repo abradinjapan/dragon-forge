@@ -60,7 +60,7 @@ typedef ANVIL__address ANVIL__cell;
 typedef ANVIL__u8 ANVIL__instruction_ID;
 typedef ANVIL__u8 ANVIL__flag_ID;
 typedef ANVIL__u8 ANVIL__operation_ID;
-typedef ANVIL__u8 ANVIL__cell_ID;
+typedef ANVIL__u16 ANVIL__cell_ID;
 
 // invalids
 #define ANVIL__define__null_offset_ID -1
@@ -1211,7 +1211,7 @@ typedef enum ANVIL__rt {
 
     // statistics
     ANVIL__rt__FIRST_ID = ANVIL__rt__START,
-    ANVIL__rt__LAST_ID = 255, // NUMBER DOES NOT CHANGE!
+    ANVIL__rt__LAST_ID = 65535, // NUMBER DOES NOT CHANGE!
     ANVIL__rt__TOTAL_COUNT = ANVIL__rt__LAST_ID + 1,
 } ANVIL__rt;
 
@@ -2795,8 +2795,8 @@ typedef enum ANVIL__srt {
     ANVIL__srt__constant__ascii_character_bit_size = ANVIL__srt__constant__8,
 
     // locations
-    ANVIL__srt__start__workspace = 64,
-    ANVIL__srt__start__function_io = ANVIL__rt__TOTAL_COUNT - 128,
+    ANVIL__srt__start__workspace = 8192,
+    ANVIL__srt__start__function_io = ANVIL__rt__TOTAL_COUNT - 8192,
 
     // count
     ANVIL__srt__COUNT = ANVIL__srt__END - ANVIL__srt__START,
