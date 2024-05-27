@@ -3,7 +3,144 @@
 
 /* Include */
 // instruction coding
-#include "anvil_coder.h"
+#include "../anvil_coder.h"
+
+/* Define */
+// lexing types
+typedef ANVIL__u8 ANVIL__lexling_type;
+typedef ANVIL__address ANVIL__lexling_address;
+typedef ANVIL__lexling_address ANVIL__lexling_start;
+typedef ANVIL__lexling_address ANVIL__lexling_end;
+typedef ANVIL__u64 ANVIL__lexling_index;
+typedef ANVIL__u64 ANVIL__lexling_depth; // used for comments and strings
+
+// other compiler types
+typedef ANVIL__u64 ANVIL__argument_index;
+typedef ANVIL__u64 ANVIL__io_count;
+typedef ANVIL__io_count ANVIL__input_count;
+typedef ANVIL__io_count ANVIL__output_count;
+typedef ANVIL__u64 ANVIL__accountling_index;
+typedef ANVIL__accountling_index ANVIL__variable_index;
+typedef ANVIL__accountling_index ANVIL__call_index;
+typedef ANVIL__accountling_index ANVIL__offset_index;
+typedef ANVIL__accountling_index ANVIL__flag_index;
+typedef ANVIL__accountling_index ANVIL__statement_index;
+typedef ANVIL__accountling_index ANVIL__header_index;
+typedef ANVIL__accountling_index ANVIL__string_index;
+typedef ANVIL__u64 ANVIL__abstraction_index;
+
+// strings
+char* ANVIL__global__predefined_cell_name_strings[] = {
+    "dragon.error_code",
+    "dragon.constant.character_byte_size",
+    "dragon.constant.character_bit_size",
+    "dragon.constant.bits_in_byte",
+    "dragon.constant.cell_byte_size",
+    "dragon.constant.cell_bit_size",
+    "dragon.constant.true",
+    "dragon.constant.false",
+    "dragon.constant.0",
+    "dragon.constant.1",
+    "dragon.constant.2",
+    "dragon.constant.4",
+    "dragon.constant.8",
+    "dragon.constant.16",
+    "dragon.constant.24",
+    "dragon.constant.32",
+    "dragon.constant.40",
+    "dragon.constant.48",
+    "dragon.constant.56",
+    "dragon.constant.64",
+    "dragon.constant.program_input.start",
+    "dragon.constant.program_input.end",
+    "dragon.constant.program_output.start",
+    "dragon.constant.program_output.end",
+    "dragon.stack.start",
+    "dragon.stack.current",
+    "dragon.stack.end",
+};
+char* ANVIL__global__predefined_flag_name_strings[] = {
+    "dragon.always",
+    "dragon.never",
+    "dragon.temporary",
+};
+char* ANVIL__global__argument_type_name_strings[] = {
+    "invalid",
+    "variable",
+    "input_variable",
+    "output_variable",
+    "body_variable",
+    "predefined_variable",
+    "offset",
+    "flag",
+    "flag_user_defined",
+    "flag_predefined",
+    "boolean",
+    "binary",
+    "integer",
+    "hexadecimal",
+    "string",
+};
+char* ANVIL__global__accountling_call_type_name_strings[] = {
+    "dragon.set",
+    "dragon.print.integer.signed",
+    "dragon.print.integer.unsigned",
+    "dragon.print.character",
+    "dragon.print.buffer_as_string",
+    "dragon.print.binary",
+    "dragon.io.cell_to_address",
+    "dragon.io.address_to_cell",
+    "dragon.io.file_to_buffer",
+    "dragon.io.buffer_to_file",
+    "dragon.copy",
+    "dragon.copy.buffer",
+    "dragon.memory.request",
+    "dragon.memory.return",
+    "dragon.buffer.calculate_length",
+    "dragon.cast.cell_to_unsigned_integer_string",
+    "dragon.integer.add",
+    "dragon.integer.subtract",
+    "dragon.integer.multiply",
+    "dragon.integer.divide",
+    "dragon.integer.modulous",
+    "dragon.integer.within_range",
+    "dragon.binary.or",
+    "dragon.binary.invert",
+    "dragon.binary.and",
+    "dragon.binary.xor",
+    "dragon.binary.shift_higher",
+    "dragon.binary.shift_lower",
+    "dragon.binary.overwrite",
+    "dragon.flag.get",
+    "dragon.flag.set",
+    "dragon.flag.invert",
+    "dragon.flag.or",
+    "dragon.flag.and",
+    "dragon.flag.xor",
+    "dragon.jump",
+    "dragon.open.context",
+    "dragon.compile",
+    "dragon.run",
+    "dragon.reset.error_code",
+    "dragon.get.program_inputs",
+    "dragon.set.program_outputs",
+    "dragon.context_buffer.set_inputs",
+    "dragon.context_buffer.get_outputs",
+};
+
+// program stage type
+typedef enum ANVIL__pst {
+    // stages
+    ANVIL__pst__invalid, // invalid
+    ANVIL__pst__lexing, // lexing files
+    ANVIL__pst__parsing, // parsing files
+    ANVIL__pst__accounting, // semantics for all files
+    ANVIL__pst__generating, // building program
+    ANVIL__pst__running, // running program
+
+    // count
+    ANVIL__pst__COUNT,
+} ANVIL__pst;
 
 /* Current */
 // check if a current buffer is still valid

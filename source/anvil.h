@@ -2,7 +2,7 @@
 #define DRAGON__anvil
 
 /* Include */
-#include "compiler.h"
+#include "compiler/compiler.h"
 
 /* Allocations */
 // allocations
@@ -129,9 +129,6 @@ void ANVIL__print__allocations(ANVIL__allocations allocations) {
 
     return;
 }
-
-/* Compiler Predefinitions */
-//void ANVIL__compile__files(ANVIL__buffer user_codes, ANVIL__bt print_debug, ANVIL__buffer* final_program, ANVIL__error* error);
 
 /* Helper Functions */
 // convert instruction type to instruction length type
