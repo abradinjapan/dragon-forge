@@ -46,11 +46,6 @@ void MAIN__print__context(ANVIL__context* context) {
     return;
 }
 
-// test anvil
-void MAIN__test__anvil() {
-    
-}
-
 // entry point
 int main(int argc, char** argv) {
     ANVIL__list files;
@@ -60,10 +55,6 @@ int main(int argc, char** argv) {
 
     // init error
     error = ANVIL__create_null__error();
-
-    // DEBUG
-    // test anvil
-    MAIN__test__anvil();
 
     // open files list
     files = ANVIL__open__list_with_error(sizeof(ANVIL__buffer) * 32, &error);
