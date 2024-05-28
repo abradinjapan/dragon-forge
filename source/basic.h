@@ -27,7 +27,6 @@ typedef ANVIL__s8 s8;
 typedef ANVIL__s16 s16;
 typedef ANVIL__s32 s32;
 typedef ANVIL__s64 s64;
-// (ANVIL__current defined later as it requires buffer type)
 
 // pointers
 typedef void* ANVIL__address;
@@ -95,9 +94,6 @@ ANVIL__buffer ANVIL__create__buffer(ANVIL__address start, ANVIL__address end) {
 
 	return output;
 }
-
-// aliase defines
-typedef ANVIL__buffer ANVIL__current;
 
 // create buffer in it's standard null setup
 ANVIL__buffer ANVIL__create_null__buffer() {
