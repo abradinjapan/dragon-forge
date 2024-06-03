@@ -128,6 +128,7 @@ int main(int argc, char** argv) {
                 ANVIL__close__buffer(json);
             // no error occured, run code
             } else {
+                /*
                 ANVIL__bt memory_error_occured = ANVIL__bt__false;
 
                 // setup allocations
@@ -148,12 +149,12 @@ int main(int argc, char** argv) {
 
                 // setup context
                 ANVIL__context context = ANVIL__setup__context(program);
-                /*ANVIL__remember__allocation(&allocations, ANVIL__create__buffer(&context, &context + sizeof(ANVIL__context) - 1), &memory_error_occured);
-                if (memory_error_occured) {
-                    printf("Internal Error: Program built successfully, but allocations failed to append.\n");
-
-                    return 1;
-                }*/
+                //ANVIL__remember__allocation(&allocations, ANVIL__create__buffer(&context, &context + sizeof(ANVIL__context) - 1), &memory_error_occured);
+                //if (memory_error_occured) {
+                //    printf("Internal Error: Program built successfully, but allocations failed to append.\n");
+                //
+                //    return 1;
+                //}
 
                 // print debug
                 if (debug_mode == ANVIL__bt__true) {
@@ -172,7 +173,7 @@ int main(int argc, char** argv) {
                 ANVIL__close__allocations(&allocations);
 
                 // close program
-                ANVIL__close__buffer(program);
+                ANVIL__close__buffer(program);*/
             }
         // if no files
         } else {

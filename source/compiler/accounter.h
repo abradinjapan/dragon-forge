@@ -1410,6 +1410,11 @@ ANVIL__buffer ANVIL__account__convert_string(ANVIL__parsling_argument string, AN
     return output;
 }
 
+// check if arguments have the same text
+ANVIL__bt ANVIL__check__parsling_arguments_have_same_name(ANVIL__parsling_argument a, ANVIL__parsling_argument b) {
+    return ANVIL__calculate__buffer_contents_equal(a.text.lexling.value, b.text.lexling.value);
+}
+
 // check to see if argument is in list
 ANVIL__parsling_argument ANVIL__account__get_argument_in_list__by_text(ANVIL__list* arguments, ANVIL__parsling_argument searching_for, ANVIL__bt* found) {
     // setup current
@@ -1421,7 +1426,7 @@ ANVIL__parsling_argument ANVIL__account__get_argument_in_list__by_text(ANVIL__li
         ANVIL__parsling_argument argument = *(ANVIL__parsling_argument*)current_argument.start;
 
         // if names are identical
-        if (ANVIL__check__parsling_arguments_have_same_text(argument, searching_for)) {
+        if (ANVIL__check__parsling_arguments_have_same_name(argument, searching_for)) {
             // found in list
             *found = ANVIL__bt__true;
             return argument;
@@ -1434,6 +1439,30 @@ ANVIL__parsling_argument ANVIL__account__get_argument_in_list__by_text(ANVIL__li
     // not in list
     *found = ANVIL__bt__false;
     return ANVIL__create_null__parsling_argument();;
+}
+
+// find parsling argument index in list
+ANVIL__argument_index ANVIL__find__parsling_argument_index__by_name(ANVIL__list list, ANVIL__parsling_argument argument) {
+    ANVIL__argument_index output = 0;
+
+    // setup current
+    ANVIL__current current_argument = ANVIL__calculate__current_from_list_filled_index(&list);
+
+    // find argument
+    while (ANVIL__check__current_within_range(current_argument)) {
+        // check arg
+        if (ANVIL__check__parsling_arguments_have_same_name(*(ANVIL__parsling_argument*)current_argument.start, argument)) {
+            // found
+            return output;
+        }
+
+        // next arg
+        output++;
+        current_argument.start += sizeof(ANVIL__parsling_argument);
+    }
+
+    // not found
+    return output;
 }
 
 // get accountling argument list
@@ -1461,6 +1490,7 @@ ANVIL__list ANVIL__account__accountling_argument_list(ANVIL__accountling_abstrac
         } else if (argument.type == ANVIL__pat__variable || argument.type == ANVIL__pat__variable__body) {
             ANVIL__append__accountling_argument(&output, ANVIL__create__accountling_argument(argument.type, ANVIL__find__parsling_argument_index__by_name((*abstraction).variables, argument), argument), error);
         } else if (argument.type == ANVIL__pat__literal__boolean || argument.type == ANVIL__pat__literal__binary || argument.type == ANVIL__pat__literal__integer || argument.type == ANVIL__pat__literal__hexadecimal) {
+            // TODO (make value conversion an accounting problem)
             ANVIL__append__accountling_argument(&output, ANVIL__create__accountling_argument(argument.type, argument.value, argument), error);
         } else if (argument.type == ANVIL__pat__offset) {
             ANVIL__append__accountling_argument(&output, ANVIL__create__accountling_argument(argument.type, ANVIL__find__parsling_argument_index__by_name((*abstraction).offsets, argument), argument), error);

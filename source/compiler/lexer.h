@@ -21,6 +21,7 @@ typedef enum ANVIL__lt {
     ANVIL__lt__left_curly_bracket,
     ANVIL__lt__right_curly_bracket,
     ANVIL__lt__name,
+    ANVIL__lt__colon,
     ANVIL__lt__at,
     ANVIL__lt__hashtag,
     ANVIL__lt__equals,
@@ -84,15 +85,15 @@ void ANVIL__close__lexlings(ANVIL__lexlings lexlings) {
 }
 
 // append a lexling to the list
-void ANVIL__append__lexling(ANVIL__lexlings* lexlings, ANVIL__lexling lexling, ANVIL__error* error) {
+void ANVIL__append__lexling(ANVIL__list* list, ANVIL__lexling lexling, ANVIL__error* error) {
     // request space
-    ANVIL__list__request__space(&((*lexlings).data), sizeof(ANVIL__lexling), &(*error).memory_error_occured);
+    ANVIL__list__request__space(list, sizeof(ANVIL__lexling), &(*error).memory_error_occured);
 
     // append data
-    (*(ANVIL__lexling*)ANVIL__calculate__list_current_address(&((*lexlings).data))) = lexling;
+    (*(ANVIL__lexling*)ANVIL__calculate__list_current_address(list)) = lexling;
 
     // increase fill
-    (*lexlings).data.filled_index += sizeof(ANVIL__lexling);
+    (*list).filled_index += sizeof(ANVIL__lexling);
 
     return;
 }
@@ -217,25 +218,25 @@ ANVIL__lexlings ANVIL__compile__lex(ANVIL__buffer user_code, ANVIL__file_index f
         // check for lexlings
         if (ANVIL__calculate__valid_character_range(current, '(', '(')) {
             // add lexling
-            ANVIL__append__lexling(&output, ANVIL__create__lexling(ANVIL__lt__left_parenthesis, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
+            ANVIL__append__lexling(&output.data, ANVIL__create__lexling(ANVIL__lt__left_parenthesis, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
 
             // next character
             current.start += sizeof(ANVIL__character);
         } else if (ANVIL__calculate__valid_character_range(current, ')', ')')) {
             // add lexling
-            ANVIL__append__lexling(&output, ANVIL__create__lexling(ANVIL__lt__right_parenthesis, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
+            ANVIL__append__lexling(&output.data, ANVIL__create__lexling(ANVIL__lt__right_parenthesis, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
 
             // next character
             current.start += sizeof(ANVIL__character);
         } else if (ANVIL__calculate__valid_character_range(current, '{', '{')) {
             // add lexling
-            ANVIL__append__lexling(&output, ANVIL__create__lexling(ANVIL__lt__left_curly_bracket, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
+            ANVIL__append__lexling(&output.data, ANVIL__create__lexling(ANVIL__lt__left_curly_bracket, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
 
             // next character
             current.start += sizeof(ANVIL__character);
         } else if (ANVIL__calculate__valid_character_range(current, '}', '}')) {
             // add lexling
-            ANVIL__append__lexling(&output, ANVIL__create__lexling(ANVIL__lt__right_curly_bracket, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
+            ANVIL__append__lexling(&output.data, ANVIL__create__lexling(ANVIL__lt__right_curly_bracket, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
 
             // next character
             current.start += sizeof(ANVIL__character);
@@ -252,22 +253,28 @@ ANVIL__lexlings ANVIL__compile__lex(ANVIL__buffer user_code, ANVIL__file_index f
             }
 
             // record lexling
-            ANVIL__append__lexling(&output, ANVIL__create__lexling(ANVIL__lt__name, ANVIL__create__buffer(temp_start, temp_end), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, ANVIL__create__buffer(temp_start, temp_end)))), error);
+            ANVIL__append__lexling(&output.data, ANVIL__create__lexling(ANVIL__lt__name, ANVIL__create__buffer(temp_start, temp_end), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, ANVIL__create__buffer(temp_start, temp_end)))), error);
+        } else if (ANVIL__calculate__valid_character_range(current, ':', ':')) {
+            // add lexling
+            ANVIL__append__lexling(&output.data, ANVIL__create__lexling(ANVIL__lt__colon, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
+
+            // next character
+            current.start += sizeof(ANVIL__character);
         } else if (ANVIL__calculate__valid_character_range(current, '@', '@')) {
             // add lexling
-            ANVIL__append__lexling(&output, ANVIL__create__lexling(ANVIL__lt__at, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
+            ANVIL__append__lexling(&output.data, ANVIL__create__lexling(ANVIL__lt__at, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
 
             // next character
             current.start += sizeof(ANVIL__character);
         } else if (ANVIL__calculate__valid_character_range(current, '#', '#')) {
             // add lexling
-            ANVIL__append__lexling(&output, ANVIL__create__lexling(ANVIL__lt__hashtag, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
+            ANVIL__append__lexling(&output.data, ANVIL__create__lexling(ANVIL__lt__hashtag, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
 
             // next character
             current.start += sizeof(ANVIL__character);
         } else if (ANVIL__calculate__valid_character_range(current, '=', '=')) {
             // add lexling
-            ANVIL__append__lexling(&output, ANVIL__create__lexling(ANVIL__lt__equals, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
+            ANVIL__append__lexling(&output.data, ANVIL__create__lexling(ANVIL__lt__equals, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
 
             // next character
             current.start += sizeof(ANVIL__character);
@@ -298,7 +305,7 @@ ANVIL__lexlings ANVIL__compile__lex(ANVIL__buffer user_code, ANVIL__file_index f
             data.end = current.start;
 
             // append lexling
-            ANVIL__append__lexling(&output, ANVIL__create__lexling(ANVIL__lt__string_literal, data, ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, data))), error);
+            ANVIL__append__lexling(&output.data, ANVIL__create__lexling(ANVIL__lt__string_literal, data, ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, data))), error);
 
             // next character
             current.start += sizeof(ANVIL__character);
@@ -322,7 +329,7 @@ ANVIL__lexlings ANVIL__compile__lex(ANVIL__buffer user_code, ANVIL__file_index f
     quit:
 
     // append eof lexling
-    ANVIL__append__lexling(&output, ANVIL__create__lexling(ANVIL__lt__end_of_file, ANVIL__open__buffer_from_string((u8*)"[EOF]", ANVIL__bt__false, ANVIL__bt__false), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
+    ANVIL__append__lexling(&output.data, ANVIL__create__lexling(ANVIL__lt__end_of_file, ANVIL__open__buffer_from_string((u8*)"[EOF]", ANVIL__bt__false, ANVIL__bt__false), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
 
     return output;
 }

@@ -5,8 +5,8 @@
 // compiler subparts
 #include "lexer.h"
 #include "parser.h"
-#include "accounter.h"
-#include "generator.h"
+//#include "accounter.h"
+//#include "generator.h"
 
 /* Compile */
 // one compiled object across multiple stages
@@ -14,7 +14,7 @@ typedef struct ANVIL__compilation_unit {
     ANVIL__buffer user_codes;
     ANVIL__list lexling_buffers;
     ANVIL__list parsling_buffers;
-    ANVIL__accountling_program accountlings;
+    //ANVIL__accountling_program accountlings;
     ANVIL__pst stages_completed;
 } ANVIL__compilation_unit;
 
@@ -56,10 +56,10 @@ void ANVIL__close__compilation_unit(ANVIL__compilation_unit unit) {
         ANVIL__close__list(unit.parsling_buffers);
     }
 
-    // close accountling data
+    /*// close accountling data
     if (unit.stages_completed > ANVIL__pst__parsing) {
         ANVIL__close__accountling_program(unit.accountlings);
-    }
+    }*/
 
     return;
 }
@@ -159,7 +159,7 @@ void ANVIL__compile__files(ANVIL__buffer user_codes, ANVIL__bt print_debug, ANVI
         current_file_index++;
     }
 
-    // account
+    /*// account
     compilation_unit.accountlings = ANVIL__account__program(compilation_unit.parsling_buffers, error);
 
     // mark as done
@@ -181,7 +181,7 @@ void ANVIL__compile__files(ANVIL__buffer user_codes, ANVIL__bt print_debug, ANVI
     }
 
     // generate program
-    ANVIL__forge__anvil_program(final_program, compilation_unit.accountlings, 65536, error);
+    ANVIL__forge__anvil_program(final_program, compilation_unit.accountlings, 65536, error);*/
 
     // quit label
     quit:
