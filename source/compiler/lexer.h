@@ -25,6 +25,7 @@ typedef enum ANVIL__lt {
     ANVIL__lt__at,
     ANVIL__lt__hashtag,
     ANVIL__lt__equals,
+    ANVIL__lt__exclamation_point,
     ANVIL__lt__string_literal,
     ANVIL__lt__end_of_file,
     ANVIL__lt__COUNT,
@@ -275,6 +276,12 @@ ANVIL__lexlings ANVIL__compile__lex(ANVIL__buffer user_code, ANVIL__file_index f
         } else if (ANVIL__calculate__valid_character_range(current, '=', '=')) {
             // add lexling
             ANVIL__append__lexling(&output.data, ANVIL__create__lexling(ANVIL__lt__equals, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
+
+            // next character
+            current.start += sizeof(ANVIL__character);
+        } else if (ANVIL__calculate__valid_character_range(current, '!', '!')) {
+            // add lexling
+            ANVIL__append__lexling(&output.data, ANVIL__create__lexling(ANVIL__lt__exclamation_point, ANVIL__create__buffer(current.start, current.start), ANVIL__create__character_location(file_index, current_line_number, ANVIL__calculate__character_index(user_code, current))), error);
 
             // next character
             current.start += sizeof(ANVIL__character);

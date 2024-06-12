@@ -52,10 +52,15 @@ typedef enum ANVIL__gat {
     // strings
     ANVIL__gat__literal__string,
 
+    // types
+    ANVIL__gat__type,
+    ANVIL__gat__type__structure,
+    ANVIL__gat__type__from_variable, // used for when types are being extracted from variables
+    ANVIL__gat__type__predefined,
+
     // count
     ANVIL__gat__COUNT,
 } ANVIL__gat;
-
 
 // strings
 char* ANVIL__global__predefined_cell_name_strings[] = {
@@ -108,6 +113,10 @@ char* ANVIL__global__argument_type_name_strings[] = {
     "integer",
     "hexadecimal",
     "string",
+    "type",
+    "structure_type",
+    "type_from_variable",
+    "predefined_type",
 };
 char* ANVIL__global__accountling_call_type_name_strings[] = {
     ANVIL__define__master_namespace ".set",
@@ -601,6 +610,10 @@ ANVIL__bt ANVIL__translate__string_to_hexedecimal(ANVIL__buffer string, ANVIL__c
     }
 
     return ANVIL__bt__true;
+}
+
+ANVIL__buffer ANVIL__convert__general_argument_type_to_string_buffer(ANVIL__gat argument_type) {
+    return ANVIL__open__buffer_from_string((u8*)(ANVIL__global__argument_type_name_strings[argument_type]), ANVIL__bt__false, ANVIL__bt__false);
 }
 
 #endif

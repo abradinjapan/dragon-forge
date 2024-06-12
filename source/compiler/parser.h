@@ -31,22 +31,18 @@ typedef struct ANVIL__parsling_argument {
     // definition
     ANVIL__gat category;
     ANVIL__namespace namespace;
-    ANVIL__bt has_specific_type;
-    ANVIL__namespace variable_type;
 
     // value
     ANVIL__cell_integer_value cellular_value;
 } ANVIL__parsling_argument;
 
 // create a custom argument
-ANVIL__parsling_argument ANVIL__create__parsling_argument(ANVIL__gat category, ANVIL__namespace namespace, ANVIL__bt has_specific_type, ANVIL__namespace variable_type, ANVIL__cell_integer_value cellular_value) {
+ANVIL__parsling_argument ANVIL__create__parsling_argument(ANVIL__gat category, ANVIL__namespace namespace, ANVIL__cell_integer_value cellular_value) {
     ANVIL__parsling_argument output;
 
     // setup output
     output.category = category;
     output.namespace = namespace;
-    output.has_specific_type = has_specific_type;
-    output.variable_type = variable_type;
     output.cellular_value = cellular_value;
 
     return output;
@@ -54,15 +50,20 @@ ANVIL__parsling_argument ANVIL__create__parsling_argument(ANVIL__gat category, A
 
 // setup null argument
 ANVIL__parsling_argument ANVIL__create_null__parsling_argument() {
-    return ANVIL__create__parsling_argument(ANVIL__gat__invalid, ANVIL__create_null__namespace(), ANVIL__bt__false, ANVIL__create_null__namespace(), 0);
+    return ANVIL__create__parsling_argument(ANVIL__gat__invalid, ANVIL__create_null__namespace(), 0);
 }
 
 // statement type
 typedef enum ANVIL__stt {
     ANVIL__stt__invalid,
+
+    // statements
     ANVIL__stt__function_call,
-    ANVIL__stt__function_header,
     ANVIL__stt__offset,
+
+    // headers
+    ANVIL__stt__function_header,
+    ANVIL__stt__structure_header,
 
     // count
     ANVIL__stt__COUNT,
@@ -106,6 +107,27 @@ ANVIL__parsling_statement ANVIL__create_null__parsling_statement() {
     return ANVIL__create__parsling_statement(ANVIL__stt__invalid, ANVIL__create_null__parsling_argument(), ANVIL__create_null__list(), ANVIL__create_null__list(), 0, 0);
 }
 
+// one structure
+typedef struct ANVIL__parsling_structure {
+    ANVIL__parsling_statement header;
+} ANVIL__parsling_structure;
+
+// create a custom structure
+ANVIL__parsling_structure ANVIL__create__parsling_structure(ANVIL__parsling_statement header) {
+    ANVIL__parsling_structure output;
+
+    // setup output
+    output.header = header;
+
+    return output;
+}
+
+// create a null structure
+ANVIL__parsling_structure ANVIL__create_null__parsling_structure() {
+    // return empty
+    return ANVIL__create__parsling_structure(ANVIL__create_null__parsling_statement());
+}
+
 // one function
 typedef struct ANVIL__parsling_function {
     ANVIL__parsling_statement header;
@@ -132,6 +154,7 @@ ANVIL__parsling_function ANVIL__create_null__parsling_function() {
 // one program
 typedef struct ANVIL__parsling_program {
     ANVIL__list functions; // ANVIL__parsling_function
+    ANVIL__list structures; // ANVIL__parsling_structure
 } ANVIL__parsling_program;
 
 // create a custom program
@@ -192,6 +215,20 @@ void ANVIL__append__parsling_statement(ANVIL__list* list, ANVIL__parsling_statem
     return;
 }
 
+// append parsling structure
+void ANVIL__append__parsling_structure(ANVIL__list* list, ANVIL__parsling_structure data, ANVIL__error* error) {
+    // request space
+    ANVIL__list__request__space(list, sizeof(ANVIL__parsling_structure), &(*error).memory_error_occured);
+
+    // append data
+    (*(ANVIL__parsling_structure*)ANVIL__calculate__list_current_address(list)) = data;
+
+    // increase fill
+    (*list).filled_index += sizeof(ANVIL__parsling_structure);
+
+    return;
+}
+
 // append parsling function
 void ANVIL__append__parsling_function(ANVIL__list* list, ANVIL__parsling_function data, ANVIL__error* error) {
     // request space
@@ -220,22 +257,60 @@ void ANVIL__append__parsling_program(ANVIL__list* list, ANVIL__parsling_program 
     return;
 }
 
+// close namespace
+void ANVIL__close__parsling_namespace(ANVIL__namespace namespace) {
+    // close list
+    ANVIL__close__list(namespace.lexlings);
+
+    return;
+}
+
+// close argument
+void ANVIL__close__parsling_argument(ANVIL__parsling_argument argument) {
+    // close namespace
+    ANVIL__close__parsling_namespace(argument.namespace);
+
+    return;
+}
+
+// close arguments
+void ANVIL__close__parsling_arguments(ANVIL__list* arguments) {
+    ANVIL__current current = ANVIL__calculate__current_from_list_filled_index(arguments);
+
+    // close arguments
+    while (ANVIL__check__current_within_range(current)) {
+        // close argument
+        ANVIL__close__parsling_argument(*(ANVIL__parsling_argument*)current.start);
+
+        // next argument
+        current.start += sizeof(ANVIL__parsling_argument);
+    }
+
+    // close arguments buffer
+    ANVIL__close__list(*arguments);
+
+    return;
+}
+
 // close statement
 void ANVIL__close__parsling_statement(ANVIL__parsling_statement statement) {
+    // close name
+    ANVIL__close__parsling_argument(statement.name);
+
     // close io
     if (ANVIL__check__empty_list(statement.inputs) == ANVIL__bt__false) {
-        ANVIL__close__list(statement.inputs);
+        ANVIL__close__parsling_arguments(&statement.inputs);
     }
     if (ANVIL__check__empty_list(statement.outputs) == ANVIL__bt__false) {
-        ANVIL__close__list(statement.outputs);
+        ANVIL__close__parsling_arguments(&statement.outputs);
     }
 
     return;
 }
 
 // close statements
-void ANVIL__close__parsling_statements(ANVIL__list list) {
-    ANVIL__current current_statement = ANVIL__calculate__current_from_list_filled_index(&list);
+void ANVIL__close__parsling_statements(ANVIL__list* list) {
+    ANVIL__current current_statement = ANVIL__calculate__current_from_list_filled_index(list);
 
     // clean up each statement
     while (ANVIL__check__current_within_range(current_statement)) {
@@ -247,7 +322,15 @@ void ANVIL__close__parsling_statements(ANVIL__list list) {
     }
 
     // clean up statements buffer
-    ANVIL__close__list(list);
+    ANVIL__close__list(*list);
+
+    return;
+}
+
+// close structure
+void ANVIL__close__parsling_structure(ANVIL__parsling_structure structure) {
+    // close header
+    ANVIL__close__parsling_statement(structure.header);
 
     return;
 }
@@ -259,7 +342,7 @@ void ANVIL__close__parsling_function(ANVIL__parsling_function function) {
     
     // close statements
     if (ANVIL__check__empty_list(function.statements) == ANVIL__bt__false) {
-        ANVIL__close__parsling_statements(function.statements);
+        ANVIL__close__parsling_statements(&function.statements);
     }
 
     return;
@@ -277,9 +360,22 @@ void ANVIL__close__parsling_program(ANVIL__parsling_program program) {
         // next function
         current.start += sizeof(ANVIL__parsling_function);
     }
+    
+    // next current
+    current = ANVIL__calculate__current_from_list_filled_index(&(program.structures));
 
-    // free the function list
+    // free each structure
+    while (ANVIL__check__current_within_range(current)) {
+        // free structure
+        ANVIL__close__parsling_structure(*(ANVIL__parsling_structure*)current.start);
+
+        // next structure
+        current.start += sizeof(ANVIL__parsling_structure);
+    }
+
+    // free the lists
     ANVIL__close__list(program.functions);
+    ANVIL__close__list(program.structures);
 
     return;
 }
@@ -365,6 +461,9 @@ ANVIL__namespace ANVIL__parse__namespace(ANVIL__current* current, ANVIL__error* 
         // count lexling
         output.count++;
 
+        // next lexling
+        ANVIL__advance__lexling_current(current, 1);
+
         // get other lexlings
         while (ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__colon) {
             // skip past colon
@@ -388,7 +487,7 @@ ANVIL__namespace ANVIL__parse__namespace(ANVIL__current* current, ANVIL__error* 
                 // set error
                 *error = ANVIL__open__error("Parsing Error: Expected a name.", ANVIL__read__lexling_from_current(*current).location);
 
-                break;
+                return output;
             }
         }
     // if it is a string
@@ -398,6 +497,9 @@ ANVIL__namespace ANVIL__parse__namespace(ANVIL__current* current, ANVIL__error* 
         if (ANVIL__check__error_occured(error)) {
             return output;
         }
+
+        // next lexling
+        ANVIL__advance__lexling_current(current, 1);
     // not found, error
     } else {
         // set error
@@ -416,7 +518,7 @@ ANVIL__parsling_argument ANVIL__parse__function_argument(ANVIL__current* current
     // is variable / literal
     if (ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__name) {
         // parse namespace
-        output = ANVIL__create__parsling_argument(ANVIL__gat__variable, ANVIL__parse__namespace(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), 0);
+        output = ANVIL__create__parsling_argument(ANVIL__gat__variable, ANVIL__parse__namespace(current, error), 0);
         
         /*// translate literal information for accounting to translate
         // boolean
@@ -432,6 +534,13 @@ ANVIL__parsling_argument ANVIL__parse__function_argument(ANVIL__current* current
         } else if (ANVIL__translate__string_to_hexedecimal(ANVIL__read__lexling_from_current(*current).value, &value)) {
             argument = ANVIL__create__parsling_argument(ANVIL__gat__literal__hexadecimal, ANVIL__parse__namespace__one_name_only(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), value);
         }*/
+    // is type definition
+    } else if (ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__exclamation_point) {
+        // next lexling
+        ANVIL__advance__lexling_current(current, 1);
+
+        // parse namespace
+        output = ANVIL__create__parsling_argument(ANVIL__gat__type, ANVIL__parse__namespace(current, error), 0);
     // offset
     } else if (ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__at) {
         // advance current past at
@@ -440,7 +549,7 @@ ANVIL__parsling_argument ANVIL__parse__function_argument(ANVIL__current* current
         // if correct type
         if (ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__name) {
             // get name
-            output = ANVIL__create__parsling_argument(ANVIL__gat__offset, ANVIL__parse__namespace(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), 0);
+            output = ANVIL__create__parsling_argument(ANVIL__gat__offset, ANVIL__parse__namespace(current, error), 0);
         // error
         } else {
             *error = ANVIL__open__error("Parse Error: Offset is missing name.", ANVIL__read__lexling_from_current(*current).location);
@@ -455,7 +564,7 @@ ANVIL__parsling_argument ANVIL__parse__function_argument(ANVIL__current* current
         // if correct type
         if (ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__name) {
             // get name
-            output = ANVIL__create__parsling_argument(ANVIL__gat__flag, ANVIL__parse__namespace(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), 0);
+            output = ANVIL__create__parsling_argument(ANVIL__gat__flag, ANVIL__parse__namespace(current, error), 0);
         // error
         } else {
             *error = ANVIL__open__error("Parse Error: Flag is missing name.", ANVIL__read__lexling_from_current(*current).location);
@@ -465,7 +574,7 @@ ANVIL__parsling_argument ANVIL__parse__function_argument(ANVIL__current* current
     // string literal
     } else if (ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__string_literal) {
         // get argument
-        output = ANVIL__create__parsling_argument(ANVIL__gat__literal__string, ANVIL__parse__namespace(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), 0);
+        output = ANVIL__create__parsling_argument(ANVIL__gat__literal__string, ANVIL__parse__namespace(current, error), 0);
     // error
     } else {
         *error = ANVIL__open__error("Parse Error: Unrecognized argument type.", ANVIL__read__lexling_from_current(*current).location);
@@ -474,9 +583,9 @@ ANVIL__parsling_argument ANVIL__parse__function_argument(ANVIL__current* current
     }
 
     // check argument for variable only
-    if (is_function_header_argument == ANVIL__bt__true && output.category != ANVIL__gat__variable) {
+    if (is_function_header_argument == ANVIL__bt__true && (output.category != ANVIL__gat__variable && output.category != ANVIL__gat__type)) {
         // set error
-        *error = ANVIL__open__error("Parse Error: A non-variable argument was detected in a header.", ANVIL__read__lexling_from_current(*current).location);
+        *error = ANVIL__open__error("Parse Error: A non-variable / non-type argument was detected in a header.", ANVIL__read__lexling_from_current(*current).location);
 
         return output;
     }
@@ -487,7 +596,7 @@ ANVIL__parsling_argument ANVIL__parse__function_argument(ANVIL__current* current
     }
 
     // next current
-    ANVIL__advance__lexling_current(current, 1);
+    //ANVIL__advance__lexling_current(current, 1);
 
     return output;
 }
@@ -501,8 +610,6 @@ ANVIL__list ANVIL__parse__function_call_statement_arguments(ANVIL__current* curr
 
     // open names list
     output = ANVIL__open__list_with_error(sizeof(ANVIL__parsling_argument) * 8, error);
-
-    // check for error
     if (ANVIL__check__error_occured(error)) {
         return output;
     }
@@ -563,10 +670,10 @@ ANVIL__parsling_statement ANVIL__parse__statement(ANVIL__current* current, ANVIL
         // check for offset name
         if (ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__name) {
             // set name
-            output.name = ANVIL__create__parsling_argument(ANVIL__gat__offset, ANVIL__parse__namespace(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), 0);
+            output.name = ANVIL__create__parsling_argument(ANVIL__gat__offset, ANVIL__parse__namespace(current, error), 0);
 
             // advance current
-            ANVIL__advance__lexling_current(current, 1);
+            //ANVIL__advance__lexling_current(current, 1);
         // invalid syntax
         } else {
             // set error
@@ -581,13 +688,16 @@ ANVIL__parsling_statement ANVIL__parse__statement(ANVIL__current* current, ANVIL
 
         // setup type
         output.type = ANVIL__stt__offset;
-    // is an function call
+    // is a function call
     } else if (ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__name) {
         // get name
-        output.name = ANVIL__create__parsling_argument(ANVIL__gat__offset, ANVIL__parse__namespace(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), 0);
+        output.name = ANVIL__create__parsling_argument(ANVIL__gat__offset, ANVIL__parse__namespace(current, error), 0);
+        if (ANVIL__check__error_occured(error) == ANVIL__bt__true) {
+            return output;
+        }
 
         // advance current
-        ANVIL__advance__lexling_current(current, 1);
+        //ANVIL__advance__lexling_current(current, 1);
 
         // get inputs
         output.inputs = ANVIL__parse__function_call_statement_arguments(current, &input_count, is_header, error);
@@ -609,6 +719,26 @@ ANVIL__parsling_statement ANVIL__parse__statement(ANVIL__current* current, ANVIL
         } else {
             output.type = ANVIL__stt__function_call;
         }
+    // is a structure declaration
+    } else if (is_header == ANVIL__bt__true && ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__exclamation_point) {
+        // pass exclamation point
+        ANVIL__advance__lexling_current(current, 1);
+
+        // parse namespace
+        output.name = ANVIL__create__parsling_argument(ANVIL__gat__type, ANVIL__parse__namespace(current, error), 0);
+        if (ANVIL__check__error_occured(error) == ANVIL__bt__true) {
+            return output;
+        }
+
+        // parse inputs
+        output.inputs = ANVIL__parse__function_call_statement_arguments(current, &input_count, is_header, error);
+        output.input_count = input_count;
+        if (ANVIL__check__error_occured(error) == ANVIL__bt__true) {
+            return output;
+        }
+
+        // set type
+        output.type = ANVIL__stt__structure_header;
     // error
     } else {
         // set error
@@ -620,19 +750,22 @@ ANVIL__parsling_statement ANVIL__parse__statement(ANVIL__current* current, ANVIL
     return output;
 }
 
-// parse an function
-ANVIL__parsling_function ANVIL__parse__function(ANVIL__current* current, ANVIL__error* error) {
-    ANVIL__parsling_function output = ANVIL__create_null__parsling_function();
-
-    // check for eof
-    if (ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__end_of_file) {
-        return output;
-    }
+// parse a structure
+ANVIL__parsling_structure ANVIL__parse__structure(ANVIL__current* current, ANVIL__error* error) {
+    ANVIL__parsling_structure output;
 
     // parse header
     output.header = ANVIL__parse__statement(current, ANVIL__bt__true, error);
-    
-    // check for error
+
+    return output;
+}
+
+// parse a function
+ANVIL__parsling_function ANVIL__parse__function(ANVIL__current* current, ANVIL__error* error) {
+    ANVIL__parsling_function output = ANVIL__create_null__parsling_function();
+
+    // parse header
+    output.header = ANVIL__parse__statement(current, ANVIL__bt__true, error);
     if (ANVIL__check__error_occured(error)) {
         return output;
     }
@@ -644,7 +777,7 @@ ANVIL__parsling_function ANVIL__parse__function(ANVIL__current* current, ANVIL__
     // error
     } else {
         // set error
-        *error = ANVIL__open__error("Parse Error: An function definition has an equals sign missing.", ANVIL__read__lexling_from_current(*current).location);
+        *error = ANVIL__open__error("Parse Error: A function definition has an equals sign missing.", ANVIL__read__lexling_from_current(*current).location);
 
         // quit
         return output;
@@ -693,10 +826,11 @@ ANVIL__parsling_function ANVIL__parse__function(ANVIL__current* current, ANVIL__
     return output;
 }
 
-// parse a file (program)
+// parse a program (file)
 ANVIL__parsling_program ANVIL__parse__program(ANVIL__lexlings lexlings, ANVIL__error* error) {
     ANVIL__parsling_program output;
-    ANVIL__parsling_function temp;
+    ANVIL__parsling_function temp_function;
+    ANVIL__parsling_structure temp_structure;
     ANVIL__current current;
 
     // setup current
@@ -704,13 +838,17 @@ ANVIL__parsling_program ANVIL__parse__program(ANVIL__lexlings lexlings, ANVIL__e
 
     // open the function list
     output.functions = ANVIL__open__list_with_error(sizeof(ANVIL__parsling_function) * 64, error);
-
-    // check for memory error
     if (ANVIL__check__error_occured(error)) {
         goto quit;
     }
 
-    // parse functions
+    // open the structure list
+    output.structures = ANVIL__open__list_with_error(sizeof(ANVIL__parsling_structure) * 64, error);
+    if (ANVIL__check__error_occured(error)) {
+        goto quit;
+    }
+
+    // parse functions & structures
     while (ANVIL__check__current_within_range(current)) {
         // if end of file
         if (ANVIL__read__lexling_from_current(current).type == ANVIL__lt__end_of_file) {
@@ -718,11 +856,20 @@ ANVIL__parsling_program ANVIL__parse__program(ANVIL__lexlings lexlings, ANVIL__e
             goto quit;
         }
         
-        // parse function
-        temp = ANVIL__parse__function(&current, error);
+        // determine abstraction type
+        if (ANVIL__read__lexling_from_current(current).type == ANVIL__lt__exclamation_point) {
+            // parse structure
+            temp_structure = ANVIL__parse__structure(&current, error);
 
-        // append function
-        ANVIL__append__parsling_function(&(output.functions), temp, error);
+            // append structure
+            ANVIL__append__parsling_structure(&(output.structures), temp_structure, error);
+        } else {
+            // parse function
+            temp_function = ANVIL__parse__function(&current, error);
+
+            // append function
+            ANVIL__append__parsling_function(&(output.functions), temp_function, error);
+        }
 
         // check for error
         if (ANVIL__check__error_occured(error) == ANVIL__bt__true) {
@@ -734,10 +881,6 @@ ANVIL__parsling_program ANVIL__parse__program(ANVIL__lexlings lexlings, ANVIL__e
     quit:
 
     return output;
-}
-
-ANVIL__buffer ANVIL__convert__parsed_argument_type_to_string_buffer(ANVIL__gat argument_type) {
-    return ANVIL__open__buffer_from_string((u8*)(ANVIL__global__argument_type_name_strings[argument_type]), ANVIL__bt__false, ANVIL__bt__false);
 }
 
 // print namespace
@@ -768,13 +911,13 @@ void ANVIL__print__namespace(ANVIL__namespace namespace) {
 void ANVIL__print__parsling_argument(ANVIL__parsling_argument argument) {
     // print type
     printf("[");
-    ANVIL__print__buffer(ANVIL__convert__parsed_argument_type_to_string_buffer(argument.category));
+    ANVIL__print__buffer(ANVIL__convert__general_argument_type_to_string_buffer(argument.category));
     printf("]");
 
     // print data
-    if (argument.category == ANVIL__gat__variable || ANVIL__gat__variable__input || ANVIL__gat__variable__output || ANVIL__gat__variable__body || ANVIL__gat__variable__predefined || ANVIL__gat__offset || ANVIL__gat__flag || ANVIL__gat__literal__string) {
+    if (argument.category == ANVIL__gat__variable || argument.category == ANVIL__gat__variable__input || argument.category == ANVIL__gat__variable__output || argument.category == ANVIL__gat__variable__body || argument.category == ANVIL__gat__variable__predefined || argument.category == ANVIL__gat__offset || argument.category == ANVIL__gat__flag || argument.category == ANVIL__gat__literal__string || argument.category == ANVIL__gat__type || argument.category == ANVIL__gat__type__structure || argument.category == ANVIL__gat__type__from_variable || argument.category == ANVIL__gat__type__predefined) {
         ANVIL__print__namespace(argument.namespace);
-    } else if (argument.category == ANVIL__gat__literal__boolean || ANVIL__gat__literal__binary || ANVIL__gat__literal__hexadecimal) {
+    } else if (argument.category == ANVIL__gat__literal__boolean || argument.category == ANVIL__gat__literal__binary || argument.category == ANVIL__gat__literal__hexadecimal) {
         ANVIL__print__namespace(argument.namespace);
         printf("[%lu]", argument.cellular_value);
     } else if (argument.category == ANVIL__gat__literal__integer) {
@@ -834,7 +977,7 @@ void ANVIL__print__parsed_statement(ANVIL__parsling_statement statement) {
     return;
 }
 
-// print an function
+// print a function
 void ANVIL__print__parsed_function(ANVIL__parsling_function function) {
     ANVIL__current current_statement = ANVIL__calculate__current_from_list_filled_index(&function.statements);
 
@@ -868,9 +1011,24 @@ void ANVIL__print__parsed_function(ANVIL__parsling_function function) {
     return;
 }
 
+// print a structure
+void ANVIL__print__parsed_structure(ANVIL__parsling_structure structure) {
+    // print header
+    printf("\tStructure: ");
+
+    // print arguments
+    ANVIL__print__parsling_arguments(&structure.header.inputs);
+
+    // next line
+    printf("\n");
+
+    return;
+}
+
 // print a program
 void ANVIL__print__parsed_program(ANVIL__parsling_program program) {
     ANVIL__current current_function = ANVIL__calculate__current_from_list_filled_index(&(program.functions));
+    ANVIL__current current_structure = ANVIL__calculate__current_from_list_filled_index(&(program.structures));
     
     // print header
     printf("Parsed Program:\n");
@@ -882,6 +1040,15 @@ void ANVIL__print__parsed_program(ANVIL__parsling_program program) {
 
         // advance current
         current_function.start += sizeof(ANVIL__parsling_function);
+    }
+
+    // print each structure
+    while (ANVIL__check__current_within_range(current_structure)) {
+        // print structure
+        ANVIL__print__parsed_structure(*(ANVIL__parsling_structure*)current_structure.start);
+
+        // advance current
+        current_structure.start += sizeof(ANVIL__parsling_structure);
     }
 
     return;
