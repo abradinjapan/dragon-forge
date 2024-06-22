@@ -556,21 +556,6 @@ ANVIL__parsling_argument ANVIL__parse__function_argument(ANVIL__current* current
 
             return output;
         }
-    // flag
-    } else if (ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__hashtag) {
-        // advance current past hashtag
-        ANVIL__advance__lexling_current(current, 1);
-
-        // if correct type
-        if (ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__name) {
-            // get name
-            output = ANVIL__create__parsling_argument(ANVIL__gat__flag, ANVIL__parse__namespace(current, error), 0);
-        // error
-        } else {
-            *error = ANVIL__open__error("Parse Error: Flag is missing name.", ANVIL__read__lexling_from_current(*current).location);
-
-            return output;
-        }
     // string literal
     } else if (ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__string_literal) {
         // get argument
