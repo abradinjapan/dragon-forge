@@ -327,6 +327,7 @@ void ANVIL__close__parsling_statements(ANVIL__list*);
 void ANVIL__close__parsling_scope(ANVIL__parsling_scope scope) {
     // close statements
     if (ANVIL__check__empty_list(scope.statements) == ANVIL__bt__false) {
+        // close statements
         ANVIL__close__parsling_statements(&scope.statements);
     }
 
@@ -348,6 +349,7 @@ void ANVIL__close__parsling_statement(ANVIL__parsling_statement statement) {
 
     // close scope
     ANVIL__close__parsling_scope(statement.subscope);
+    ANVIL__close__parsling_argument(statement.subscope_flag_name);
 
     return;
 }
@@ -722,13 +724,16 @@ ANVIL__parsling_statement ANVIL__parse__statement(ANVIL__current* current, ANVIL
             ANVIL__error look_ahead_error = ANVIL__create_null__error();
 
             // parse ahead one namespace
-            ANVIL__parse__namespace(&look_ahead_current, &look_ahead_error);
+            ANVIL__namespace temp = ANVIL__parse__namespace(&look_ahead_current, &look_ahead_error);
 
             // check for error
             if (ANVIL__check__error_occured(&look_ahead_error)) {
                 // clear error (already set to not a lookahead scope)
                 ANVIL__close__error(look_ahead_error);
             }
+
+            // close temporary namespace
+            ANVIL__close__parsling_namespace(temp);
 
             // check for the equals sign
             if (ANVIL__check__current_within_range(look_ahead_current) && ANVIL__read__lexling_from_current(look_ahead_current).type == ANVIL__lt__equals) {
@@ -859,12 +864,8 @@ ANVIL__parsling_structure ANVIL__parse__structure(ANVIL__current* current, ANVIL
     ANVIL__parsling_structure output = ANVIL__create_null__parsling_structure();
     ANVIL__input_count input_count = 0;
 
-    // open lists
+    // open type names list
     output.type_names = ANVIL__open__list_with_error(sizeof(ANVIL__parsling_argument) * 8, error);
-    if (ANVIL__check__error_occured(error)) {
-        return output;
-    }
-    output.arguments = ANVIL__open__list_with_error(sizeof(ANVIL__parsling_argument) * 8, error);
     if (ANVIL__check__error_occured(error)) {
         return output;
     }
