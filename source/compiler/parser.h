@@ -53,6 +53,27 @@ ANVIL__parsling_argument ANVIL__create_null__parsling_argument() {
     return ANVIL__create__parsling_argument(ANVIL__gat__invalid, ANVIL__create_null__namespace(), 0);
 }
 
+// one scope
+typedef struct ANVIL__parsling_scope {
+    ANVIL__list statements; // ANVIL__parsling_statement
+} ANVIL__parsling_scope;
+
+// create custom scope
+ANVIL__parsling_scope ANVIL__create__parsling_scope(ANVIL__list statements) {
+    ANVIL__parsling_scope output;
+
+    // setup output
+    output.statements = statements;
+
+    return output;
+}
+
+// create null scope
+ANVIL__parsling_scope ANVIL__create_null__parsling_scope() {
+    // return empty
+    return ANVIL__create__parsling_scope(ANVIL__create_null__list());
+}
+
 // statement type
 typedef enum ANVIL__stt {
     ANVIL__stt__invalid,
@@ -60,6 +81,7 @@ typedef enum ANVIL__stt {
     // statements
     ANVIL__stt__function_call,
     ANVIL__stt__offset,
+    ANVIL__stt__subscope,
 
     // headers
     ANVIL__stt__function_header,
@@ -75,19 +97,21 @@ typedef struct ANVIL__parsling_statement {
     ANVIL__stt type;
 
     // name
-    ANVIL__parsling_argument name;
+    ANVIL__parsling_argument name; // offset name, subscope name & function call name
 
     // function call data
     ANVIL__list inputs; // ANVIL__parsling_argument
     ANVIL__list outputs; // ANVIL__parsling_argument
-
-    // metadata
     ANVIL__input_count input_count;
     ANVIL__output_count output_count;
+
+    // subscope data
+    ANVIL__parsling_argument subscope_flag_name;
+    ANVIL__parsling_scope subscope;
 } ANVIL__parsling_statement;
 
 // create a custom statement
-ANVIL__parsling_statement ANVIL__create__parsling_statement(ANVIL__stt type, ANVIL__parsling_argument name, ANVIL__list inputs, ANVIL__list outputs, ANVIL__input_count input_count, ANVIL__output_count output_count) {
+ANVIL__parsling_statement ANVIL__create__parsling_statement(ANVIL__stt type, ANVIL__parsling_argument name, ANVIL__list inputs, ANVIL__list outputs, ANVIL__input_count input_count, ANVIL__output_count output_count, ANVIL__parsling_argument subscope_flag_name, ANVIL__parsling_scope subscope) {
     ANVIL__parsling_statement output;
 
     // setup output
@@ -97,6 +121,8 @@ ANVIL__parsling_statement ANVIL__create__parsling_statement(ANVIL__stt type, ANV
     output.outputs = outputs;
     output.input_count = input_count;
     output.output_count = output_count;
+    output.subscope_flag_name = subscope_flag_name;
+    output.subscope = subscope;
 
     return output;
 }
@@ -104,7 +130,7 @@ ANVIL__parsling_statement ANVIL__create__parsling_statement(ANVIL__stt type, ANV
 // create a null statement
 ANVIL__parsling_statement ANVIL__create_null__parsling_statement() {
     // return empty
-    return ANVIL__create__parsling_statement(ANVIL__stt__invalid, ANVIL__create_null__parsling_argument(), ANVIL__create_null__list(), ANVIL__create_null__list(), 0, 0);
+    return ANVIL__create__parsling_statement(ANVIL__stt__invalid, ANVIL__create_null__parsling_argument(), ANVIL__create_null__list(), ANVIL__create_null__list(), 0, 0, ANVIL__create_null__parsling_argument(), ANVIL__create_null__parsling_scope());
 }
 
 // one structure
@@ -133,16 +159,16 @@ ANVIL__parsling_structure ANVIL__create_null__parsling_structure() {
 // one function
 typedef struct ANVIL__parsling_function {
     ANVIL__parsling_statement header;
-    ANVIL__list statements; // ANVIL__parsling_statement
+    ANVIL__parsling_scope scope;
 } ANVIL__parsling_function;
 
 // create a custom function
-ANVIL__parsling_function ANVIL__create__parsling_function(ANVIL__parsling_statement header, ANVIL__list statements) {
+ANVIL__parsling_function ANVIL__create__parsling_function(ANVIL__parsling_statement header, ANVIL__parsling_scope scope) {
     ANVIL__parsling_function output;
 
     // setup output
     output.header = header;
-    output.statements = statements;
+    output.scope = scope;
 
     return output;
 }
@@ -150,7 +176,7 @@ ANVIL__parsling_function ANVIL__create__parsling_function(ANVIL__parsling_statem
 // create a null function
 ANVIL__parsling_function ANVIL__create_null__parsling_function() {
     // return empty
-    return ANVIL__create__parsling_function(ANVIL__create_null__parsling_statement(), ANVIL__create_null__list());
+    return ANVIL__create__parsling_function(ANVIL__create_null__parsling_statement(), ANVIL__create_null__parsling_scope());
 }
 
 // one program
@@ -294,6 +320,19 @@ void ANVIL__close__parsling_arguments(ANVIL__list* arguments) {
     return;
 }
 
+// forward declaration
+void ANVIL__close__parsling_statements(ANVIL__list*);
+
+// close scope
+void ANVIL__close__parsling_scope(ANVIL__parsling_scope scope) {
+    // close statements
+    if (ANVIL__check__empty_list(scope.statements) == ANVIL__bt__false) {
+        ANVIL__close__parsling_statements(&scope.statements);
+    }
+
+    return;
+}
+
 // close statement
 void ANVIL__close__parsling_statement(ANVIL__parsling_statement statement) {
     // close name
@@ -306,6 +345,9 @@ void ANVIL__close__parsling_statement(ANVIL__parsling_statement statement) {
     if (ANVIL__check__empty_list(statement.outputs) == ANVIL__bt__false) {
         ANVIL__close__parsling_arguments(&statement.outputs);
     }
+
+    // close scope
+    ANVIL__close__parsling_scope(statement.subscope);
 
     return;
 }
@@ -343,10 +385,8 @@ void ANVIL__close__parsling_function(ANVIL__parsling_function function) {
     // close header
     ANVIL__close__parsling_statement(function.header);
     
-    // close statements
-    if (ANVIL__check__empty_list(function.statements) == ANVIL__bt__false) {
-        ANVIL__close__parsling_statements(&function.statements);
-    }
+    // close scope
+    ANVIL__close__parsling_scope(function.scope);
 
     return;
 }
@@ -412,14 +452,14 @@ void ANVIL__revert__lexling_current(ANVIL__current* current, ANVIL__lexling_inde
 ANVIL__namespace ANVIL__parse__namespace__one_name_only(ANVIL__current* current, ANVIL__error* error) {
     ANVIL__namespace output;
 
+    // setup count
+    output.count = 0;
+
     // open lexling list
     output.lexlings = ANVIL__open__list_with_error(sizeof(ANVIL__lexling) * 8, error);
     if (ANVIL__check__error_occured(error)) {
         return output;
     }
-
-    // setup count
-    output.count = 0;
 
     // check for name
     if (ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__name) {
@@ -447,14 +487,14 @@ ANVIL__namespace ANVIL__parse__namespace__one_name_only(ANVIL__current* current,
 ANVIL__namespace ANVIL__parse__namespace(ANVIL__current* current, ANVIL__error* error) {
     ANVIL__namespace output;
 
+    // setup count
+    output.count = 0;
+
     // open lexling list
     output.lexlings = ANVIL__open__list_with_error(sizeof(ANVIL__lexling) * 8, error);
     if (ANVIL__check__error_occured(error)) {
         return output;
     }
-
-    // setup count
-    output.count = 0;
 
     // check for initial name
     if (ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__name) {
@@ -586,9 +626,6 @@ ANVIL__parsling_argument ANVIL__parse__function_argument(ANVIL__current* current
         return output;
     }
 
-    // next current
-    //ANVIL__advance__lexling_current(current, 1);
-
     return output;
 }
 
@@ -647,11 +684,15 @@ ANVIL__list ANVIL__parse__function_call_statement_arguments(ANVIL__current* curr
     return output;
 }
 
+// predefine
+ANVIL__parsling_scope ANVIL__parse__scope(ANVIL__current* current, ANVIL__error* error);
+
 // parse one statement
 ANVIL__parsling_statement ANVIL__parse__statement(ANVIL__current* current, ANVIL__bt is_header, ANVIL__error* error) {
     ANVIL__parsling_statement output = ANVIL__create_null__parsling_statement();
     ANVIL__input_count input_count;
     ANVIL__output_count output_count;
+    ANVIL__bt is_scoped_offset = ANVIL__bt__false;
 
     // check for offset
     if (ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__at) {
@@ -662,9 +703,6 @@ ANVIL__parsling_statement ANVIL__parse__statement(ANVIL__current* current, ANVIL
         if (ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__name) {
             // set name
             output.name = ANVIL__create__parsling_argument(ANVIL__gat__offset, ANVIL__parse__namespace(current, error), 0);
-
-            // advance current
-            //ANVIL__advance__lexling_current(current, 1);
         // invalid syntax
         } else {
             // set error
@@ -677,8 +715,57 @@ ANVIL__parsling_statement ANVIL__parse__statement(ANVIL__current* current, ANVIL
         output.inputs = ANVIL__create_null__list();
         output.outputs = ANVIL__create_null__list();
 
-        // setup type
-        output.type = ANVIL__stt__offset;
+        // look ahead for a scope setter
+        {
+            // setup temps
+            ANVIL__current look_ahead_current = *current;
+            ANVIL__error look_ahead_error = ANVIL__create_null__error();
+
+            // parse ahead one namespace
+            ANVIL__parse__namespace(&look_ahead_current, &look_ahead_error);
+
+            // check for error
+            if (ANVIL__check__error_occured(&look_ahead_error)) {
+                // clear error (already set to not a lookahead scope)
+                ANVIL__close__error(look_ahead_error);
+            }
+
+            // check for the equals sign
+            if (ANVIL__check__current_within_range(look_ahead_current) && ANVIL__read__lexling_from_current(look_ahead_current).type == ANVIL__lt__equals) {
+                // is a named scope
+                is_scoped_offset = ANVIL__bt__true;
+            }
+        }
+
+        // is a scope
+        if (is_scoped_offset == ANVIL__bt__true) {
+            // get scope flag namespace
+            output.subscope_flag_name = ANVIL__parse__function_argument(current, ANVIL__bt__true, error);
+            if (ANVIL__check__error_occured(error)) {
+                return output;
+            }
+
+            // check for invalid namespace
+            if (output.subscope_flag_name.category != ANVIL__gat__variable) {
+                // set error
+                *error = ANVIL__open__error("Parse Error: A named scope doesn't have its flagging variable.", ANVIL__read__lexling_from_current(*current).location);
+
+                return output;
+            }
+
+            // is a named scope
+            output.type = ANVIL__stt__subscope;
+
+            // skip past equals, already checked for it in lookahead
+            ANVIL__advance__lexling_current(current, 1);
+
+            // parse scope
+            output.subscope = ANVIL__parse__scope(current, error);
+        // is a normal offset
+        } else {
+            // setup type
+            output.type = ANVIL__stt__offset;
+        }
     // is a function call
     } else if (ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__name) {
         // get name
@@ -686,9 +773,6 @@ ANVIL__parsling_statement ANVIL__parse__statement(ANVIL__current* current, ANVIL
         if (ANVIL__check__error_occured(error) == ANVIL__bt__true) {
             return output;
         }
-
-        // advance current
-        //ANVIL__advance__lexling_current(current, 1);
 
         // get inputs
         output.inputs = ANVIL__parse__function_call_statement_arguments(current, &input_count, is_header, error);
@@ -710,26 +794,6 @@ ANVIL__parsling_statement ANVIL__parse__statement(ANVIL__current* current, ANVIL
         } else {
             output.type = ANVIL__stt__function_call;
         }
-    // is a structure declaration
-    } else if (is_header == ANVIL__bt__true && ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__exclamation_point) {
-        // pass exclamation point
-        ANVIL__advance__lexling_current(current, 1);
-
-        // parse namespace
-        output.name = ANVIL__create__parsling_argument(ANVIL__gat__type, ANVIL__parse__namespace(current, error), 0);
-        if (ANVIL__check__error_occured(error) == ANVIL__bt__true) {
-            return output;
-        }
-
-        // parse inputs
-        output.inputs = ANVIL__parse__function_call_statement_arguments(current, &input_count, is_header, error);
-        output.input_count = input_count;
-        if (ANVIL__check__error_occured(error) == ANVIL__bt__true) {
-            return output;
-        }
-
-        // set type
-        output.type = ANVIL__stt__structure_header;
     // error
     } else {
         // set error
@@ -738,6 +802,51 @@ ANVIL__parsling_statement ANVIL__parse__statement(ANVIL__current* current, ANVIL
         } else {
             *error = ANVIL__open__error("Parse Error: Unrecognized statement type.", ANVIL__read__lexling_from_current(*current).location);
         }
+    }
+
+    return output;
+}
+
+// parse a scope
+ANVIL__parsling_scope ANVIL__parse__scope(ANVIL__current* current, ANVIL__error* error) {
+    ANVIL__parsling_scope output;
+
+    // check for scope opener
+    if (ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__left_curly_bracket) {
+        // advance current
+        ANVIL__advance__lexling_current(current, 1);
+    // scope opener not found, error
+    } else {
+        // set error
+        *error = ANVIL__open__error("Parse Error: Scope is missing left curly bracket.", ANVIL__read__lexling_from_current(*current).location);
+
+        return output;
+    }
+
+    // parse statements
+    // open statements list
+    output.statements = ANVIL__open__list_with_error(sizeof(ANVIL__parsling_statement) * 16, error);
+    
+    // get statements
+    while (ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type != ANVIL__lt__right_curly_bracket) {
+        // parse statement
+        ANVIL__parsling_statement statement = ANVIL__parse__statement(current, ANVIL__bt__false, error);
+
+        // add statement
+        ANVIL__append__parsling_statement(&output.statements, statement, error);
+        if (ANVIL__check__error_occured(error)) {
+            return output;
+        }
+    }
+
+    // check for scope closer
+    if (ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__right_curly_bracket) {
+        // advance current
+        ANVIL__advance__lexling_current(current, 1);
+    // scope opener not found, error
+    } else {
+        // setup error
+        *error = ANVIL__open__error("Parse Error: Scope is missing right curly bracket.", ANVIL__read__lexling_from_current(*current).location);
 
         return output;
     }
@@ -747,7 +856,7 @@ ANVIL__parsling_statement ANVIL__parse__statement(ANVIL__current* current, ANVIL
 
 // parse a structure
 ANVIL__parsling_structure ANVIL__parse__structure(ANVIL__current* current, ANVIL__error* error) {
-    ANVIL__parsling_structure output;
+    ANVIL__parsling_structure output = ANVIL__create_null__parsling_structure();
     ANVIL__input_count input_count = 0;
 
     // open lists
@@ -804,45 +913,8 @@ ANVIL__parsling_function ANVIL__parse__function(ANVIL__current* current, ANVIL__
         return output;
     }
 
-    // check for scope opener
-    if (ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__left_curly_bracket) {
-        // advance current
-        ANVIL__advance__lexling_current(current, 1);
-    // scope opener not found, error
-    } else {
-        // set error
-        *error = ANVIL__open__error("Parse Error: Scope is missing left curly bracket.", ANVIL__read__lexling_from_current(*current).location);
-
-        return output;
-    }
-
-    // parse statements
-    // open statements list
-    output.statements = ANVIL__open__list_with_error(sizeof(ANVIL__parsling_statement) * 16, error);
-    
-    // get statements
-    while (ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type != ANVIL__lt__right_curly_bracket) {
-        // parse statement
-        ANVIL__parsling_statement statement = ANVIL__parse__statement(current, ANVIL__bt__false, error);
-
-        // add statement
-        ANVIL__append__parsling_statement(&output.statements, statement, error);
-        if (ANVIL__check__error_occured(error)) {
-            return output;
-        }
-    }
-
-    // check for scope closer
-    if (ANVIL__check__current_within_range(*current) && ANVIL__read__lexling_from_current(*current).type == ANVIL__lt__right_curly_bracket) {
-        // advance current
-        ANVIL__advance__lexling_current(current, 1);
-    // scope opener not found, error
-    } else {
-        // setup error
-        *error = ANVIL__open__error("Parse Error: Scope is missing right curly bracket.", ANVIL__read__lexling_from_current(*current).location);
-
-        return output;
-    }
+    // parse scope
+    output.scope = ANVIL__parse__scope(current, error);
 
     return output;
 }
@@ -977,13 +1049,22 @@ void ANVIL__print__parsling_arguments(ANVIL__list* arguments) {
     return;
 }
 
+// forward declaration
+void ANVIL__print__parsed_scope(ANVIL__parsling_scope scope, ANVIL__tab_count tab_depth);
+
 // print statement
-void ANVIL__print__parsed_statement(ANVIL__parsling_statement statement) {
+void ANVIL__print__parsed_statement(ANVIL__parsling_statement statement, ANVIL__tab_count tab_depth) {
+    // print tabs
+    ANVIL__print__tabs(tab_depth);
+
     // print statement
     if (statement.type == ANVIL__stt__offset) {
         // print offset information
         printf("@");
         ANVIL__print__namespace(statement.name.namespace);
+
+        // print new line
+        printf("\n");
     } else if (statement.type == ANVIL__stt__function_call || statement.type == ANVIL__stt__function_header) {
         // print statement name
         ANVIL__print__namespace(statement.name.namespace);
@@ -993,36 +1074,32 @@ void ANVIL__print__parsed_statement(ANVIL__parsling_statement statement) {
 
         // print outputs
         ANVIL__print__parsling_arguments(&statement.outputs);
+
+        // print new line
+        printf("\n");
+    } else if (statement.type == ANVIL__stt__subscope) {
+        // print scope
+        printf("@");
+        ANVIL__print__namespace(statement.name.namespace);
+        printf(" ");
+        ANVIL__print__namespace(statement.subscope_flag_name.namespace);
+        printf(":\n");
+        ANVIL__print__parsed_scope(statement.subscope, tab_depth + 1);
     }
 
     return;
 }
 
-// print a function
-void ANVIL__print__parsed_function(ANVIL__parsling_function function) {
-    ANVIL__current current_statement = ANVIL__calculate__current_from_list_filled_index(&function.statements);
-
-    // print header
-    printf("\tFunction: ");
-    if (function.header.type != ANVIL__stt__invalid) {
-        ANVIL__print__parsed_statement(function.header);
-    }
-
-    // new line for statements
-    printf("\n");
+// print a scope
+void ANVIL__print__parsed_scope(ANVIL__parsling_scope scope, ANVIL__tab_count tab_depth) {
+    ANVIL__current current_statement = ANVIL__calculate__current_from_list_filled_index(&scope.statements);
 
     // print statements
-    if (ANVIL__check__empty_list(function.statements) == ANVIL__bt__false) {
+    if (ANVIL__check__empty_list(scope.statements) == ANVIL__bt__false) {
         // print each statement
         while (ANVIL__check__current_within_range(current_statement)) {
-            // print formatting
-            printf("\t\t");
-
             // print statement
-            ANVIL__print__parsed_statement(*(ANVIL__parsling_statement*)current_statement.start);
-
-            // print new line
-            printf("\n");
+            ANVIL__print__parsed_statement(*(ANVIL__parsling_statement*)current_statement.start, tab_depth);
 
             // advance current
             current_statement.start += sizeof(ANVIL__parsling_statement);
@@ -1032,12 +1109,28 @@ void ANVIL__print__parsed_function(ANVIL__parsling_function function) {
     return;
 }
 
+// print a function
+void ANVIL__print__parsed_function(ANVIL__parsling_function function, ANVIL__tab_count tab_depth) {
+    // print header
+    ANVIL__print__tabs(tab_depth);
+    printf("Function: ");
+    if (function.header.type != ANVIL__stt__invalid) {
+        ANVIL__print__parsed_statement(function.header, 0);
+
+        // print scope(s)
+        ANVIL__print__parsed_scope(function.scope, tab_depth + 1);
+    }
+
+    return;
+}
+
 // print a structure
-void ANVIL__print__parsed_structure(ANVIL__parsling_structure structure) {
+void ANVIL__print__parsed_structure(ANVIL__parsling_structure structure, ANVIL__tab_count tab_depth) {
     ANVIL__current current_name = ANVIL__calculate__current_from_list_filled_index(&structure.type_names);
 
     // print header
-    printf("\tStructure: ");
+    ANVIL__print__tabs(tab_depth);
+    printf("Structure: ");
 
     // print names
     while (ANVIL__check__current_within_range(current_name)) {
@@ -1068,7 +1161,7 @@ void ANVIL__print__parsed_program(ANVIL__parsling_program program) {
     // print each function
     while (ANVIL__check__current_within_range(current_function)) {
         // print function
-        ANVIL__print__parsed_function(*(ANVIL__parsling_function*)current_function.start);
+        ANVIL__print__parsed_function(*(ANVIL__parsling_function*)current_function.start, 1);
 
         // advance current
         current_function.start += sizeof(ANVIL__parsling_function);
@@ -1077,7 +1170,7 @@ void ANVIL__print__parsed_program(ANVIL__parsling_program program) {
     // print each structure
     while (ANVIL__check__current_within_range(current_structure)) {
         // print structure
-        ANVIL__print__parsed_structure(*(ANVIL__parsling_structure*)current_structure.start);
+        ANVIL__print__parsed_structure(*(ANVIL__parsling_structure*)current_structure.start, 1);
 
         // advance current
         current_structure.start += sizeof(ANVIL__parsling_structure);
