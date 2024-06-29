@@ -4,4 +4,10 @@
 /* Include */
 #include "parser.h"
 
+/* Account */
+// account all files into one accountling program
+ANVIL__accountling_program ANVIL__account__program(ANVIL__list parsling_programs, ANVIL__error* error) {
+    // expand functions and structures (since functions & structures can have more than one type per definition, expanding out all definitions is necessary for semantic analysis)
+}
+
 #endif
