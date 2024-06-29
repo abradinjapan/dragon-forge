@@ -626,7 +626,7 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
     ANVIL__cell_ID compile__error__character_location__character_index;
     ANVIL__buffer compile__output_program;
     ANVIL__buffer compile__output_error_message;
-    ANVIL__error compile__error;
+    COMPILER__error compile__error;
     ANVIL__bt compile__buffer_appending_error = ANVIL__bt__false;
 
     // run temps
@@ -947,13 +947,13 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         compile__error__character_location__character_index = ANVIL__read_next__cell_ID(execution_read_address);
 
         // run compiler (WARNING, buffers are NOT checked for vality!)
-        ANVIL__compile__files(ANVIL__create__buffer((*context).cells[compile__user_code_buffers_buffer_start], (*context).cells[compile__user_code_buffers_buffer_end]), (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__debug_enabled], &compile__output_program, &compile__error);
+        COMPILER__compile__files(ANVIL__create__buffer((*context).cells[compile__user_code_buffers_buffer_start], (*context).cells[compile__user_code_buffers_buffer_end]), (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__debug_enabled], &compile__output_program, &compile__error);
 
         // get temps
         compile__output_error_message = compile__error.message;
 
         // check if program was created
-        if (ANVIL__check__error_occured(&compile__error) == ANVIL__bt__false) {
+        if (COMPILER__check__error_occured(&compile__error) == ANVIL__bt__false) {
             // add new buffer to allocations
             ANVIL__remember__allocation(allocations, compile__output_program, &compile__buffer_appending_error);
 

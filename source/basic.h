@@ -636,6 +636,30 @@ ANVIL__bt ANVIL__check__empty_list(ANVIL__list list) {
     return ANVIL__check__empty_buffer(list.buffer);
 }
 
+/* Current */
+// define
+typedef ANVIL__buffer ANVIL__current;
+
+// check if a current buffer is still valid
+ANVIL__bt ANVIL__check__current_within_range(ANVIL__current current) {
+    return (current.start <= current.end);
+}
+
+// calculate a current buffer from a list // NOTE: buffer cannot be null or calculation fails!
+ANVIL__current ANVIL__calculate__current_from_list_filled_index(ANVIL__list* list) {
+    return ANVIL__create__buffer((*list).buffer.start, (*list).buffer.start + (*list).filled_index - 1);
+}
+
+// check for a character at a current
+ANVIL__bt ANVIL__check__character_range_at_current(ANVIL__current current, ANVIL__character range_start, ANVIL__character range_end) {
+    return ((*(ANVIL__character*)current.start) >= range_start) && ((*(ANVIL__character*)current.start) <= range_end);
+}
+
+// calculate the amounnt of items in one list (assumes all items are same size!)
+ANVIL__list_filled_index ANVIL__calculate__list_content_count(ANVIL__list list, size_t item_size) {
+    return list.filled_index / item_size;
+}
+
 /* Essentials */
 ANVIL__u64 ANVIL__calculate__exponent(ANVIL__u64 base, ANVIL__u64 exponent) {
     ANVIL__u64 output = 1;
