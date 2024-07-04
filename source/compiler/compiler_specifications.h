@@ -38,11 +38,6 @@ typedef enum COMPILER__gat {
     // offsets
     COMPILER__gat__offset,
 
-    // flags
-    COMPILER__gat__flag,
-    COMPILER__gat__flag__user_defined,
-    COMPILER__gat__flag__predefined,
-
     // literals
     COMPILER__gat__literal__boolean,
     COMPILER__gat__literal__binary,
@@ -54,9 +49,6 @@ typedef enum COMPILER__gat {
 
     // types
     COMPILER__gat__type,
-    COMPILER__gat__type__structure,
-    COMPILER__gat__type__from_variable, // used for when types are being extracted from variables
-    COMPILER__gat__type__predefined,
 
     // count
     COMPILER__gat__COUNT,
@@ -299,7 +291,7 @@ ANVIL__buffer COMPILER__serialize__error_json(COMPILER__error error, ANVIL__bt* 
     json = ANVIL__open__list(sizeof(ANVIL__character) * 2048, error_occured);
 
     // generate json
-    ANVIL__list__append__buffer_data(&json, ANVIL__open__buffer_from_string((u8*)"{\n\t\"message\": \"", ANVIL__bt__false, ANVIL__bt__false), error_occured);
+    ANVIL__list__append__buffer_data(&json, ANVIL__open__buffer_from_string((u8*)"\"error\": {\n\t\"message\": \"", ANVIL__bt__false, ANVIL__bt__false), error_occured);
     ANVIL__list__append__buffer_data(&json, error.message, error_occured);
     ANVIL__list__append__buffer_data(&json, ANVIL__open__buffer_from_string((u8*)"\",\n\t\"file_index\": \"", ANVIL__bt__false, ANVIL__bt__false), error_occured);
     temp_buffer = COMPILER__translate__integer_value_to_string(error.location.file_index);
