@@ -97,18 +97,12 @@ char* COMPILER__global__argument_type_name_strings[] = {
     "body_variable",
     "predefined_variable",
     "offset",
-    "flag",
-    "flag_user_defined",
-    "flag_predefined",
     "boolean",
     "binary",
     "integer",
     "hexadecimal",
     "string",
     "type",
-    "structure_type",
-    "type_from_variable",
-    "predefined_type",
 };
 char* COMPILER__global__accountling_call_type_name_strings[] = {
     COMPILER__define__master_namespace ".set",
