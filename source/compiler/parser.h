@@ -74,23 +74,6 @@ COMPILER__parsling_scope COMPILER__create_null__parsling_scope() {
     return COMPILER__create__parsling_scope(ANVIL__create_null__list());
 }
 
-// statement type
-typedef enum COMPILER__stt {
-    COMPILER__stt__invalid,
-
-    // statements
-    COMPILER__stt__function_call,
-    COMPILER__stt__offset,
-    COMPILER__stt__subscope,
-
-    // headers
-    COMPILER__stt__function_header,
-    COMPILER__stt__structure_header,
-
-    // count
-    COMPILER__stt__COUNT,
-} COMPILER__stt;
-
 // one statement
 typedef struct COMPILER__parsling_statement {
     // statement type
@@ -763,7 +746,7 @@ COMPILER__parsling_statement COMPILER__parse__statement(ANVIL__current* current,
         // is a normal offset
         } else {
             // setup type
-            output.type = COMPILER__stt__offset;
+            output.type = COMPILER__stt__offset__normal;
         }
     // is a function call
     } else if (ANVIL__check__current_within_range(*current) && COMPILER__read__lexling_from_current(*current).type == COMPILER__lt__name) {
@@ -1056,9 +1039,23 @@ void COMPILER__print__parsed_statement(COMPILER__parsling_statement statement, A
     ANVIL__print__tabs(tab_depth);
 
     // print statement
-    if (statement.type == COMPILER__stt__offset) {
+    if (statement.type == COMPILER__stt__offset__normal) {
         // print offset information
-        printf("@");
+        printf("@[normal]");
+        COMPILER__print__namespace(statement.name.name);
+
+        // print new line
+        printf("\n");
+    } else if (statement.type == COMPILER__stt__offset__top) {
+        // print offset information
+        printf("@[top]");
+        COMPILER__print__namespace(statement.name.name);
+
+        // print new line
+        printf("\n");
+    } else if (statement.type == COMPILER__stt__offset__bottom) {
+        // print offset information
+        printf("@[bottom]");
         COMPILER__print__namespace(statement.name.name);
 
         // print new line

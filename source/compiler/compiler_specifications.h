@@ -13,6 +13,7 @@ typedef COMPILER__io_count COMPILER__input_count;
 typedef COMPILER__io_count COMPILER__output_count;
 typedef ANVIL__u64 COMPILER__accountling_index;
 typedef COMPILER__accountling_index COMPILER__variable_index;
+typedef COMPILER__accountling_index COMPILER__variable_type_index;
 typedef COMPILER__accountling_index COMPILER__call_index;
 typedef COMPILER__accountling_index COMPILER__offset_index;
 typedef COMPILER__accountling_index COMPILER__flag_index;
@@ -54,6 +55,25 @@ typedef enum COMPILER__gat {
     COMPILER__gat__COUNT,
 } COMPILER__gat;
 
+// statement type
+typedef enum COMPILER__stt {
+    COMPILER__stt__invalid,
+
+    // statements
+    COMPILER__stt__function_call,
+    COMPILER__stt__offset__normal,
+    COMPILER__stt__offset__top,
+    COMPILER__stt__offset__bottom,
+    COMPILER__stt__subscope,
+
+    // headers
+    COMPILER__stt__function_header,
+    COMPILER__stt__structure_header,
+
+    // count
+    COMPILER__stt__COUNT,
+} COMPILER__stt;
+
 // strings
 char* COMPILER__global__predefined_cell_name_strings[] = {
     COMPILER__define__master_namespace ".error_code",
@@ -83,11 +103,6 @@ char* COMPILER__global__predefined_cell_name_strings[] = {
     COMPILER__define__master_namespace ".stack.start",
     COMPILER__define__master_namespace ".stack.current",
     COMPILER__define__master_namespace ".stack.end",
-};
-char* COMPILER__global__predefined_flag_name_strings[] = {
-    COMPILER__define__master_namespace ".always",
-    COMPILER__define__master_namespace ".never",
-    COMPILER__define__master_namespace ".temporary",
 };
 char* COMPILER__global__argument_type_name_strings[] = {
     "invalid",

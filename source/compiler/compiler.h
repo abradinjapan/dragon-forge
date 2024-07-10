@@ -5,15 +5,15 @@
 // compiler subparts
 #include "lexer.h"
 #include "parser.h"
-//#include "accounter.h"
-//#include "generator.h"
+#include "accounter.h"
+#include "generator.h"
 
 /* Compile */
 // one compiled object across multiple stages
 typedef struct COMPILER__compilation_unit {
     ANVIL__buffer user_codes;
     ANVIL__list lexling_buffers;
-    ANVIL__list parsling_buffers;
+    ANVIL__list parsling_buffers; // COMPILER__parsling_program
     //COMPILER__accountling_program accountlings;
     COMPILER__pst stages_completed;
 } COMPILER__compilation_unit;
@@ -85,7 +85,6 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt print_debug, A
     compilation_unit.user_codes = user_codes;
     compilation_unit.lexling_buffers = COMPILER__open__list_with_error(sizeof(COMPILER__lexlings) * 5, error);
     compilation_unit.parsling_buffers = COMPILER__open__list_with_error(sizeof(COMPILER__parsling_program) * 5, error);
-    compilation_unit.stages_completed = COMPILER__pst__invalid;
 
     // check for error
     if (COMPILER__check__error_occured(error)) {
@@ -102,6 +101,9 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt print_debug, A
 
     // lex and parse each file
     while (ANVIL__check__current_within_range(current)) {
+        // reset stage completed
+        compilation_unit.stages_completed = COMPILER__pst__invalid;
+
         // get file
         ANVIL__buffer user_code = *(ANVIL__buffer*)current.start;
 
