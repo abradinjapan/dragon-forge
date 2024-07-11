@@ -26,6 +26,34 @@ COMPILER__namespace COMPILER__create_null__namespace() {
     return COMPILER__create__namespace(ANVIL__create_null__list(), 0);
 }
 
+// check if namespaces are the same
+ANVIL__bt COMPILER__check__identical_namespaces(COMPILER__namespace a, COMPILER__namespace b) {
+    ANVIL__current current_namespace_a = ANVIL__calculate__current_from_list_filled_index(&a.lexlings);
+    ANVIL__current current_namespace_b = ANVIL__calculate__current_from_list_filled_index(&b.lexlings);
+
+    // check each count
+    if (a.count != b.count) {
+        // not equivalent
+        return ANVIL__bt__false;
+    }
+
+    // check for discrepencies
+    while (ANVIL__check__current_within_range(current_namespace_a) && ANVIL__check__current_within_range(current_namespace_b)) {
+        // check name equivalency
+        if (ANVIL__calculate__buffer_contents_equal((*(COMPILER__lexling*)current_namespace_a.start).value, (*(COMPILER__lexling*)current_namespace_b.start).value) == ANVIL__bt__false) {
+            // not equivalent
+            return ANVIL__bt__false;
+        }
+
+        // next name
+        current_namespace_a.start += sizeof(COMPILER__lexling);
+        current_namespace_b.start += sizeof(COMPILER__lexling);
+    }
+
+    // no discrepencies, equivalent
+    return ANVIL__bt__true;
+}
+
 // parsling argument
 typedef struct COMPILER__parsling_argument {
     // definition
@@ -1147,20 +1175,11 @@ void COMPILER__print__parsed_structure(COMPILER__parsling_structure structure, A
 
 // print a program
 void COMPILER__print__parsed_program(COMPILER__parsling_program program) {
-    ANVIL__current current_function = ANVIL__calculate__current_from_list_filled_index(&(program.functions));
     ANVIL__current current_structure = ANVIL__calculate__current_from_list_filled_index(&(program.structures));
+    ANVIL__current current_function = ANVIL__calculate__current_from_list_filled_index(&(program.functions));
     
     // print header
     printf("Parsed Program:\n");
-
-    // print each function
-    while (ANVIL__check__current_within_range(current_function)) {
-        // print function
-        COMPILER__print__parsed_function(*(COMPILER__parsling_function*)current_function.start, 1);
-
-        // advance current
-        current_function.start += sizeof(COMPILER__parsling_function);
-    }
 
     // print each structure
     while (ANVIL__check__current_within_range(current_structure)) {
@@ -1169,6 +1188,15 @@ void COMPILER__print__parsed_program(COMPILER__parsling_program program) {
 
         // advance current
         current_structure.start += sizeof(COMPILER__parsling_structure);
+    }
+
+    // print each function
+    while (ANVIL__check__current_within_range(current_function)) {
+        // print function
+        COMPILER__print__parsed_function(*(COMPILER__parsling_function*)current_function.start, 1);
+
+        // advance current
+        current_function.start += sizeof(COMPILER__parsling_function);
     }
 
     return;

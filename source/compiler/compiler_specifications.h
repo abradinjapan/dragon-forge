@@ -20,7 +20,14 @@ typedef COMPILER__accountling_index COMPILER__flag_index;
 typedef COMPILER__accountling_index COMPILER__statement_index;
 typedef COMPILER__accountling_index COMPILER__header_index;
 typedef COMPILER__accountling_index COMPILER__string_index;
+typedef COMPILER__accountling_index COMPILER__definition_index;
 typedef ANVIL__u64 COMPILER__abstraction_index;
+typedef ANVIL__u64 COMPILER__structure_index;
+typedef ANVIL__buffer COMPILER__structure_handle;
+typedef ANVIL__buffer COMPILER__function_handle;
+
+// definitions
+#define ANVIL__define__null_file_index_ID -1
 
 // master namespace
 #define COMPILER__define__master_namespace "dragon"
@@ -172,6 +179,7 @@ typedef enum COMPILER__pst {
     COMPILER__pst__invalid, // invalid
     COMPILER__pst__lexing, // lexing files
     COMPILER__pst__parsing, // parsing files
+    COMPILER__pst__expanding, // expanding / individualizing parsing definitions
     COMPILER__pst__accounting, // semantics for all files
     COMPILER__pst__generating, // building program
     COMPILER__pst__running, // running program
@@ -251,6 +259,30 @@ COMPILER__character_location COMPILER__create__character_location(ANVIL__file_in
 COMPILER__character_location COMPILER__create_null__character_location() {
     return COMPILER__create__character_location(-1, -1, -1);
 }
+
+/* Definition Locations */
+/*// the location of a function call / structure
+typedef struct COMPILER__definition_location {
+    ANVIL__file_index file_index;
+    COMPILER__definition_index definition_index;
+} COMPILER__definition_location;
+
+// create definition location
+COMPILER__definition_location COMPILER__create__definition_location(ANVIL__file_index file_index, COMPILER__definition_index definition_index) {
+    COMPILER__definition_location output;
+
+    // create output
+    output.file_index = file_index;
+    output.definition_index = definition_index;
+
+    return output;
+}
+
+// create null definition location
+COMPILER__definition_location COMPILER__create_null__definition_location() {
+    // return empty
+    return COMPILER__create__definition_location(ANVIL__define__null_file_index_ID, ANVIL__define__null_call_ID);
+}*/
 
 /* Errors */
 // error information
