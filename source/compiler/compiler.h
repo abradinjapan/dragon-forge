@@ -5,7 +5,6 @@
 // compiler subparts
 #include "lexer.h"
 #include "parser.h"
-#include "expander.h"
 #include "accounter.h"
 #include "generator.h"
 
@@ -15,7 +14,6 @@ typedef struct COMPILER__compilation_unit {
     ANVIL__buffer user_codes;
     ANVIL__list lexling_buffers;
     ANVIL__list parsling_buffers; // COMPILER__parsling_program
-    COMPILER__expandling_program expanded_definitions;
     //COMPILER__accountling_program accountlings;
     COMPILER__pst stages_completed;
 } COMPILER__compilation_unit;
@@ -161,14 +159,6 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt print_debug, A
         // advance current
         current.start += sizeof(ANVIL__buffer);
         current_file_index++;
-    }
-
-    // expand
-    compilation_unit.expanded_definitions = COMPILER__expand__program(&compilation_unit.parsling_buffers, error);
-
-    // print expandlings
-    if (print_debug) {
-        COMPILER__print__expandling_program(compilation_unit.expanded_definitions);
     }
 
     /*// account
