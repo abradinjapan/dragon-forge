@@ -573,7 +573,7 @@ COMPILER__parsling_argument COMPILER__parse__function_argument(ANVIL__current* c
         // parse namespace
         output = COMPILER__create__parsling_argument(COMPILER__gat__variable, COMPILER__parse__namespace(current, error), COMPILER__create_null__namespace());
         
-        // check for optional type
+        // check for type
         // is type definition
         if (COMPILER__read__lexling_from_current(*current).type == COMPILER__lt__exclamation_point) {
             // next lexling
@@ -581,6 +581,11 @@ COMPILER__parsling_argument COMPILER__parse__function_argument(ANVIL__current* c
 
             // parse type
             output.type = COMPILER__parse__namespace__one_name_only(current, error);
+        } else if (is_function_header_argument == ANVIL__bt__true) {
+            // set error
+            *error = COMPILER__open__error("Parsing Error: Missing type in function header argument.", COMPILER__read__lexling_from_current(*current).location);
+
+            return output;
         }
 
         /*// translate literal information for accounting to translate
@@ -628,11 +633,6 @@ COMPILER__parsling_argument COMPILER__parse__function_argument(ANVIL__current* c
         // set error
         *error = COMPILER__open__error("Parse Error: A non-variable / non-type argument was detected in a header.", COMPILER__read__lexling_from_current(*current).location);
 
-        return output;
-    }
-
-    // check for error
-    if (COMPILER__check__error_occured(error)) {
         return output;
     }
 
