@@ -26,6 +26,28 @@ COMPILER__namespace COMPILER__create_null__namespace() {
     return COMPILER__create__namespace(ANVIL__create_null__list(), 0);
 }
 
+// open namespace from string
+COMPILER__namespace COMPILER__open__namespace_from_single_lexling(COMPILER__lexling lexling, COMPILER__error* error) {
+    COMPILER__namespace output = COMPILER__create_null__namespace();
+
+    // open lexlings list
+    output.lexlings = COMPILER__open__list_with_error(sizeof(COMPILER__lexling), error);
+    if (COMPILER__check__error_occured(error)) {
+        return output;
+    }
+
+    // append lexling
+    COMPILER__append__lexling(&output.lexlings, lexling, error);
+    if (COMPILER__check__error_occured(error)) {
+        return output;
+    }
+
+    // setup count
+    output.count = 1;
+
+    return output;
+}
+
 // check if namespaces are the same
 ANVIL__bt COMPILER__check__identical_namespaces(COMPILER__namespace a, COMPILER__namespace b) {
     ANVIL__current current_namespace_a = ANVIL__calculate__current_from_list_filled_index(&a.lexlings);
@@ -54,10 +76,15 @@ ANVIL__bt COMPILER__check__identical_namespaces(COMPILER__namespace a, COMPILER_
     return ANVIL__bt__true;
 }
 
+// get lexling location from namespace
+COMPILER__character_location COMPILER__get__namespace_lexling_location(COMPILER__namespace name) {
+    return ((COMPILER__lexling*)name.lexlings.buffer.start)[0].location;
+}
+
 // parsling argument
 typedef struct COMPILER__parsling_argument {
     // definition
-    COMPILER__gat category;
+    COMPILER__pat category;
     COMPILER__namespace name;
 
     // optional type
@@ -65,7 +92,7 @@ typedef struct COMPILER__parsling_argument {
 } COMPILER__parsling_argument;
 
 // create a custom argument
-COMPILER__parsling_argument COMPILER__create__parsling_argument(COMPILER__gat category, COMPILER__namespace name, COMPILER__namespace type) {
+COMPILER__parsling_argument COMPILER__create__parsling_argument(COMPILER__pat category, COMPILER__namespace name, COMPILER__namespace type) {
     COMPILER__parsling_argument output;
 
     // setup output
@@ -78,7 +105,7 @@ COMPILER__parsling_argument COMPILER__create__parsling_argument(COMPILER__gat ca
 
 // setup null argument
 COMPILER__parsling_argument COMPILER__create_null__parsling_argument() {
-    return COMPILER__create__parsling_argument(COMPILER__gat__invalid, COMPILER__create_null__namespace(), COMPILER__create_null__namespace());
+    return COMPILER__create__parsling_argument(COMPILER__pat__invalid, COMPILER__create_null__namespace(), COMPILER__create_null__namespace());
 }
 
 // one scope
@@ -571,7 +598,7 @@ COMPILER__parsling_argument COMPILER__parse__function_argument(ANVIL__current* c
     // is variable / literal
     if (COMPILER__read__lexling_from_current(*current).type == COMPILER__lt__name) {
         // parse namespace
-        output = COMPILER__create__parsling_argument(COMPILER__gat__variable, COMPILER__parse__namespace(current, error), COMPILER__create_null__namespace());
+        output = COMPILER__create__parsling_argument(COMPILER__pat__name, COMPILER__parse__namespace(current, error), COMPILER__create_null__namespace());
         
         // check for type
         // is type definition
@@ -591,16 +618,16 @@ COMPILER__parsling_argument COMPILER__parse__function_argument(ANVIL__current* c
         /*// translate literal information for accounting to translate
         // boolean
         if (ANVIL__translate__string_to_boolean(ANVIL__read__lexling_from_current(*current).value, &value)) {
-            argument = ANVIL__create__parsling_argument(ANVIL__gat__literal__boolean, ANVIL__parse__namespace__one_name_only(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), value);
+            argument = ANVIL__create__parsling_argument(ANVIL__pat__literal__boolean, ANVIL__parse__namespace__one_name_only(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), value);
         // binary
         } else if (ANVIL__translate__string_to_binary(ANVIL__read__lexling_from_current(*current).value, &value)) {
-            argument = ANVIL__create__parsling_argument(ANVIL__gat__literal__binary, ANVIL__parse__namespace__one_name_only(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), value);
+            argument = ANVIL__create__parsling_argument(ANVIL__pat__literal__binary, ANVIL__parse__namespace__one_name_only(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), value);
         // integer
         } else if (ANVIL__translate__string_to_integer(ANVIL__read__lexling_from_current(*current).value, &value)) {
-            argument = ANVIL__create__parsling_argument(ANVIL__gat__literal__integer, ANVIL__parse__namespace__one_name_only(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), value);
+            argument = ANVIL__create__parsling_argument(ANVIL__pat__literal__integer, ANVIL__parse__namespace__one_name_only(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), value);
         // hexadecimal
         } else if (ANVIL__translate__string_to_hexedecimal(ANVIL__read__lexling_from_current(*current).value, &value)) {
-            argument = ANVIL__create__parsling_argument(ANVIL__gat__literal__hexadecimal, ANVIL__parse__namespace__one_name_only(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), value);
+            argument = ANVIL__create__parsling_argument(ANVIL__pat__literal__hexadecimal, ANVIL__parse__namespace__one_name_only(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), value);
         }*/
     // offset
     } else if (COMPILER__read__lexling_from_current(*current).type == COMPILER__lt__at) {
@@ -610,7 +637,7 @@ COMPILER__parsling_argument COMPILER__parse__function_argument(ANVIL__current* c
         // if correct type
         if (COMPILER__read__lexling_from_current(*current).type == COMPILER__lt__name) {
             // get name
-            output = COMPILER__create__parsling_argument(COMPILER__gat__offset, COMPILER__parse__namespace(current, error), COMPILER__create_null__namespace());
+            output = COMPILER__create__parsling_argument(COMPILER__pat__offset, COMPILER__parse__namespace(current, error), COMPILER__create_null__namespace());
         // error
         } else {
             *error = COMPILER__open__error("Parse Error: Offset is missing name.", COMPILER__read__lexling_from_current(*current).location);
@@ -620,7 +647,7 @@ COMPILER__parsling_argument COMPILER__parse__function_argument(ANVIL__current* c
     // string literal
     } else if (COMPILER__read__lexling_from_current(*current).type == COMPILER__lt__string_literal) {
         // get argument
-        output = COMPILER__create__parsling_argument(COMPILER__gat__literal__string, COMPILER__parse__namespace(current, error), COMPILER__create_null__namespace());
+        output = COMPILER__create__parsling_argument(COMPILER__pat__string_literal, COMPILER__parse__namespace(current, error), COMPILER__create_null__namespace());
     // error
     } else {
         *error = COMPILER__open__error("Parse Error: Unrecognized argument type.", COMPILER__read__lexling_from_current(*current).location);
@@ -629,7 +656,7 @@ COMPILER__parsling_argument COMPILER__parse__function_argument(ANVIL__current* c
     }
 
     // check argument for variable only
-    if (is_function_header_argument == ANVIL__bt__true && output.category != COMPILER__gat__variable) {
+    if (is_function_header_argument == ANVIL__bt__true && output.category != COMPILER__pat__name) {
         // set error
         *error = COMPILER__open__error("Parse Error: A non-variable / non-type argument was detected in a header.", COMPILER__read__lexling_from_current(*current).location);
 
@@ -710,7 +737,7 @@ COMPILER__parsling_statement COMPILER__parse__statement(ANVIL__current* current,
         // check for offset name
         if (ANVIL__check__current_within_range(*current) && COMPILER__read__lexling_from_current(*current).type == COMPILER__lt__name) {
             // set name
-            output.name = COMPILER__create__parsling_argument(COMPILER__gat__offset, COMPILER__parse__namespace(current, error), COMPILER__create_null__namespace());
+            output.name = COMPILER__create__parsling_argument(COMPILER__pat__offset, COMPILER__parse__namespace(current, error), COMPILER__create_null__namespace());
             if (COMPILER__check__error_occured(error)) {
                 return output;
             }
@@ -753,13 +780,13 @@ COMPILER__parsling_statement COMPILER__parse__statement(ANVIL__current* current,
             output.type = COMPILER__stt__subscope;
 
             // get scope flag namespace
-            output.subscope_flag_name = COMPILER__create__parsling_argument(COMPILER__gat__variable, COMPILER__parse__namespace(current, error), COMPILER__create_null__namespace());
+            output.subscope_flag_name = COMPILER__create__parsling_argument(COMPILER__pat__name, COMPILER__parse__namespace(current, error), COMPILER__create_null__namespace());
             if (COMPILER__check__error_occured(error)) {
                 return output;
             }
 
             // check for invalid namespace
-            if (output.subscope_flag_name.category != COMPILER__gat__variable) {
+            if (output.subscope_flag_name.category != COMPILER__pat__name) {
                 // set error
                 *error = COMPILER__open__error("Parse Error: A named scope doesn't have its flagging variable.", COMPILER__read__lexling_from_current(*current).location);
 
@@ -774,12 +801,12 @@ COMPILER__parsling_statement COMPILER__parse__statement(ANVIL__current* current,
         // is a normal offset
         } else {
             // setup type
-            output.type = COMPILER__stt__offset__normal;
+            output.type = COMPILER__stt__offset;
         }
     // is a function call
     } else if (ANVIL__check__current_within_range(*current) && COMPILER__read__lexling_from_current(*current).type == COMPILER__lt__name) {
         // get name
-        output.name = COMPILER__create__parsling_argument(COMPILER__gat__offset, COMPILER__parse__namespace(current, error), COMPILER__create_null__namespace());
+        output.name = COMPILER__create__parsling_argument(COMPILER__pat__offset, COMPILER__parse__namespace(current, error), COMPILER__create_null__namespace());
         if (COMPILER__check__error_occured(error) == ANVIL__bt__true) {
             return output;
         }
@@ -891,7 +918,7 @@ COMPILER__parsling_structure COMPILER__parse__structure(ANVIL__current* current,
         }
 
         // append argument
-        COMPILER__append__parsling_argument(&output.type_names, COMPILER__create__parsling_argument(COMPILER__gat__type, name, COMPILER__create_null__namespace()), error);
+        COMPILER__append__parsling_argument(&output.type_names, COMPILER__create__parsling_argument(COMPILER__pat__type, name, COMPILER__create_null__namespace()), error);
     }
 
     // parse arguments
@@ -1067,23 +1094,9 @@ void COMPILER__print__parsed_statement(COMPILER__parsling_statement statement, A
     ANVIL__print__tabs(tab_depth);
 
     // print statement
-    if (statement.type == COMPILER__stt__offset__normal) {
+    if (statement.type == COMPILER__stt__offset) {
         // print offset information
         printf("@[normal]");
-        COMPILER__print__namespace(statement.name.name);
-
-        // print new line
-        printf("\n");
-    } else if (statement.type == COMPILER__stt__offset__top) {
-        // print offset information
-        printf("@[top]");
-        COMPILER__print__namespace(statement.name.name);
-
-        // print new line
-        printf("\n");
-    } else if (statement.type == COMPILER__stt__offset__bottom) {
-        // print offset information
-        printf("@[bottom]");
         COMPILER__print__namespace(statement.name.name);
 
         // print new line
@@ -1102,7 +1115,7 @@ void COMPILER__print__parsed_statement(COMPILER__parsling_statement statement, A
         printf("\n");
     } else if (statement.type == COMPILER__stt__subscope) {
         // print scope
-        printf("@");
+        printf("@[subscope]");
         COMPILER__print__namespace(statement.name.name);
         printf(" ");
         COMPILER__print__namespace(statement.subscope_flag_name.name);

@@ -12,9 +12,9 @@
 // one compiled object across multiple stages
 typedef struct COMPILER__compilation_unit {
     ANVIL__buffer user_codes;
-    ANVIL__list lexling_buffers;
+    ANVIL__list lexling_buffers; // COMPILER__lexlings
     ANVIL__list parsling_buffers; // COMPILER__parsling_program
-    //COMPILER__accountling_program accountlings;
+    COMPILER__accountling_program accountlings;
     COMPILER__pst stages_completed;
 } COMPILER__compilation_unit;
 
@@ -161,7 +161,7 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt print_debug, A
         current_file_index++;
     }
 
-    /*// account
+    // account
     compilation_unit.accountlings = COMPILER__account__program(compilation_unit.parsling_buffers, error);
 
     // mark as done
@@ -177,7 +177,7 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt print_debug, A
         COMPILER__print__accountling_program(compilation_unit.accountlings);
     }
 
-    // inform user of code generation
+    /*// inform user of code generation
     if (print_debug) {
         printf("Generating code...\n");
     }

@@ -55,6 +55,22 @@ COMPILER__lexling COMPILER__create_null__lexling() {
     return COMPILER__create__lexling(COMPILER__lt__invalid, ANVIL__create_null__buffer(), COMPILER__create_null__character_location());
 }
 
+// open lexling from string
+COMPILER__lexling COMPILER__open__lexling_from_string(const char* string, COMPILER__lexling_type type, COMPILER__character_location location) {
+    COMPILER__lexling output = COMPILER__create_null__lexling();
+
+    // setup value
+    output.value = ANVIL__open__buffer_from_string((u8*)string, ANVIL__bt__false, ANVIL__bt__false);
+
+    // setup type
+    output.type = type;
+
+    // setup location
+    output.location = location;
+
+    return output;
+}
+
 // lexlings
 typedef struct COMPILER__lexlings {
     ANVIL__list data;

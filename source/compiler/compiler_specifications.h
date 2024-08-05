@@ -14,63 +14,74 @@ typedef COMPILER__io_count COMPILER__output_count;
 typedef ANVIL__u64 COMPILER__accountling_index;
 typedef COMPILER__accountling_index COMPILER__variable_index;
 typedef COMPILER__accountling_index COMPILER__variable_type_index;
-typedef COMPILER__accountling_index COMPILER__call_index;
-typedef COMPILER__accountling_index COMPILER__offset_index;
-typedef COMPILER__accountling_index COMPILER__flag_index;
-typedef COMPILER__accountling_index COMPILER__statement_index;
-typedef COMPILER__accountling_index COMPILER__header_index;
-typedef COMPILER__accountling_index COMPILER__string_index;
-typedef COMPILER__accountling_index COMPILER__definition_index;
+typedef ANVIL__u64 COMPILER__blueprintling;
 typedef ANVIL__u64 COMPILER__abstraction_index;
 typedef ANVIL__u64 COMPILER__structure_index;
+typedef ANVIL__u64 COMPILER__structure_member_index;
+typedef COMPILER__structure_member_index COMPILER__structure_member_count;
 typedef ANVIL__buffer COMPILER__structure_handle;
 typedef ANVIL__buffer COMPILER__function_handle;
 
 // definitions
-#define ANVIL__define__null_file_index_ID -1
+#define COMPILER__define__variable_is_internal_type -1
 
 // master namespace
 #define COMPILER__define__master_namespace "dragon"
 
-// general argument types
-typedef enum COMPILER__gat {
-    COMPILER__gat__invalid,
+// accounting blueprintling types
+typedef enum COMPILER__abt {
+    COMPILER__abt__end_blueprint,
+    COMPILER__abt__define_type,
+    COMPILER__abt__define_function_call,
+} COMPILER__abt;
 
-    // variables
-    COMPILER__gat__variable,
-    COMPILER__gat__variable__input,
-    COMPILER__gat__variable__output,
-    COMPILER__gat__variable__body,
-    COMPILER__gat__variable__predefined,
+// parsling argument type
+typedef enum COMPILER__pat {
+    // start
+    COMPILER__pat__START,
+
+    // invalid
+    COMPILER__pat__invalid = COMPILER__pat__START,
+
+    // anything that uses name lexlings and possibly colons
+    COMPILER__pat__name,
 
     // offsets
-    COMPILER__gat__offset,
+    COMPILER__pat__offset,
 
     // literals
-    COMPILER__gat__literal__boolean,
-    COMPILER__gat__literal__binary,
-    COMPILER__gat__literal__integer,
-    COMPILER__gat__literal__hexadecimal,
+    COMPILER__pat__string_literal,
 
-    // strings
-    COMPILER__gat__literal__string,
+    // type
+    COMPILER__pat__type,
 
-    // types
-    COMPILER__gat__type,
+    // end
+    COMPILER__pat__END,
 
     // count
-    COMPILER__gat__COUNT,
-} COMPILER__gat;
+    COMPILER__pat__COUNT = COMPILER__pat__END - COMPILER__pat__START,
+} COMPILER__pat;
+char* COMPILER__global__general_argument_type_names[] = {
+    "invalid",
+    "name",
+    "offset",
+    "string",
+    "type",
+};
 
-// statement type
+// all predefined cell names
+char* COMPILER__global__predefined_cell_names[] = {
+    COMPILER__define__master_namespace ".error_code",
+};
+
+// statement type type
 typedef enum COMPILER__stt {
+    // invalid
     COMPILER__stt__invalid,
 
     // statements
     COMPILER__stt__function_call,
-    COMPILER__stt__offset__normal,
-    COMPILER__stt__offset__top,
-    COMPILER__stt__offset__bottom,
+    COMPILER__stt__offset,
     COMPILER__stt__subscope,
 
     // headers
@@ -81,105 +92,12 @@ typedef enum COMPILER__stt {
     COMPILER__stt__COUNT,
 } COMPILER__stt;
 
-// strings
-char* COMPILER__global__predefined_cell_name_strings[] = {
-    COMPILER__define__master_namespace ".error_code",
-    COMPILER__define__master_namespace ".constant.character_byte_size",
-    COMPILER__define__master_namespace ".constant.character_bit_size",
-    COMPILER__define__master_namespace ".constant.bits_in_byte",
-    COMPILER__define__master_namespace ".constant.cell_byte_size",
-    COMPILER__define__master_namespace ".constant.cell_bit_size",
-    COMPILER__define__master_namespace ".constant.true",
-    COMPILER__define__master_namespace ".constant.false",
-    COMPILER__define__master_namespace ".constant.0",
-    COMPILER__define__master_namespace ".constant.1",
-    COMPILER__define__master_namespace ".constant.2",
-    COMPILER__define__master_namespace ".constant.4",
-    COMPILER__define__master_namespace ".constant.8",
-    COMPILER__define__master_namespace ".constant.16",
-    COMPILER__define__master_namespace ".constant.24",
-    COMPILER__define__master_namespace ".constant.32",
-    COMPILER__define__master_namespace ".constant.40",
-    COMPILER__define__master_namespace ".constant.48",
-    COMPILER__define__master_namespace ".constant.56",
-    COMPILER__define__master_namespace ".constant.64",
-    COMPILER__define__master_namespace ".constant.program_input.start",
-    COMPILER__define__master_namespace ".constant.program_input.end",
-    COMPILER__define__master_namespace ".constant.program_output.start",
-    COMPILER__define__master_namespace ".constant.program_output.end",
-    COMPILER__define__master_namespace ".stack.start",
-    COMPILER__define__master_namespace ".stack.current",
-    COMPILER__define__master_namespace ".stack.end",
-};
-char* COMPILER__global__argument_type_name_strings[] = {
-    "invalid",
-    "variable",
-    "input_variable",
-    "output_variable",
-    "body_variable",
-    "predefined_variable",
-    "offset",
-    "boolean",
-    "binary",
-    "integer",
-    "hexadecimal",
-    "string",
-    "type",
-};
-char* COMPILER__global__accountling_call_type_name_strings[] = {
-    COMPILER__define__master_namespace ".set",
-    COMPILER__define__master_namespace ".print.integer.signed",
-    COMPILER__define__master_namespace ".print.integer.unsigned",
-    COMPILER__define__master_namespace ".print.character",
-    COMPILER__define__master_namespace ".print.buffer_as_string",
-    COMPILER__define__master_namespace ".print.binary",
-    COMPILER__define__master_namespace ".io.cell_to_address",
-    COMPILER__define__master_namespace ".io.address_to_cell",
-    COMPILER__define__master_namespace ".io.file_to_buffer",
-    COMPILER__define__master_namespace ".io.buffer_to_file",
-    COMPILER__define__master_namespace ".copy",
-    COMPILER__define__master_namespace ".copy.buffer",
-    COMPILER__define__master_namespace ".memory.request",
-    COMPILER__define__master_namespace ".memory.return",
-    COMPILER__define__master_namespace ".buffer.calculate_length",
-    COMPILER__define__master_namespace ".cast.cell_to_unsigned_integer_string",
-    COMPILER__define__master_namespace ".integer.add",
-    COMPILER__define__master_namespace ".integer.subtract",
-    COMPILER__define__master_namespace ".integer.multiply",
-    COMPILER__define__master_namespace ".integer.divide",
-    COMPILER__define__master_namespace ".integer.modulous",
-    COMPILER__define__master_namespace ".integer.within_range",
-    COMPILER__define__master_namespace ".binary.or",
-    COMPILER__define__master_namespace ".binary.invert",
-    COMPILER__define__master_namespace ".binary.and",
-    COMPILER__define__master_namespace ".binary.xor",
-    COMPILER__define__master_namespace ".binary.shift_higher",
-    COMPILER__define__master_namespace ".binary.shift_lower",
-    COMPILER__define__master_namespace ".binary.overwrite",
-    COMPILER__define__master_namespace ".flag.get",
-    COMPILER__define__master_namespace ".flag.set",
-    COMPILER__define__master_namespace ".flag.invert",
-    COMPILER__define__master_namespace ".flag.or",
-    COMPILER__define__master_namespace ".flag.and",
-    COMPILER__define__master_namespace ".flag.xor",
-    COMPILER__define__master_namespace ".jump",
-    COMPILER__define__master_namespace ".open.context",
-    COMPILER__define__master_namespace ".compile",
-    COMPILER__define__master_namespace ".run",
-    COMPILER__define__master_namespace ".reset.error_code",
-    COMPILER__define__master_namespace ".get.program_inputs",
-    COMPILER__define__master_namespace ".set.program_outputs",
-    COMPILER__define__master_namespace ".context_buffer.set_inputs",
-    COMPILER__define__master_namespace ".context_buffer.get_outputs",
-};
-
 // program stage type
 typedef enum COMPILER__pst {
     // stages
     COMPILER__pst__invalid, // invalid
     COMPILER__pst__lexing, // lexing files
     COMPILER__pst__parsing, // parsing files
-    COMPILER__pst__expanding, // expanding / individualizing parsing definitions
     COMPILER__pst__accounting, // semantics for all files
     COMPILER__pst__generating, // building program
     COMPILER__pst__running, // running program
@@ -187,6 +105,124 @@ typedef enum COMPILER__pst {
     // count
     COMPILER__pst__COUNT,
 } COMPILER__pst;
+
+// accountling argument type
+typedef enum COMPILER__aat {
+    COMPILER__aat__invalid,
+    COMPILER__aat__cell_value,
+    COMPILER__aat__string_index,
+    COMPILER__aat__offset,
+    COMPILER__aat__COUNT,
+} COMPILER__aat;
+
+// predefined types
+// names
+char* COMPILER__global__predefined_type_names[] = {
+    COMPILER__define__master_namespace ".cell",
+    COMPILER__define__master_namespace ".buffer",
+    COMPILER__define__master_namespace ".list",
+};
+// predefined type type
+typedef enum COMPILER__ptt {
+    // start
+    COMPILER__ptt__START = COMPILER__aat__COUNT,
+
+    // type definitions
+    COMPILER__ptt__dragon_cell = COMPILER__ptt__START,
+    COMPILER__ptt__dragon_buffer,
+    COMPILER__ptt__dragon_list,
+
+    // user defined start
+    COMPILER__ptt__USER_DEFINED_START,
+
+    // end
+    COMPILER__ptt__END = COMPILER__ptt__USER_DEFINED_START,
+
+    // count
+    COMPILER__ptt__COUNT = COMPILER__ptt__END - COMPILER__ptt__START,
+} COMPILER__ptt;
+// blueprint
+COMPILER__blueprintling COMPILER__global__predefined_types[] = {
+    // cell
+    COMPILER__abt__define_type,
+        COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__define__variable_is_internal_type,
+    // buffer
+    COMPILER__abt__define_type,
+        COMPILER__ptt__dragon_buffer,
+        2,
+        COMPILER__ptt__dragon_cell, // start
+        COMPILER__ptt__dragon_cell, // end
+    // list
+    COMPILER__abt__define_type,
+        COMPILER__ptt__dragon_list,
+        3,
+        COMPILER__ptt__dragon_buffer, // data buffer
+        COMPILER__ptt__dragon_cell, // increase
+        COMPILER__ptt__dragon_cell, // filled index
+    COMPILER__abt__end_blueprint,
+};
+
+// all predefined function call names
+char* COMPILER__global__predefined_function_call_names[] = {
+    COMPILER__define__master_namespace ".set",
+    COMPILER__define__master_namespace ".print.integer.signed",
+    COMPILER__define__master_namespace ".print.integer.unsigned",
+};
+// predefined function call name type
+typedef enum COMPILER__pfcnt {
+    COMPILER__pfcnt__set,
+} COMPILER__pfcnt;
+// predefined function call types
+typedef enum COMPILER__pfct {
+    // invalid call type
+    COMPILER__pfct__invalid = 0,
+
+    // calls
+    COMPILER__pfct__set__cell_value,
+
+    // user defined
+    COMPILER__pfct__USER_DEFINED,
+} COMPILER__pfct;
+// blueprint
+COMPILER__blueprintling COMPILER__global__predefined_function_calls[] = {
+    COMPILER__abt__define_function_call,
+        COMPILER__pfct__set__cell_value,
+        COMPILER__pfcnt__set,
+        1,
+        COMPILER__aat__cell_value,
+        1,
+        COMPILER__ptt__dragon_cell,
+    COMPILER__abt__end_blueprint,
+};
+
+/* Blueprints */
+// advance blueprintling by one
+void COMPILER__next__blueprintling(ANVIL__current* current) {
+    // next blueprintling
+    (*current).start += sizeof(COMPILER__blueprintling);
+
+    return;
+}
+
+// read one blueprintling but do not advance current
+COMPILER__blueprintling COMPILER__read__blueprintling(ANVIL__current* current) {
+    return *(COMPILER__blueprintling*)(*current).start;
+}
+
+// read one blueprintling and advance current to next one
+COMPILER__blueprintling COMPILER__read_and_next__blueprintling(ANVIL__current* current) {
+    COMPILER__blueprintling output;
+
+    // read output
+    output = COMPILER__read__blueprintling(current);
+
+    // advance current
+    COMPILER__next__blueprintling(current);
+
+    return output;
+}
 
 /* Translation */
 // calculate the amount of digits in a decimal number
@@ -621,8 +657,8 @@ ANVIL__bt COMPILER__translate__string_to_hexedecimal(ANVIL__buffer string, ANVIL
     return ANVIL__bt__true;
 }
 
-ANVIL__buffer COMPILER__convert__general_argument_type_to_string_buffer(COMPILER__gat argument_type) {
-    return ANVIL__open__buffer_from_string((u8*)(COMPILER__global__argument_type_name_strings[argument_type]), ANVIL__bt__false, ANVIL__bt__false);
+ANVIL__buffer COMPILER__convert__general_argument_type_to_string_buffer(COMPILER__pat argument_type) {
+    return ANVIL__open__buffer_from_string((u8*)(COMPILER__global__general_argument_type_names[argument_type]), ANVIL__bt__false, ANVIL__bt__false);
 }
 
 #endif

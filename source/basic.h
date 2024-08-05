@@ -43,6 +43,7 @@ typedef ANVIL__u64 ANVIL__length;
 typedef ANVIL__u64 ANVIL__bit_count;
 typedef ANVIL__u64 ANVIL__byte_count;
 #define ANVIL__define__bits_in_byte 8
+#define ANVIL__define__zero_length 0
 
 // boolean type
 typedef enum ANVIL__bt {
@@ -50,6 +51,9 @@ typedef enum ANVIL__bt {
 	ANVIL__bt__true = 1,
 	ANVIL__bt__COUNT = 2,
 } ANVIL__bt;
+
+// file index
+#define ANVIL__define__null_file_index_ID -1
 
 /* Allocation */
 // return memory to OS
@@ -634,6 +638,30 @@ ANVIL__buffer ANVIL__list__open_buffer_from_list(ANVIL__list* list, ANVIL__bt* m
 // check if a list is uninitialized
 ANVIL__bt ANVIL__check__empty_list(ANVIL__list list) {
     return ANVIL__check__empty_buffer(list.buffer);
+}
+
+/* Counted List */
+// structure
+typedef struct ANVIL__counted_list {
+    ANVIL__list list;
+    ANVIL__length count;
+} ANVIL__counted_list;
+
+// create structure
+ANVIL__counted_list ANVIL__create__counted_list(ANVIL__list list, ANVIL__length count) {
+    ANVIL__counted_list output;
+
+    // setup output
+    output.list = list;
+    output.count = count;
+
+    return output;
+}
+
+// create null structure
+ANVIL__counted_list ANVIL__create_null__counted_list() {
+    // return empty
+    return ANVIL__create__counted_list(ANVIL__create_null__list(), ANVIL__define__zero_length);
 }
 
 /* Current */
