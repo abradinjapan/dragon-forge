@@ -213,7 +213,7 @@ COMPILER__accountling_program COMPILER__account__program(ANVIL__list parsling_pr
 void COMPILER__print__accountling_structures(COMPILER__accountling_structures structures, ANVIL__tab_count tab_depth) {
     // print header
     ANVIL__print__tabs(tab_depth);
-    printf("Name table:\n");
+    printf("Structure Name Table:\n");
 
     // print name table
     // setup current
