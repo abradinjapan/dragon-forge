@@ -122,10 +122,30 @@ char* COMPILER__global__predefined_type_names[] = {
     COMPILER__define__master_namespace ".buffer",
     COMPILER__define__master_namespace ".list",
 };
+// predefined type's member names
+const char* COMPILER__global__predefined_type_member_names[] = {
+    "value",
+    "start",
+    "end",
+    "buffer",
+    "increase",
+    "filled_index",
+    "INTERNAL",
+};
+// predefined type member name type
+typedef enum COMPILER__ptmnt {
+    COMPILER__ptmnt__value,
+    COMPILER__ptmnt__start,
+    COMPILER__ptmnt__end,
+    COMPILER__ptmnt__buffer,
+    COMPILER__ptmnt__increase,
+    COMPILER__ptmnt__filled_index,
+    COMPILER__ptmnt__COUNT,
+} COMPILER__ptmnt;
 // predefined type type
 typedef enum COMPILER__ptt {
     // start
-    COMPILER__ptt__START = COMPILER__aat__COUNT,
+    COMPILER__ptt__START = 0,
 
     // type definitions
     COMPILER__ptt__dragon_cell = COMPILER__ptt__START,
@@ -148,19 +168,25 @@ COMPILER__blueprintling COMPILER__global__predefined_types[] = {
         COMPILER__ptt__dragon_cell,
         1,
         COMPILER__define__variable_is_internal_type,
+            COMPILER__ptmnt__value,
     // buffer
     COMPILER__abt__define_type,
         COMPILER__ptt__dragon_buffer,
         2,
         COMPILER__ptt__dragon_cell, // start
+            COMPILER__ptmnt__start,
         COMPILER__ptt__dragon_cell, // end
+            COMPILER__ptmnt__end,
     // list
     COMPILER__abt__define_type,
         COMPILER__ptt__dragon_list,
         3,
         COMPILER__ptt__dragon_buffer, // data buffer
+            COMPILER__ptmnt__buffer,
         COMPILER__ptt__dragon_cell, // increase
+            COMPILER__ptmnt__increase,
         COMPILER__ptt__dragon_cell, // filled index
+            COMPILER__ptmnt__filled_index,
     COMPILER__abt__end_blueprint,
 };
 
