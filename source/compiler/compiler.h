@@ -56,10 +56,10 @@ void COMPILER__close__compilation_unit(COMPILER__compilation_unit unit) {
         ANVIL__close__list(unit.parsling_buffers);
     }
 
-    /*// close accountling data
+    // close accountling data
     if (unit.stages_completed > COMPILER__pst__parsing) {
         COMPILER__close__accountling_program(unit.accountlings);
-    }*/
+    }
 
     return;
 }

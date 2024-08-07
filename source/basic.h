@@ -664,6 +664,14 @@ ANVIL__counted_list ANVIL__create_null__counted_list() {
     return ANVIL__create__counted_list(ANVIL__create_null__list(), ANVIL__define__zero_length);
 }
 
+// close counted list
+void ANVIL__close__counted_list(ANVIL__counted_list counted_list) {
+    // close internals
+    ANVIL__close__list(counted_list.list);
+
+    return;
+}
+
 /* Current */
 // define
 typedef ANVIL__buffer ANVIL__current;

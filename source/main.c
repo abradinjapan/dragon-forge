@@ -122,6 +122,7 @@ int main(int argc, char** argv) {
                 }
 
                 // print error
+                fflush(stdout);
                 ANVIL__print__buffer(json);
 
                 // deallocate error message

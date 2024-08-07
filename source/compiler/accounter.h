@@ -40,7 +40,18 @@
 typedef struct COMPILER__accountling_structure_member {
     COMPILER__structure_index structure_ID; // the ID of the member's type
     COMPILER__namespace name; // the namespace of the member
+    ANVIL__bt predefined; // if the member is built in statically
 } COMPILER__accountling_structure_member;
+
+// close a predefined accountling structure member
+void COMPILER__close__accountling_structure_member(COMPILER__accountling_structure_member member) {
+    // close namespace
+    if (member.predefined == ANVIL__bt__true) {
+        COMPILER__close__parsling_namespace(member.name);
+    }
+
+    return;
+}
 
 // append accountling structure member
 void COMPILER__append__accountling_structure_member(ANVIL__list* list, COMPILER__accountling_structure_member data, COMPILER__error* error) {
@@ -58,9 +69,38 @@ void COMPILER__append__accountling_structure_member(ANVIL__list* list, COMPILER_
 
 // one structure
 typedef struct COMPILER__accountling_structure {
-    COMPILER__namespace name; // copied from parser
+    COMPILER__namespace name; // copied from parser when user defined, opened explicitly when predefined
     ANVIL__counted_list members; // COMPILER__structure_index
+    ANVIL__bt predefined;
 } COMPILER__accountling_structure;
+
+// close one structure
+void COMPILER__close__accountling_structure(COMPILER__accountling_structure structure) {
+    // close name
+    if (structure.predefined == ANVIL__bt__true) {
+        COMPILER__close__parsling_namespace(structure.name);
+    }
+
+    // set current
+    ANVIL__current current_member = ANVIL__calculate__current_from_list_filled_index(&structure.members.list);
+
+    // for each member
+    while (ANVIL__check__current_within_range(current_member)) {
+        // get member
+        COMPILER__accountling_structure_member member = *(COMPILER__accountling_structure_member*)current_member.start;
+
+        // close member
+        COMPILER__close__accountling_structure_member(member);
+
+        // next member
+        current_member.start += sizeof(COMPILER__accountling_structure_member);
+    }
+
+    // close members
+    ANVIL__close__counted_list(structure.members);
+
+    return;
+}
 
 // append accountling structure
 void COMPILER__append__accountling_structure(ANVIL__list* list, COMPILER__accountling_structure data, COMPILER__error* error) {
@@ -82,11 +122,61 @@ typedef struct COMPILER__accountling_structures {
     ANVIL__counted_list data_table; // COMPILER__accountling_structure
 } COMPILER__accountling_structures;
 
+// close accountling structures
+void COMPILER__close__accountling_structures(COMPILER__accountling_structures structures) {
+    // close name table
+    // close each predefined name
+    ANVIL__current current_table_name = ANVIL__calculate__current_from_list_filled_index(&structures.name_table.list);
+    COMPILER__structure_index name_index = 0;
+
+    // for each name
+    while (ANVIL__check__current_within_range(current_table_name) && name_index < COMPILER__ptt__USER_DEFINED_START) {
+        // close name
+        COMPILER__close__parsling_namespace(*(COMPILER__namespace*)current_table_name.start);
+
+        // next name
+        current_table_name.start += sizeof(COMPILER__namespace);
+        name_index++;
+    }
+
+    // close list
+    ANVIL__close__counted_list(structures.name_table);
+
+    // close structures
+    // setup current
+    ANVIL__current current_structure = ANVIL__calculate__current_from_list_filled_index(&structures.data_table.list);
+
+    // for each structure
+    while (ANVIL__check__current_within_range(current_structure)) {
+        // get structure
+        COMPILER__accountling_structure structure = *(COMPILER__accountling_structure*)current_structure.start;
+
+        // close structure
+        COMPILER__close__accountling_structure(structure);
+
+        // next structure
+        current_structure.start += sizeof(COMPILER__accountling_structure);
+    }
+
+    // close data table
+    ANVIL__close__counted_list(structures.data_table);
+
+    return;
+}
+
 // one program
 typedef struct COMPILER__accountling_program {
     COMPILER__accountling_structures structures;
     ANVIL__counted_list functions; // COMPILER__accountling_function
 } COMPILER__accountling_program;
+
+// close a program
+void COMPILER__close__accountling_program(COMPILER__accountling_program program) {
+    // close structures
+    COMPILER__close__accountling_structures(program.structures);
+
+    return;
+}
 
 // check to see if a type name exists
 COMPILER__structure_index COMPILER__find__accountling_structure_name_index(ANVIL__counted_list structure_names, COMPILER__namespace searching_for) {
@@ -175,6 +265,7 @@ ANVIL__counted_list COMPILER__account__structures__generate_predefined_type_data
 
         // setup accountling structure structure
         COMPILER__accountling_structure accountling_structure;
+        accountling_structure.predefined = ANVIL__bt__true;
         accountling_structure.name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_type_names[definition_type], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
         if (COMPILER__check__error_occured(error)) {
             return structure_data;
@@ -201,6 +292,7 @@ ANVIL__counted_list COMPILER__account__structures__generate_predefined_type_data
             COMPILER__accountling_structure_member member_temp;
             member_temp.structure_ID = member_type;
             member_temp.name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_type_member_names[member_name_ID], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+            member_temp.predefined = ANVIL__bt__true;
             if (COMPILER__check__error_occured(error)) {
                 return structure_data;
             }
@@ -327,6 +419,7 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
 
                 // setup accountling structure structure
                 COMPILER__accountling_structure accountling_structure;
+                accountling_structure.predefined = ANVIL__bt__false;
                 accountling_structure.name = structure_name.name;
                 accountling_structure.members = ANVIL__create__counted_list(COMPILER__open__list_with_error(sizeof(COMPILER__accountling_structure_member) * 16, error), 0);
                 if (COMPILER__check__error_occured(error)) {
@@ -338,7 +431,11 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
 
                 // check for no arguments, this is an error
                 if (parsling_structure.arguments.filled_index < 1) {
+                    // set error
                     *error = COMPILER__open__error("Accounting Error: A structure cannot have zero members.", COMPILER__get__namespace_lexling_location(structure_name.name));
+
+                    // close members
+                    ANVIL__close__counted_list(accountling_structure.members);
 
                     return output;
                 }
@@ -353,6 +450,9 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
                         // set error
                         *error = COMPILER__open__error("Accounting Error: A structure member is of unknown type.", COMPILER__get__namespace_lexling_location(parsling_member.type));
 
+                        // close members
+                        ANVIL__close__counted_list(accountling_structure.members);
+
                         // DEBUG
                         ANVIL__print__tabs(1);
                         COMPILER__print__namespace(parsling_member.type);
@@ -365,6 +465,7 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
                     COMPILER__accountling_structure_member accountling_member;
                     accountling_member.structure_ID = COMPILER__find__accountling_structure_name_index(output.name_table, parsling_member.type);
                     accountling_member.name = parsling_member.name;
+                    accountling_member.predefined = ANVIL__bt__false;
 
                     // append member
                     COMPILER__append__accountling_structure_member(&accountling_structure.members.list, accountling_member, error);
