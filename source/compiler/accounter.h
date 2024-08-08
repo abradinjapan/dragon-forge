@@ -472,7 +472,7 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
                     if (COMPILER__check__error_occured(error)) {
                         return output;
                     }
-
+                    
                     // next member
                     current_structure_member.start += sizeof(COMPILER__parsling_argument);
                 }
@@ -482,6 +482,7 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
                 if (COMPILER__check__error_occured(error)) {
                     return output;
                 }
+                output.data_table.count++;
 
                 // next structure name
                 current_structure_name.start += sizeof(COMPILER__parsling_argument);
@@ -558,7 +559,7 @@ void COMPILER__print__accountling_structure(COMPILER__accountling_structures acc
 void COMPILER__print__accountling_structures(COMPILER__accountling_structures structures, ANVIL__tab_count tab_depth) {
     // print header
     ANVIL__print__tabs(tab_depth);
-    printf("Structure Name Table:\n");
+    printf("Structure Name Table (%lu):\n", structures.name_table.count);
 
     // print name table
     // setup current
@@ -581,7 +582,7 @@ void COMPILER__print__accountling_structures(COMPILER__accountling_structures st
 
     // print header
     ANVIL__print__tabs(tab_depth);
-    printf("Structures:\n");
+    printf("Structures (%lu):\n", structures.data_table.count);
 
     // print all structures
     // setup current
@@ -607,7 +608,7 @@ void COMPILER__print__accountling_program(COMPILER__accountling_program program)
     // print header
     printf("Accounted Program:\n");
 
-    // print name table
+    // print structures
     COMPILER__print__accountling_structures(program.structures, 1);
 
     return;
