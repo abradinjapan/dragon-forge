@@ -541,7 +541,7 @@ void COMPILER__print__accountling_structure(COMPILER__accountling_structures acc
         COMPILER__print__namespace(member.name);
         printf(" !");
         if (member.structure_ID >= accountling_structures.name_table.count) {
-            printf("(internal/error)");
+            printf("(internal||error)");
         } else {
             COMPILER__print__namespace(((COMPILER__namespace*)accountling_structures.name_table.list.buffer.start)[member.structure_ID]);
         }
