@@ -70,7 +70,7 @@ void COMPILER__append__accountling_structure_member(ANVIL__list* list, COMPILER_
 // one structure
 typedef struct COMPILER__accountling_structure {
     COMPILER__namespace name; // copied from parser when user defined, opened explicitly when predefined
-    ANVIL__counted_list members; // COMPILER__structure_index
+    ANVIL__counted_list members; // COMPILER__accountling_structure_member
     ANVIL__bt predefined;
 } COMPILER__accountling_structure;
 
@@ -198,6 +198,33 @@ COMPILER__structure_index COMPILER__find__accountling_structure_name_index(ANVIL
 
         // next structure
         current_structure.start += sizeof(COMPILER__namespace);
+        output++;
+    }
+
+    // not found
+    return output;
+}
+
+// check to see if a type member exists
+COMPILER__structure_member_index COMPILER__find__accountling_structure_member_name_index(ANVIL__counted_list structures, COMPILER__namespace searching_for) {
+    COMPILER__structure_member_index output = 0;
+
+    // check each structure entry or name
+    ANVIL__current current_structure = ANVIL__calculate__current_from_list_filled_index(&structures.list);
+
+    // check each entry
+    while (ANVIL__check__current_within_range(current_structure)) {
+        // get structure
+        COMPILER__accountling_structure_member member = *(COMPILER__accountling_structure_member*)current_structure.start;
+
+        // check name
+        if (COMPILER__check__identical_namespaces(searching_for, member.name) == ANVIL__bt__true) {
+            // match!
+            return output;
+        }
+
+        // next structure
+        current_structure.start += sizeof(COMPILER__accountling_structure_member);
         output++;
     }
 
@@ -453,11 +480,6 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
                         // close members
                         ANVIL__close__counted_list(accountling_structure.members);
 
-                        // DEBUG
-                        ANVIL__print__tabs(1);
-                        COMPILER__print__namespace(parsling_member.type);
-                        printf("\n");
-
                         return output;
                     }
 
@@ -467,11 +489,23 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
                     accountling_member.name = parsling_member.name;
                     accountling_member.predefined = ANVIL__bt__false;
 
+                    // check for duplicate member
+                    if (COMPILER__find__accountling_structure_member_name_index(accountling_structure.members, accountling_member.name) < accountling_structure.members.count) {
+                        // set error
+                        *error = COMPILER__open__error("Accounting Error: A structure has two or more arguments with the same name.", COMPILER__get__namespace_lexling_location(parsling_member.name));
+
+                        // free unused member
+                        ANVIL__close__counted_list(accountling_structure.members);
+
+                        return output;
+                    }
+
                     // append member
                     COMPILER__append__accountling_structure_member(&accountling_structure.members.list, accountling_member, error);
                     if (COMPILER__check__error_occured(error)) {
                         return output;
                     }
+                    accountling_structure.members.count++;
                     
                     // next member
                     current_structure_member.start += sizeof(COMPILER__parsling_argument);
