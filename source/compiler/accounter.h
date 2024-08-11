@@ -341,6 +341,35 @@ ANVIL__counted_list COMPILER__account__structures__generate_predefined_type_data
     return structure_data;
 }
 
+// type trace type
+typedef struct COMPILER__accountling_structure_member_identifier {
+    COMPILER__structure_index structure_index;
+    COMPILER__structure_member_index member_index;
+} COMPILER__accountling_structure_member_identifier;
+
+// check for recursive types
+void COMPILER__account__check_for_recursive_structures(ANVIL__counted_list structures, COMPILER__error* error) {
+    // setup tracker
+    ANVIL__buffer type_trace = ANVIL__open__buffer(sizeof(COMPILER__accountling_structure_member_identifier) * structures.count);
+
+    // check each structure
+    for (COMPILER__structure_index i = 0; i < structures.count; i++) {
+        // fresh init trace data
+        for (COMPILER__structure_index j = 0; j < structures.count; j++) {
+            // init as not found
+            ((COMPILER__accountling_structure_member_identifier*)type_trace.start)[j].member_index = 0;
+            ((COMPILER__accountling_structure_member_identifier*)type_trace.start)[j].structure_index = 0;
+        }
+
+        // setup trace index
+        COMPILER__structure_index trace_index = 0;
+
+        // 
+    }
+
+    return;
+}
+
 // generate and get all types
 COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsling_programs, COMPILER__error* error) {
     COMPILER__accountling_structures output;
@@ -530,8 +559,8 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
         current_program.start += sizeof(COMPILER__parsling_program);
     }
 
-    // check for recursive type definitions
-    // TODO
+    // check every type for recursive type definitions
+    COMPILER__account__check_for_recursive_structures(output.data_table, error);
 
     return output;
 }
