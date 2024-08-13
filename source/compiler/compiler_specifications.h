@@ -21,6 +21,7 @@ typedef ANVIL__u64 COMPILER__structure_member_index;
 typedef COMPILER__structure_member_index COMPILER__structure_member_count;
 typedef ANVIL__buffer COMPILER__structure_handle;
 typedef ANVIL__buffer COMPILER__function_handle;
+typedef ANVIL__u64 COMPILER__stack_index;
 
 // definitions
 #define COMPILER__define__variable_is_internal_type -1
