@@ -15,7 +15,8 @@ typedef ANVIL__u64 COMPILER__accountling_index;
 typedef COMPILER__accountling_index COMPILER__variable_index;
 typedef COMPILER__accountling_index COMPILER__variable_type_index;
 typedef ANVIL__u64 COMPILER__blueprintling;
-typedef ANVIL__u64 COMPILER__abstraction_index;
+typedef ANVIL__u64 COMPILER__function_index;
+typedef ANVIL__u64 COMPILER__function_header_index;
 typedef ANVIL__u64 COMPILER__structure_index;
 typedef ANVIL__u64 COMPILER__structure_member_index;
 typedef COMPILER__structure_member_index COMPILER__structure_member_count;
@@ -194,12 +195,12 @@ COMPILER__blueprintling COMPILER__global__predefined_types[] = {
 // all predefined function call names
 char* COMPILER__global__predefined_function_call_names[] = {
     COMPILER__define__master_namespace ".set",
-    COMPILER__define__master_namespace ".print.integer.signed",
-    COMPILER__define__master_namespace ".print.integer.unsigned",
+    COMPILER__define__master_namespace ".print.buffer_as_string",
 };
 // predefined function call name type
 typedef enum COMPILER__pfcnt {
     COMPILER__pfcnt__set,
+    COMPILER__pfcnt__print__buffer_as_string,
 } COMPILER__pfcnt;
 // predefined function call types
 typedef enum COMPILER__pfct {
@@ -208,11 +209,13 @@ typedef enum COMPILER__pfct {
 
     // calls
     COMPILER__pfct__set__cell_value,
+    COMPILER__pfct__set__string,
+    COMPILER__pfct__print__buffer_as_string,
 
     // user defined
     COMPILER__pfct__USER_DEFINED,
 } COMPILER__pfct;
-// blueprint
+// blueprint (NOTE: definitions MUST be in order!)
 COMPILER__blueprintling COMPILER__global__predefined_function_calls[] = {
     COMPILER__abt__define_function_call,
         COMPILER__pfct__set__cell_value,
@@ -220,7 +223,20 @@ COMPILER__blueprintling COMPILER__global__predefined_function_calls[] = {
         1,
         COMPILER__aat__cell_value,
         1,
-        COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+    COMPILER__abt__define_function_call,
+        COMPILER__pfct__set__string,
+        COMPILER__pfcnt__set,
+        1,
+        COMPILER__aat__string_index,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+    COMPILER__abt__define_function_call,
+        COMPILER__pfct__print__buffer_as_string,
+        COMPILER__pfcnt__print__buffer_as_string,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+        0,
     COMPILER__abt__end_blueprint,
 };
 
@@ -449,6 +465,20 @@ ANVIL__list COMPILER__open__list_with_error(ANVIL__list_increase list_increase, 
 // append a buffer but the error is compiler
 void COMPILER__append__buffer_with_error(ANVIL__list* list, ANVIL__buffer buffer, COMPILER__error* error) {
     ANVIL__list__append__buffer(list, buffer, &((*error).memory_error_occured));
+
+    return;
+}
+
+// append structure index
+void COMPILER__append__structure_index(ANVIL__list* list, COMPILER__structure_index data, COMPILER__error* error) {
+    // request space
+    ANVIL__list__request__space(list, sizeof(COMPILER__structure_index), &(*error).memory_error_occured);
+
+    // append data
+    (*(COMPILER__structure_index*)ANVIL__calculate__list_current_address(list)) = data;
+
+    // increase fill
+    (*list).filled_index += sizeof(COMPILER__structure_index);
 
     return;
 }
