@@ -6,15 +6,6 @@
 // Accounting is about setting up your data for how you wanna generate code.
 // Next language can be called Sword.
 /*
-    All variables will have one type and one value.
-    Arguments are different from variables.
-    Is there a difference between using a variable and declaring a variable?
-        Yes.
-        Do variables exist independently of arguments?
-            Yes.
-    Three things: Arguments, variables, calls.
-*/
-/*
     Steps of accounting everything:
         1) Validate and get structure table.
         2) Get all function call headers.
@@ -23,7 +14,15 @@
         1) Collect all function relevant data (variables, strings, scopes, normal offsets, scoped offsets, statement map, etc).
         2) Translate syntactic data into an indexable blueprint of the function.
 */
+/*
+    How to access and work with structures:
+        Since structures contain sub-structures and the like, it is important to lay out how they work.
+        A structure will be itself and all sub-structure-variables layed out in order.
+        Structure paths like "data.stuff.oof" are simply names given to the sub-structure-variables.
+        So all structures are effectively just multiple variables with each grouping also getting its own name.
+*/
 /* Include */
+#include "compiler_specifications.h"
 #include "parser.h"
 
 /* Account */
@@ -182,6 +181,42 @@ typedef struct COMPILER__accountling_functions {
     ANVIL__counted_list bodies; // COMPILER__accountling_function (not yet implemented)
 } COMPILER__accountling_functions;
 
+// close accountling functions
+void COMPILER__close__accountling_functions(COMPILER__accountling_functions functions) {
+    // close all headers
+    // setup current
+    ANVIL__current current_function_header = ANVIL__calculate__current_from_list_filled_index(&functions.headers.list);
+
+    // setup header counter
+    COMPILER__structure_index header_index = 0;
+
+    // for each header
+    while (ANVIL__check__current_within_range(current_function_header)) {
+        // get header
+        COMPILER__accountling_function_header function_header = *(COMPILER__accountling_function_header*)current_function_header.start;
+
+        // close header
+        // if header is predefined
+        if (header_index < COMPILER__pfct__USER_DEFINED) {
+            // close name
+            COMPILER__close__parsling_namespace(function_header.name);
+        }
+
+        // close io
+        ANVIL__close__counted_list(function_header.input_types);
+        ANVIL__close__counted_list(function_header.output_types);
+
+        // next header
+        current_function_header.start += sizeof(COMPILER__accountling_function_header);
+        header_index++;
+    }
+
+    // close header buffer
+    ANVIL__close__counted_list(functions.headers);
+
+    return;
+}
+
 // one program
 typedef struct COMPILER__accountling_program {
     COMPILER__accountling_structures structures;
@@ -192,6 +227,9 @@ typedef struct COMPILER__accountling_program {
 void COMPILER__close__accountling_program(COMPILER__accountling_program program) {
     // close structures
     COMPILER__close__accountling_structures(program.structures);
+
+    // close functions
+    COMPILER__close__accountling_functions(program.functions);
 
     return;
 }
@@ -610,7 +648,7 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
                         return output;
                     }
                     accountling_structure.members.count++;
-                    
+
                     // next member
                     current_structure_member.start += sizeof(COMPILER__parsling_argument);
                 }
@@ -707,8 +745,108 @@ ANVIL__counted_list COMPILER__account__functions__generate_predefined_function_h
     return headers;
 }
 
+// account all user defined function header arguments
+ANVIL__counted_list COMPILER__account__functions__user_defined_function_header_arguments(ANVIL__counted_list structure_names, ANVIL__list parsling_header_arguments, COMPILER__error* error) {
+    // allocate structure index list
+    ANVIL__counted_list output = ANVIL__create__counted_list(COMPILER__open__list_with_error(sizeof(COMPILER__structure_index) * 8, error), 0);
+
+    // setup current
+    ANVIL__current current_parsling_argument = ANVIL__calculate__current_from_list_filled_index(&parsling_header_arguments);
+
+    // for each argument
+    while (ANVIL__check__current_within_range(current_parsling_argument)) {
+        // get argument
+        COMPILER__parsling_argument parsling_argument = *(COMPILER__parsling_argument*)current_parsling_argument.start;
+
+        // validate and check the argument for a valid argument type
+        // get index
+        COMPILER__structure_index structure_index = COMPILER__find__accountling_structure_name_index(structure_names, parsling_argument.type);
+
+        // if index deems invalid
+        if (structure_index >= structure_names.count) {
+            // set error
+            *error = COMPILER__open__error("Accounting Error: A function header argument has an unknown type.", COMPILER__get__namespace_lexling_location(parsling_argument.type));
+
+            return output;
+        }
+
+        // record structure index
+        COMPILER__append__structure_index(&output.list, structure_index + COMPILER__aat__COUNT, error);
+        if (COMPILER__check__error_occured(error)) {
+            return output;
+        }
+
+        // next argument
+        current_parsling_argument.start += sizeof(COMPILER__parsling_argument);
+    }
+
+    return output;
+}
+
+// account all user defined function headers
+ANVIL__counted_list COMPILER__account__functions__user_defined_function_headers(ANVIL__counted_list headers, ANVIL__list parsling_programs, ANVIL__counted_list structure_names, COMPILER__error* error) {
+    // for each parsling program
+    // setup current
+    ANVIL__current current_program = ANVIL__calculate__current_from_list_filled_index(&parsling_programs);
+
+    // for each program
+    while (ANVIL__check__current_within_range(current_program)) {
+        // get parsling program
+        COMPILER__parsling_program parsling_program = *(COMPILER__parsling_program*)current_program.start;
+
+        // for each function
+        // setup current
+        ANVIL__current current_function = ANVIL__calculate__current_from_list_filled_index(&parsling_program.functions);
+
+        // for each function
+        while (ANVIL__check__current_within_range(current_function)) {
+            // get parsling function
+            COMPILER__parsling_function parsling_function = *(COMPILER__parsling_function*)current_function.start;
+
+            // account header
+            {
+                // setup variable
+                COMPILER__accountling_function_header header;
+
+                // get name
+                header.name = parsling_function.header.name.name;
+
+                // get inputs
+                header.input_types = COMPILER__account__functions__user_defined_function_header_arguments(structure_names, parsling_function.header.inputs, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return headers;
+                }
+
+                // get outputs
+                header.output_types = COMPILER__account__functions__user_defined_function_header_arguments(structure_names, parsling_function.header.outputs, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return headers;
+                }
+
+                // check if function header is already used
+                // TODO
+
+                // append header
+                COMPILER__append__accountling_function_header(&headers.list, header, error);
+                headers.count++;
+                if (COMPILER__check__error_occured((error))) {
+                    return headers;
+                }
+            }
+
+            // next function
+            current_function.start += sizeof(COMPILER__parsling_function);
+        }
+
+        // next parsling program
+        current_program.start += sizeof(COMPILER__parsling_program);
+    }
+
+    return headers;
+}
+
 // account all functions
-COMPILER__accountling_functions COMPILER__account__functions(ANVIL__list parsling_programs, COMPILER__error* error) {
+COMPILER__accountling_functions COMPILER__account__functions(ANVIL__list parsling_programs, ANVIL__counted_list structure_names, COMPILER__error* error) {
     COMPILER__accountling_functions output;
 
     // open output
@@ -723,8 +861,11 @@ COMPILER__accountling_functions COMPILER__account__functions(ANVIL__list parslin
         return output;
     }
 
-    // account function headers
-    // TODO
+    // account user defined function headers
+    output.headers = COMPILER__account__functions__user_defined_function_headers(output.headers, parsling_programs, structure_names, error);
+    if (COMPILER__check__error_occured(error)) {
+        return output;
+    }
 
     return output;
 }
@@ -736,11 +877,8 @@ COMPILER__accountling_program COMPILER__account__program(ANVIL__list parsling_pr
     // get all structures
     output.structures = COMPILER__account__structures(parsling_programs, error);
 
-    // generate predefined variables
-    // TODO
-
     // get all functions & function headers
-    output.functions = COMPILER__account__functions(parsling_programs, error);
+    output.functions = COMPILER__account__functions(parsling_programs, output.structures.name_table, error);
 
     return output;
 }

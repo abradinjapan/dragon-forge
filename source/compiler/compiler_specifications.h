@@ -204,11 +204,8 @@ typedef enum COMPILER__pfcnt {
 } COMPILER__pfcnt;
 // predefined function call types
 typedef enum COMPILER__pfct {
-    // invalid call type
-    COMPILER__pfct__invalid = 0,
-
     // calls
-    COMPILER__pfct__set__cell_value,
+    COMPILER__pfct__set__cell_value = 0,
     COMPILER__pfct__set__string,
     COMPILER__pfct__print__buffer_as_string,
 
@@ -296,7 +293,7 @@ ANVIL__buffer COMPILER__translate__integer_value_to_string(ANVIL__u64 number) {
 
     // count digits
     digit_count = COMPILER__calculate__decimals_digit_count_in_number(number);
-    
+
     // allocate output
     output = ANVIL__open__buffer(sizeof(ANVIL__character) * digit_count);
 
@@ -451,7 +448,7 @@ ANVIL__bt COMPILER__check__error_occured(COMPILER__error* error) {
 void COMPILER__close__error(COMPILER__error error) {
     // clean up buffers
     ANVIL__close__buffer(error.message);
-    
+
     return;
 }
 
@@ -692,7 +689,7 @@ ANVIL__bt COMPILER__translate__string_to_hexedecimal(ANVIL__buffer string, ANVIL
 
             continue;
         }
-        
+
         // check digit
         hex_digit = COMPILER__translate__character_to_hexadecimal(*(ANVIL__character*)current.start, &invalid_character);
         if (invalid_character == ANVIL__bt__true) {
