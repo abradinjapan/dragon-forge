@@ -178,13 +178,21 @@ void COMPILER__append__accountling_function_header(ANVIL__list* list, COMPILER__
 // one function
 typedef struct COMPILER__accountling_function {
     COMPILER__accountling_function_header header;
-
+    // TODO
 } COMPILER__accountling_function;
+
+// all function headers
+typedef struct COMPILER__accountling_function_headers {
+    ANVIL__counted_list sets; // COMPILER__accountling_function_header, dragon.set()()
+    ANVIL__counted_list packs; // COMPILER__accountling_function_header, dragon.pack()()
+    ANVIL__counted_list appends; // COMPILER__accountling_function_header, dragon.list.append()()
+    ANVIL__counted_list user_defined; // COMPILER__accountling_function_header, user_defined()()
+} COMPILER__accountling_function_headers;
 
 // all functions
 typedef struct COMPILER__accountling_functions {
     ANVIL__counted_list headers; // COMPILER__accountling_function_header
-    ANVIL__counted_list bodies; // COMPILER__accountling_function (not yet implemented)
+    ANVIL__counted_list bodies; // COMPILER__accountling_function
 } COMPILER__accountling_functions;
 
 // close accountling functions
@@ -508,7 +516,7 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
         COMPILER__parsling_program program = *(COMPILER__parsling_program*)current_program.start;
 
         // for each structure
-        ANVIL__current current_structure = ANVIL__calculate__current_from_list_filled_index(&program.structures);
+        ANVIL__current current_structure = ANVIL__calculate__current_from_list_filled_index(&program.structures.list);
 
         // for each structure
         while (ANVIL__check__current_within_range(current_structure)) {
@@ -516,7 +524,7 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
             COMPILER__parsling_structure structure = *(COMPILER__parsling_structure*)current_structure.start;
 
             // for each structure name
-            ANVIL__current current_structure_name = ANVIL__calculate__current_from_list_filled_index(&structure.type_names);
+            ANVIL__current current_structure_name = ANVIL__calculate__current_from_list_filled_index(&structure.type_names.list);
 
             // for each structure name
             while (ANVIL__check__current_within_range(current_structure_name)) {
@@ -566,7 +574,7 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
         COMPILER__parsling_program program = *(COMPILER__parsling_program*)current_program.start;
 
         // for each structure
-        ANVIL__current current_structure = ANVIL__calculate__current_from_list_filled_index(&program.structures);
+        ANVIL__current current_structure = ANVIL__calculate__current_from_list_filled_index(&program.structures.list);
 
         // for each structure
         while (ANVIL__check__current_within_range(current_structure)) {
@@ -574,7 +582,7 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
             COMPILER__parsling_structure parsling_structure = *(COMPILER__parsling_structure*)current_structure.start;
 
             // for each structure name
-            ANVIL__current current_structure_name = ANVIL__calculate__current_from_list_filled_index(&parsling_structure.type_names);
+            ANVIL__current current_structure_name = ANVIL__calculate__current_from_list_filled_index(&parsling_structure.type_names.list);
 
             // for each structure name
             while (ANVIL__check__current_within_range(current_structure_name)) {
@@ -591,10 +599,10 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
                 }
 
                 // for each structure member
-                ANVIL__current current_structure_member = ANVIL__calculate__current_from_list_filled_index(&parsling_structure.arguments);
+                ANVIL__current current_structure_member = ANVIL__calculate__current_from_list_filled_index(&parsling_structure.arguments.list);
 
                 // check for no arguments, this is an error
-                if (parsling_structure.arguments.filled_index < 1) {
+                if (parsling_structure.arguments.count < 1) {
                     // set error
                     *error = COMPILER__open__error("Accounting Error: A structure cannot have zero members.", COMPILER__get__namespace_lexling_location(structure_name.name));
 
@@ -809,12 +817,12 @@ ANVIL__counted_list COMPILER__account__functions__generate_predefined_function_h
 }
 
 // account all user defined function header arguments
-ANVIL__counted_list COMPILER__account__functions__user_defined_function_header_arguments(ANVIL__counted_list structure_names, ANVIL__list parsling_header_arguments, COMPILER__error* error) {
+ANVIL__counted_list COMPILER__account__functions__user_defined_function_header_arguments(ANVIL__counted_list structure_names, ANVIL__counted_list parsling_header_arguments, COMPILER__error* error) {
     // allocate structure index list
-    ANVIL__counted_list output = ANVIL__create__counted_list(COMPILER__open__list_with_error(sizeof(COMPILER__structure_index) * 8, error), 0);
+    ANVIL__counted_list output = COMPILER__open__counted_list_with_error(sizeof(COMPILER__structure_index) * 8, error);
 
     // setup current
-    ANVIL__current current_parsling_argument = ANVIL__calculate__current_from_list_filled_index(&parsling_header_arguments);
+    ANVIL__current current_parsling_argument = ANVIL__calculate__current_from_list_filled_index(&parsling_header_arguments.list);
 
     // for each argument
     while (ANVIL__check__current_within_range(current_parsling_argument)) {
@@ -860,7 +868,7 @@ ANVIL__counted_list COMPILER__account__functions__user_defined_function_headers(
 
         // for each function
         // setup current
-        ANVIL__current current_function = ANVIL__calculate__current_from_list_filled_index(&parsling_program.functions);
+        ANVIL__current current_function = ANVIL__calculate__current_from_list_filled_index(&parsling_program.functions.list);
 
         // for each function
         while (ANVIL__check__current_within_range(current_function)) {
@@ -929,7 +937,7 @@ ANVIL__counted_list COMPILER__account__functions__user_defined_function_bodies(A
         COMPILER__parsling_program parsling_program = *(COMPILER__parsling_program*)current_parsling_program.start;
 
         // account each function
-        ANVIL__current current_parsling_function = ANVIL__calculate__current_from_list_filled_index(&parsling_program.functions);
+        ANVIL__current current_parsling_function = ANVIL__calculate__current_from_list_filled_index(&parsling_program.functions.list);
 
         // for each function
         while (ANVIL__check__current_within_range(current_parsling_function)) {

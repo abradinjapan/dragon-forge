@@ -480,6 +480,11 @@ void COMPILER__append__structure_index(ANVIL__list* list, COMPILER__structure_in
     return;
 }
 
+/* Counted List Functions With Errors */
+ANVIL__counted_list COMPILER__open__counted_list_with_error(ANVIL__list_increase increase, COMPILER__error* error) {
+    return ANVIL__create__counted_list(COMPILER__open__list_with_error(increase, error), 0);
+}
+
 /* Conversion */
 // translate string to boolean
 ANVIL__bt COMPILER__translate__string_to_boolean(ANVIL__buffer string, ANVIL__cell_integer_value* value) {

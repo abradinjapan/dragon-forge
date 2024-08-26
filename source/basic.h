@@ -672,6 +672,11 @@ void ANVIL__close__counted_list(ANVIL__counted_list counted_list) {
     return;
 }
 
+// open counted list
+ANVIL__counted_list ANVIL__open__counted_list(ANVIL__list_increase increase, ANVIL__bt* error_occured) {
+    return ANVIL__create__counted_list(ANVIL__open__list(increase, error_occured), 0);
+}
+
 /* Current */
 // define
 typedef ANVIL__buffer ANVIL__current;
