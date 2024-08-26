@@ -4,7 +4,6 @@
 /* Notes */
 // Compiler backends are just statement translators. Not program understanders.
 // Accounting is about setting up your data for how you wanna generate code.
-// Next language can be called Sword.
 /*
     Steps of accounting everything:
         1) Validate and get structure table.
@@ -21,6 +20,7 @@
         Structure paths like "data.stuff.oof" are simply names given to the sub-structure-variables.
         So all structures are effectively just multiple variables with each grouping also getting its own name.
 */
+
 /* Include */
 #include "compiler_specifications.h"
 #include "parser.h"
@@ -174,6 +174,12 @@ void COMPILER__append__accountling_function_header(ANVIL__list* list, COMPILER__
 
     return;
 }
+
+// one function
+typedef struct COMPILER__accountling_function {
+    COMPILER__accountling_function_header header;
+
+} COMPILER__accountling_function;
 
 // all functions
 typedef struct COMPILER__accountling_functions {
@@ -910,7 +916,44 @@ ANVIL__counted_list COMPILER__account__functions__user_defined_function_headers(
 }
 
 // account all functions
-COMPILER__accountling_functions COMPILER__account__functions(ANVIL__list parsling_programs, ANVIL__counted_list structure_names, COMPILER__error* error) {
+ANVIL__counted_list COMPILER__account__functions__user_defined_function_bodies(ANVIL__counted_list function_headers, COMPILER__accountling_structures structures, ANVIL__list parsling_programs, COMPILER__error* error) {
+    // open function list
+    ANVIL__counted_list output = ANVIL__create__counted_list(COMPILER__open__list_with_error(sizeof(COMPILER__accountling_function) * 32, error), 0);
+
+    // account each program
+    ANVIL__current current_parsling_program = ANVIL__calculate__current_from_list_filled_index(&parsling_programs);
+
+    // for each parsling program
+    while (ANVIL__check__current_within_range(current_parsling_program)) {
+        // get parsling program
+        COMPILER__parsling_program parsling_program = *(COMPILER__parsling_program*)current_parsling_program.start;
+
+        // account each function
+        ANVIL__current current_parsling_function = ANVIL__calculate__current_from_list_filled_index(&parsling_program.functions);
+
+        // for each function
+        while (ANVIL__check__current_within_range(current_parsling_function)) {
+            // get function
+            COMPILER__parsling_function parsling_function = *(COMPILER__parsling_function*)current_parsling_function.start;
+
+            // account function
+            {
+                COMPILER__accountling_function function;
+            }
+
+            // next function
+            current_parsling_function.start += sizeof(COMPILER__parsling_function);
+        }
+
+        // next program
+        current_parsling_program.start += sizeof(COMPILER__parsling_program);
+    }
+
+    return output;
+}
+
+// account all functions & headers
+COMPILER__accountling_functions COMPILER__account__functions(ANVIL__list parsling_programs, COMPILER__accountling_structures structures, COMPILER__error* error) {
     COMPILER__accountling_functions output;
 
     // open output
@@ -926,10 +969,13 @@ COMPILER__accountling_functions COMPILER__account__functions(ANVIL__list parslin
     }
 
     // account user defined function headers
-    output.headers = COMPILER__account__functions__user_defined_function_headers(output.headers, parsling_programs, structure_names, error);
+    output.headers = COMPILER__account__functions__user_defined_function_headers(output.headers, parsling_programs, structures.name_table, error);
     if (COMPILER__check__error_occured(error)) {
         return output;
     }
+
+    // account user defined function bodies
+    output.bodies = COMPILER__account__functions__user_defined_function_bodies(output.headers, structures, parsling_programs, error);
 
     return output;
 }
@@ -942,7 +988,7 @@ COMPILER__accountling_program COMPILER__account__program(ANVIL__list parsling_pr
     output.structures = COMPILER__account__structures(parsling_programs, error);
 
     // get all functions & function headers
-    output.functions = COMPILER__account__functions(parsling_programs, output.structures.name_table, error);
+    output.functions = COMPILER__account__functions(parsling_programs, output.structures, error);
 
     return output;
 }
