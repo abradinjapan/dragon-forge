@@ -178,7 +178,7 @@ void COMPILER__append__accountling_function_header(ANVIL__list* list, COMPILER__
 // one function
 typedef struct COMPILER__accountling_function {
     COMPILER__accountling_function_header header;
-    // TODO
+    
 } COMPILER__accountling_function;
 
 // one function header index
@@ -333,16 +333,16 @@ COMPILER__structure_index COMPILER__find__accountling_structure_name_index(ANVIL
 }
 
 // check to see if a type member exists
-COMPILER__structure_member_index COMPILER__find__accountling_structure_member_name_index(ANVIL__counted_list structures, COMPILER__namespace searching_for) {
+COMPILER__structure_member_index COMPILER__find__accountling_structure_member_name_index(COMPILER__accountling_structure structure, COMPILER__namespace searching_for) {
     COMPILER__structure_member_index output = 0;
 
     // check each structure entry or name
-    ANVIL__current current_structure = ANVIL__calculate__current_from_list_filled_index(&structures.list);
+    ANVIL__current current_member = ANVIL__calculate__current_from_list_filled_index(&structure.members.list);
 
     // check each entry
-    while (ANVIL__check__current_within_range(current_structure)) {
-        // get structure
-        COMPILER__accountling_structure_member member = *(COMPILER__accountling_structure_member*)current_structure.start;
+    while (ANVIL__check__current_within_range(current_member)) {
+        // get member
+        COMPILER__accountling_structure_member member = *(COMPILER__accountling_structure_member*)current_member.start;
 
         // check name
         if (COMPILER__check__identical_namespaces(searching_for, member.name) == ANVIL__bt__true) {
@@ -351,7 +351,7 @@ COMPILER__structure_member_index COMPILER__find__accountling_structure_member_na
         }
 
         // next structure
-        current_structure.start += sizeof(COMPILER__accountling_structure_member);
+        current_member.start += sizeof(COMPILER__accountling_structure_member);
         output++;
     }
 
@@ -703,7 +703,7 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
                     accountling_member.predefined = ANVIL__bt__false;
 
                     // check for duplicate member
-                    if (COMPILER__find__accountling_structure_member_name_index(accountling_structure.members, accountling_member.name) < accountling_structure.members.count) {
+                    if (COMPILER__find__accountling_structure_member_name_index(accountling_structure, accountling_member.name) < accountling_structure.members.count) {
                         // set error
                         *error = COMPILER__open__error("Accounting Error: A structure has two or more arguments with the same name.", COMPILER__get__namespace_lexling_location(parsling_member.name));
 
@@ -1018,10 +1018,10 @@ COMPILER__accountling_function_headers COMPILER__account__functions__user_define
     return headers;
 }
 
-/*// account all functions
-ANVIL__counted_list COMPILER__account__functions__user_defined_function_bodies(ANVIL__counted_list function_headers, COMPILER__accountling_structures structures, ANVIL__list parsling_programs, COMPILER__error* error) {
-    // open function list
-    ANVIL__counted_list output = ANVIL__create__counted_list(COMPILER__open__list_with_error(sizeof(COMPILER__accountling_function) * 32, error), 0);
+// account all functions
+COMPILER__accountling_functions COMPILER__account__functions__user_defined_function_bodies(COMPILER__accountling_functions functions, ANVIL__list parsling_programs, COMPILER__error* error) {
+    // open function body list
+    functions.bodies = ANVIL__create__counted_list(COMPILER__open__list_with_error(sizeof(COMPILER__accountling_function) * functions.headers.category[COMPILER__afht__user_defined].count, error), 0);
 
     // account each program
     ANVIL__current current_parsling_program = ANVIL__calculate__current_from_list_filled_index(&parsling_programs);
@@ -1052,8 +1052,8 @@ ANVIL__counted_list COMPILER__account__functions__user_defined_function_bodies(A
         current_parsling_program.start += sizeof(COMPILER__parsling_program);
     }
 
-    return output;
-}*/
+    return functions;
+}
 
 // account all functions & headers
 COMPILER__accountling_functions COMPILER__account__functions(ANVIL__list parsling_programs, COMPILER__accountling_structures structures, COMPILER__error* error) {
@@ -1078,7 +1078,7 @@ COMPILER__accountling_functions COMPILER__account__functions(ANVIL__list parslin
     }
 
     // account user defined function bodies
-    //output.bodies = COMPILER__account__functions__user_defined_function_bodies(output.headers, structures, parsling_programs, error);
+    output = COMPILER__account__functions__user_defined_function_bodies(output, parsling_programs, error);
 
     return output;
 }
