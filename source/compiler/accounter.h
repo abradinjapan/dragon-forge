@@ -1072,10 +1072,10 @@ COMPILER__accountling_functions COMPILER__account__functions(ANVIL__list parslin
     }
 
     // account user defined function headers
-    /*output.headers = COMPILER__account__functions__user_defined_function_headers(output.headers, parsling_programs, structures.name_table, error);
+    output.headers = COMPILER__account__functions__user_defined_function_headers(output.headers, parsling_programs, structures.name_table, error);
     if (COMPILER__check__error_occured(error)) {
         return output;
-    }*/
+    }
 
     // account user defined function bodies
     //output.bodies = COMPILER__account__functions__user_defined_function_bodies(output.headers, structures, parsling_programs, error);
