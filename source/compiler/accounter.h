@@ -1139,7 +1139,7 @@ COMPILER__offset_index COMPILER__account__functions__get_offset_index(COMPILER__
     return output;
 }
 
-// get scopes in one scope
+// get all data that is function wide (except variables)
 void COMPILER__account__functions__get_function_level_data(COMPILER__accountling_function* accountling_function, COMPILER__parsling_scope parsling_scope, COMPILER__error* error) {
     // search through each statement
     // setup current
@@ -1156,6 +1156,14 @@ void COMPILER__account__functions__get_function_level_data(COMPILER__accountling
             if (COMPILER__account__functions__get_scope_index(accountling_function, parsling_statement.name.name) < (*accountling_function).scope_headers.count) {
                 // error, scope already exists
                 *error = COMPILER__open__error("Accounting Error: A function has two scopes with the same name.", COMPILER__get__namespace_lexling_location(parsling_statement.name.name));
+
+                return;
+            }
+
+            // check for offset name
+            if (COMPILER__account__functions__get_offset_index(accountling_function, parsling_statement.name.name) < (*accountling_function).offsets.count) {
+                // error, offset already exists
+                *error = COMPILER__open__error("Accounting Error: A scope has the name of an offset.", COMPILER__get__namespace_lexling_location(parsling_statement.name.name));
 
                 return;
             }
@@ -1177,7 +1185,7 @@ void COMPILER__account__functions__get_function_level_data(COMPILER__accountling
             // check for scope name
             if (COMPILER__account__functions__get_scope_index(accountling_function, parsling_statement.name.name) < (*accountling_function).scope_headers.count) {
                 // error, scope already exists
-                *error = COMPILER__open__error("Accounting Error: A function has a scopes with the same name as an offset.", COMPILER__get__namespace_lexling_location(parsling_statement.name.name));
+                *error = COMPILER__open__error("Accounting Error: A function has a scope with the same name as an offset.", COMPILER__get__namespace_lexling_location(parsling_statement.name.name));
 
                 return;
             }
@@ -1247,6 +1255,8 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
                 if (COMPILER__check__error_occured(error)) {
                     return functions;
                 }
+
+                // get 
 
                 // append function
                 COMPILER__append__accountling_function(&functions.bodies.list, accountling_function, error);
