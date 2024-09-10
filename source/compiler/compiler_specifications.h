@@ -7,22 +7,27 @@
 
 /* Define */
 // general compiler types
-typedef ANVIL__u64 COMPILER__argument_index;
-typedef ANVIL__u64 COMPILER__io_count;
+typedef ANVIL__u64 COMPILER__index;
+typedef COMPILER__index COMPILER__argument_index;
+typedef COMPILER__index COMPILER__io_count;
 typedef COMPILER__io_count COMPILER__input_count;
 typedef COMPILER__io_count COMPILER__output_count;
-typedef ANVIL__u64 COMPILER__accountling_index;
+typedef COMPILER__index COMPILER__accountling_index;
 typedef COMPILER__accountling_index COMPILER__variable_index;
 typedef COMPILER__accountling_index COMPILER__variable_type_index;
+typedef COMPILER__accountling_index COMPILER__variable_member_index;
 typedef ANVIL__u64 COMPILER__blueprintling;
-typedef ANVIL__u64 COMPILER__function_index;
-typedef ANVIL__u64 COMPILER__function_header_index;
-typedef ANVIL__u64 COMPILER__structure_index;
-typedef ANVIL__u64 COMPILER__structure_member_index;
+typedef COMPILER__index COMPILER__function_index;
+typedef COMPILER__index COMPILER__function_header_index;
+typedef COMPILER__index COMPILER__structure_index;
+typedef COMPILER__index COMPILER__structure_member_index;
 typedef COMPILER__structure_member_index COMPILER__structure_member_count;
 typedef ANVIL__buffer COMPILER__structure_handle;
 typedef ANVIL__buffer COMPILER__function_handle;
-typedef ANVIL__u64 COMPILER__stack_index;
+typedef COMPILER__index COMPILER__stack_index;
+typedef COMPILER__index COMPILER__offset_index;
+typedef COMPILER__index COMPILER__scope_index;
+typedef COMPILER__index COMPILER__string_index;
 
 // definitions
 #define COMPILER__define__variable_is_internal_type -1
@@ -101,6 +106,20 @@ typedef enum COMPILER__stt {
     COMPILER__stt__COUNT,
 } COMPILER__stt;
 
+// accountling statement type
+typedef enum COMPILER__ast {
+    // invalid
+    COMPILER__ast__invalid,
+
+    // types
+    COMPILER__ast__function_call,
+    COMPILER__ast__offset,
+    COMPILER__ast__scope,
+    
+    // COUNT
+    COMPILER__ast__COUNT,
+} COMPILER__ast;
+
 // program stage type
 typedef enum COMPILER__pst {
     // stages
@@ -118,9 +137,11 @@ typedef enum COMPILER__pst {
 // accountling argument type
 typedef enum COMPILER__aat {
     COMPILER__aat__invalid,
-    COMPILER__aat__cell_value,
-    COMPILER__aat__string_index,
-    COMPILER__aat__offset,
+    COMPILER__aat__cell_value, // raw value
+    COMPILER__aat__string_index, // string
+    COMPILER__aat__offset, // offset
+    COMPILER__aat__scope, // scope
+    COMPILER__aat__variable, // variable / structure member from variable
     COMPILER__aat__COUNT,
 } COMPILER__aat;
 

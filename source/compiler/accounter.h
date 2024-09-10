@@ -19,6 +19,11 @@
         A structure will be itself and all sub-structure-variables layed out in order.
         Structure paths like "data.stuff.oof" are simply names given to the sub-structure-variables.
         So all structures are effectively just multiple variables with each grouping also getting its own name.
+    Updated notes:
+        Structures are not expanded in accounting, they are expanded in generation.
+            Since you only need to know if variable types align, and not what variables go where, you don't need to mark every single sub-structure down.
+    Possible new name:
+        Descripting.
 */
 
 /* Include */
@@ -175,12 +180,6 @@ void COMPILER__append__accountling_function_header(ANVIL__list* list, COMPILER__
     return;
 }
 
-// one function
-typedef struct COMPILER__accountling_function {
-    COMPILER__accountling_function_header header;
-    
-} COMPILER__accountling_function;
-
 // one function header index
 typedef struct COMPILER__accountling_function_header_location {
     COMPILER__afht category_index;
@@ -267,6 +266,88 @@ void COMPILER__close__accountling_function_headers(COMPILER__accountling_functio
     // close lists
     COMPILER__close__accountling_function_headers__header_list(headers.category[COMPILER__afht__user_defined], ANVIL__bt__false);
     COMPILER__close__accountling_function_headers__header_list(headers.category[COMPILER__afht__sets], ANVIL__bt__true);
+
+    return;
+}
+
+// one statement argument
+typedef struct COMPILER__accountling_statement_argument {
+    // type
+    COMPILER__aat type;
+
+    // cell value data
+    ANVIL__cell cell_value;
+
+    // offset
+    COMPILER__offset_index offset_index;
+
+    // scope index
+    COMPILER__scope_index scope_index;
+
+    // string literal
+    COMPILER__string_index string_index;
+
+    // variable member
+    COMPILER__variable_index variable__variable_index;
+    COMPILER__variable_member_index variable__member_index;
+} COMPILER__accountling_statement_argument;
+
+// one statement
+typedef struct COMPILER__accountling_statement {
+    // type
+    COMPILER__ast type;
+
+    // function call inputs and outputs
+    ANVIL__counted_list inputs; // COMPILER__accountling_statement_argument
+    ANVIL__counted_list outputs; // COMPILER__accountling_statement_argument
+
+    // offset data
+    COMPILER__offset_index offset_index; // if the statement is a regular offset, use this
+
+    // scope data
+    COMPILER__scope_index scope_index;
+    ANVIL__counted_list scope_data; // COMPILER__accountling_statement
+} COMPILER__accountling_statement;
+
+// scope header
+typedef struct COMPILER__accountling_scope_header {
+    COMPILER__namespace name;
+    COMPILER__variable_index condition;
+} COMPILER__accountling_scope_header;
+
+// append accountling structure
+void COMPILER__append__accountling_scope_header(ANVIL__list* list, COMPILER__accountling_scope_header data, COMPILER__error* error) {
+    // request space
+    ANVIL__list__request__space(list, sizeof(COMPILER__accountling_scope_header), &(*error).memory_error_occured);
+
+    // append data
+    (*(COMPILER__accountling_scope_header*)ANVIL__calculate__list_current_address(list)) = data;
+
+    // increase fill
+    (*list).filled_index += sizeof(COMPILER__accountling_scope_header);
+
+    return;
+}
+
+// one function
+typedef struct COMPILER__accountling_function {
+    ANVIL__counted_list variables; // COMPILER__variable_type_index
+    ANVIL__counted_list strings;
+    ANVIL__counted_list offsets; // COMPILER__namespace
+    ANVIL__counted_list scope_headers; // COMPILER__accountling_scope_header
+    ANVIL__counted_list statements; // COMPILER__accountling_statement
+} COMPILER__accountling_function;
+
+// append accountling function
+void COMPILER__append__accountling_function(ANVIL__list* list, COMPILER__accountling_function data, COMPILER__error* error) {
+    // request space
+    ANVIL__list__request__space(list, sizeof(COMPILER__accountling_function), &(*error).memory_error_occured);
+
+    // append data
+    (*(COMPILER__accountling_function*)ANVIL__calculate__list_current_address(list)) = data;
+
+    // increase fill
+    (*list).filled_index += sizeof(COMPILER__accountling_function);
 
     return;
 }
@@ -1018,10 +1099,116 @@ COMPILER__accountling_function_headers COMPILER__account__functions__user_define
     return headers;
 }
 
+// check scope headers for name
+COMPILER__scope_index COMPILER__account__functions__get_scope_index(COMPILER__accountling_function* accountling_function, COMPILER__namespace scope_name) {
+    COMPILER__scope_index output = 0;
+
+    // search each scope header for name
+    while (output < (*accountling_function).scope_headers.count) {
+        // check name
+        if (COMPILER__check__identical_namespaces(((COMPILER__accountling_scope_header*)(*accountling_function).scope_headers.list.buffer.start)[output].name, scope_name) == ANVIL__bt__true) {
+            // match!
+            return output;
+        }
+
+        // not a match, next one
+        output++;
+    }
+
+    // no match found
+    return output;
+}
+
+// check offsets for name
+COMPILER__offset_index COMPILER__account__functions__get_offset_index(COMPILER__accountling_function* accountling_function, COMPILER__namespace offset_name) {
+    COMPILER__offset_index output = 0;
+
+    // search each offset for name
+    while (output < (*accountling_function).offsets.count) {
+        // check name
+        if (COMPILER__check__identical_namespaces(((COMPILER__namespace*)(*accountling_function).offsets.list.buffer.start)[output], offset_name) == ANVIL__bt__true) {
+            // match!
+            return output;
+        }
+
+        // not a match, next one
+        output++;
+    }
+
+    // no match found
+    return output;
+}
+
+// get scopes in one scope
+void COMPILER__account__functions__get_function_level_data(COMPILER__accountling_function* accountling_function, COMPILER__parsling_scope parsling_scope, COMPILER__error* error) {
+    // search through each statement
+    // setup current
+    ANVIL__current current_statement = ANVIL__calculate__current_from_list_filled_index(&parsling_scope.statements.list);
+
+    // for each statement
+    while (ANVIL__check__current_within_range(current_statement)) {
+        // get statement
+        COMPILER__parsling_statement parsling_statement = *(COMPILER__parsling_statement*)current_statement.start;
+
+        // check type
+        if (parsling_statement.type == COMPILER__stt__subscope) {
+            // check for scope name
+            if (COMPILER__account__functions__get_scope_index(accountling_function, parsling_statement.name.name) < (*accountling_function).scope_headers.count) {
+                // error, scope already exists
+                *error = COMPILER__open__error("Accounting Error: A function has two scopes with the same name.", COMPILER__get__namespace_lexling_location(parsling_statement.name.name));
+
+                return;
+            }
+
+            // create new scope header
+            COMPILER__accountling_scope_header scope_header;
+            scope_header.name = parsling_statement.name.name;
+
+            // if scope name does not exist, append
+            COMPILER__append__accountling_scope_header(&(*accountling_function).scope_headers.list, scope_header, error);
+            (*accountling_function).scope_headers.count++;
+
+            // search for more headers in sub-scope
+            COMPILER__account__functions__get_function_level_data(accountling_function, parsling_statement.subscope, error);
+            if (COMPILER__check__error_occured(error)) {
+                return;
+            }
+        } else if (parsling_statement.type == COMPILER__stt__offset) {
+            // check for scope name
+            if (COMPILER__account__functions__get_scope_index(accountling_function, parsling_statement.name.name) < (*accountling_function).scope_headers.count) {
+                // error, scope already exists
+                *error = COMPILER__open__error("Accounting Error: A function has a scopes with the same name as an offset.", COMPILER__get__namespace_lexling_location(parsling_statement.name.name));
+
+                return;
+            }
+
+            // check for offset name
+            if (COMPILER__account__functions__get_offset_index(accountling_function, parsling_statement.name.name) < (*accountling_function).offsets.count) {
+                // error, offset already exists
+                *error = COMPILER__open__error("Accounting Error: An offset is declared twice.", COMPILER__get__namespace_lexling_location(parsling_statement.name.name));
+
+                return;
+            }
+
+            // append offset
+            COMPILER__append__namespace(&(*accountling_function).offsets.list, parsling_statement.name.name, error);
+            if (COMPILER__check__error_occured(error)) {
+                return;
+            }
+            (*accountling_function).offsets.count++;
+        }
+
+        // next statement
+        current_statement.start += sizeof(COMPILER__parsling_statement);
+    }
+
+    return;
+}
+
 // account all functions
 COMPILER__accountling_functions COMPILER__account__functions__user_defined_function_bodies(COMPILER__accountling_functions functions, ANVIL__list parsling_programs, COMPILER__error* error) {
     // open function body list
-    functions.bodies = ANVIL__create__counted_list(COMPILER__open__list_with_error(sizeof(COMPILER__accountling_function) * functions.headers.category[COMPILER__afht__user_defined].count, error), 0);
+    functions.bodies = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_function) * functions.headers.category[COMPILER__afht__user_defined].count, error);
 
     // account each program
     ANVIL__current current_parsling_program = ANVIL__calculate__current_from_list_filled_index(&parsling_programs);
@@ -1041,7 +1228,32 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
 
             // account function
             {
-                COMPILER__accountling_function function;
+                // setup function variable
+                COMPILER__accountling_function accountling_function;
+
+                // allocate scope headers list
+                accountling_function.scope_headers = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_scope_header) * 16, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return functions;
+                }
+                // allocate offsets list
+                accountling_function.offsets = COMPILER__open__counted_list_with_error(sizeof(COMPILER__namespace) * 16, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return functions;
+                }
+
+                // get scope headers & offsets
+                COMPILER__account__functions__get_function_level_data(&accountling_function, parsling_function.scope, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return functions;
+                }
+
+                // append function
+                COMPILER__append__accountling_function(&functions.bodies.list, accountling_function, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return functions;
+                }
+                functions.bodies.count++;
             }
 
             // next function
@@ -1221,6 +1433,18 @@ void COMPILER__print__accountling_function_header_arguments(ANVIL__counted_list 
     return;
 }
 
+// print an accountling function header
+void COMPILER__print__accountling_function_header(COMPILER__accountling_function_header header) {
+    // print name
+    COMPILER__print__namespace(header.name);
+
+    // print io
+    COMPILER__print__accountling_function_header_arguments(header.input_types);
+    COMPILER__print__accountling_function_header_arguments(header.output_types);
+
+    return;
+}
+
 // print accountling functions
 void COMPILER__print__accountling_functions(COMPILER__accountling_functions functions, ANVIL__tab_count tab_depth) {
     // print section header
@@ -1246,16 +1470,67 @@ void COMPILER__print__accountling_functions(COMPILER__accountling_functions func
             // print header
             ANVIL__print__tabs(tab_depth + 2);
             printf("[ %lu ] ", header_index);
-            COMPILER__print__namespace(header.name);
-
-            // print io
-            COMPILER__print__accountling_function_header_arguments(header.input_types);
-            COMPILER__print__accountling_function_header_arguments(header.output_types);
+            COMPILER__print__accountling_function_header(header);
 
             // next header
             printf("\n");
             current_header.start += sizeof(COMPILER__accountling_function_header);
             header_index++;
+        }
+    }
+
+    // print section header
+    ANVIL__print__tabs(tab_depth);
+    printf("Function Bodies Table:\n");
+
+    // print each function
+    for (COMPILER__function_index function_index = 0; function_index < functions.bodies.count; function_index++) {
+        // get function
+        COMPILER__accountling_function function = ((COMPILER__accountling_function*)functions.bodies.list.buffer.start)[function_index];
+
+        // print data
+        {
+            // print name
+            ANVIL__print__tabs(tab_depth + 1);
+            printf("Function '");
+            COMPILER__print__accountling_function_header(((COMPILER__accountling_function_header*)functions.headers.category[COMPILER__afht__user_defined].list.buffer.start)[function_index]);
+            printf("':\n");
+
+            // print scopes
+            if (function.scope_headers.count > 0) {
+                // print scope headers header
+                ANVIL__print__tabs(tab_depth + 2);
+                printf("Scopes:\n");
+                
+                // print each scope header
+                for (COMPILER__scope_index scope_index = 0; scope_index < function.scope_headers.count; scope_index++) {
+                    // get scope
+                    COMPILER__accountling_scope_header scope_header = ((COMPILER__accountling_scope_header*)function.scope_headers.list.buffer.start)[scope_index];
+
+                    // print scope data
+                    ANVIL__print__tabs(tab_depth + 3);
+                    COMPILER__print__namespace(scope_header.name);
+                    printf("\n");
+                }
+            }
+
+            // print offsets
+            if (function.offsets.count > 0) {
+                // print offsets header
+                ANVIL__print__tabs(tab_depth + 2);
+                printf("Offsets:\n");
+                
+                // print each offset
+                for (COMPILER__offset_index offset_index = 0; offset_index < function.offsets.count; offset_index++) {
+                    // get offset
+                    COMPILER__namespace offset = ((COMPILER__namespace*)function.offsets.list.buffer.start)[offset_index];
+
+                    // print scope data
+                    ANVIL__print__tabs(tab_depth + 3);
+                    COMPILER__print__namespace(offset);
+                    printf("\n");
+                }
+            }
         }
     }
 
