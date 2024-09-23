@@ -374,10 +374,10 @@ void COMPILER__append__accountling_variable(ANVIL__list* list, COMPILER__account
 
 // one function
 typedef struct COMPILER__accountling_function {
-    ANVIL__counted_list variables; // COMPILER__accountling_variable
-    ANVIL__counted_list strings; // ANVIL__buffer
     ANVIL__counted_list offsets; // COMPILER__namespace
+    ANVIL__counted_list variables; // COMPILER__accountling_variable
     ANVIL__counted_list scope_headers; // COMPILER__accountling_scope_header
+    ANVIL__counted_list strings; // ANVIL__buffer
     ANVIL__counted_list statements; // COMPILER__accountling_statement
 } COMPILER__accountling_function;
 
@@ -395,6 +395,43 @@ void COMPILER__append__accountling_function(ANVIL__list* list, COMPILER__account
     return;
 }
 
+// close function
+void COMPILER__close__accountling_function(COMPILER__accountling_function function) {
+    // close offsets
+    ANVIL__close__counted_list(function.offsets);
+
+    // close variables
+    ANVIL__close__counted_list(function.variables);
+
+    // close scope headers
+    ANVIL__close__counted_list(function.scope_headers);
+
+    // close strings
+    for (COMPILER__string_index index = 0; index < function.strings.count; index++) {
+        // close string
+        ANVIL__close__buffer(((ANVIL__buffer*)function.strings.list.buffer.start)[index]);
+    }
+    ANVIL__close__counted_list(function.strings);
+
+    // close statements
+    for (COMPILER__statement_index index = 0; index < function.statements.count; index++) {
+        // get statement
+        COMPILER__accountling_statement statement = ((COMPILER__accountling_statement*)function.statements.list.buffer.start)[index];
+
+        // check statement type
+        if (statement.statement_type == COMPILER__ast__scope) {
+            // do nothing for now
+            // TODO
+        } else if (statement.statement_type == COMPILER__ast__user_defined_function_call) {
+            // close io
+            // TODO
+        }
+    }
+    ANVIL__close__counted_list(function.statements);
+
+    return;
+}
+
 // all functions
 typedef struct COMPILER__accountling_functions {
     COMPILER__accountling_function_headers headers;
@@ -407,7 +444,13 @@ void COMPILER__close__accountling_functions(COMPILER__accountling_functions func
     COMPILER__close__accountling_function_headers(functions.headers);
 
     // close bodies
-    // TODO
+    for (COMPILER__function_index index = 0; index < functions.bodies.count; index++) {
+        // close one body
+        COMPILER__close__accountling_function(((COMPILER__accountling_function*)functions.bodies.list.buffer.start)[index]);
+    }
+    
+    // close list
+    ANVIL__close__counted_list(functions.bodies);
 
     return;
 }
