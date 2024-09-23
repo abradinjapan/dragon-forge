@@ -292,6 +292,12 @@ typedef struct COMPILER__accountling_statement_argument {
     // COMPILER__string_index string_index; // declared directly in statements
 } COMPILER__accountling_statement_argument;
 
+// one function scope
+typedef struct COMPILER__accountling_scope {
+    COMPILER__accountling_statement_argument condition;
+    ANVIL__counted_list statements; // COMPILER__accountling_statement
+} COMPILER__accountling_scope;
+
 // one statement
 typedef struct COMPILER__accountling_statement {
     // type
@@ -311,7 +317,7 @@ typedef struct COMPILER__accountling_statement {
 
     // scope data
     COMPILER__scope_index scope_index;
-    ANVIL__counted_list scope_data; // COMPILER__accountling_statement
+    COMPILER__accountling_scope scope_data; // COMPILER__accountling_statement
 
     // user defined function call inputs and outputs
     ANVIL__counted_list function_call__inputs; // COMPILER__accountling_statement_argument
@@ -335,7 +341,6 @@ void COMPILER__append__accountling_statement(ANVIL__list* list, COMPILER__accoun
 // scope header
 typedef struct COMPILER__accountling_scope_header {
     COMPILER__namespace name;
-    COMPILER__variable_index condition;
 } COMPILER__accountling_scope_header;
 
 // append accountling scope header
@@ -378,7 +383,7 @@ typedef struct COMPILER__accountling_function {
     ANVIL__counted_list variables; // COMPILER__accountling_variable
     ANVIL__counted_list scope_headers; // COMPILER__accountling_scope_header
     ANVIL__counted_list strings; // ANVIL__buffer
-    ANVIL__counted_list statements; // COMPILER__accountling_statement
+    COMPILER__accountling_scope scope;
 } COMPILER__accountling_function;
 
 // append accountling function
@@ -392,6 +397,29 @@ void COMPILER__append__accountling_function(ANVIL__list* list, COMPILER__account
     // increase fill
     (*list).filled_index += sizeof(COMPILER__accountling_function);
 
+    return;
+}
+
+// close accountling scope
+void COMPILER__close__accountling_scope(COMPILER__accountling_scope scope) {
+    // close statements
+    for (COMPILER__statement_index index = 0; index < scope.statements.count; index++) {
+        // get statement
+        COMPILER__accountling_statement statement = ((COMPILER__accountling_statement*)scope.statements.list.buffer.start)[index];
+
+        // check statement type
+        if (statement.statement_type == COMPILER__ast__scope) {
+            // close scope
+            COMPILER__close__accountling_scope(statement.scope_data);
+        } else if (statement.statement_type == COMPILER__ast__user_defined_function_call) {
+            // close io
+            // TODO
+        }
+    }
+
+    // close list
+    ANVIL__close__counted_list(scope.statements);
+    
     return;
 }
 
@@ -413,21 +441,8 @@ void COMPILER__close__accountling_function(COMPILER__accountling_function functi
     }
     ANVIL__close__counted_list(function.strings);
 
-    // close statements
-    for (COMPILER__statement_index index = 0; index < function.statements.count; index++) {
-        // get statement
-        COMPILER__accountling_statement statement = ((COMPILER__accountling_statement*)function.statements.list.buffer.start)[index];
-
-        // check statement type
-        if (statement.statement_type == COMPILER__ast__scope) {
-            // do nothing for now
-            // TODO
-        } else if (statement.statement_type == COMPILER__ast__user_defined_function_call) {
-            // close io
-            // TODO
-        }
-    }
-    ANVIL__close__counted_list(function.statements);
+    // close scope
+    COMPILER__close__accountling_scope(function.scope);
 
     return;
 }
@@ -1539,6 +1554,21 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
     return;
 }
 
+// open accountling scope
+COMPILER__accountling_scope COMPILER__open__accountling_scope(COMPILER__error* error) {
+    COMPILER__accountling_scope output;
+
+    // setup output
+    output.statements = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_statement) * 32, error);
+    if (COMPILER__check__error_occured(error)) {
+        return output;
+    }
+    output.condition.type = COMPILER__ast__scope;
+    output.condition.scope_index = -1;
+
+    return output;
+}
+
 // account all functions
 COMPILER__accountling_functions COMPILER__account__functions__user_defined_function_bodies(COMPILER__accountling_functions functions, ANVIL__list parsling_programs, COMPILER__error* error) {
     // open function body list
@@ -1595,13 +1625,13 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
                 }
 
                 // open statements
-                accountling_function.statements = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_statement) * 32, error);
+                accountling_function.scope = COMPILER__open__accountling_scope(error);
                 if (COMPILER__check__error_occured(error)) {
                     return functions;
                 }
 
                 // get variables
-                COMPILER__account__functions__function_sequential_information__one_scope(&accountling_function, &accountling_function.statements, parsling_function.scope, error);
+                COMPILER__account__functions__function_sequential_information__one_scope(&accountling_function, &accountling_function.scope.statements, parsling_function.scope, error);
                 if (COMPILER__check__error_occured(error)) {
                     return functions;
                 }
@@ -1804,11 +1834,11 @@ void COMPILER__print__accountling_function_header(COMPILER__accountling_function
 }
 
 // print an accountling scope
-void COMPILER__print__accountling_scope(ANVIL__counted_list statements, ANVIL__tab_count tab_depth) {
+void COMPILER__print__accountling_scope(COMPILER__accountling_scope statements, ANVIL__tab_count tab_depth) {
     // print each statement
-    for (COMPILER__statement_index statement_index = 0; statement_index < statements.count; statement_index++) {
+    for (COMPILER__statement_index statement_index = 0; statement_index < statements.statements.count; statement_index++) {
         // get statement
-        COMPILER__accountling_statement statement = ((COMPILER__accountling_statement*)statements.list.buffer.start)[statement_index];
+        COMPILER__accountling_statement statement = ((COMPILER__accountling_statement*)statements.statements.list.buffer.start)[statement_index];
 
         // print statement start
         ANVIL__print__tabs(tab_depth + 1);
@@ -1917,13 +1947,13 @@ void COMPILER__print__accountling_functions(COMPILER__accountling_functions func
             }
 
             // print statements
-            if (function.statements.count > 0) {
+            if (function.scope.statements.count > 0) {
                 // print statements header
                 ANVIL__print__tabs(tab_depth + 2);
                 printf("Statements:\n");
                 
                 // print statements
-                COMPILER__print__accountling_scope(function.statements, tab_depth + 2);
+                COMPILER__print__accountling_scope(function.scope, tab_depth + 2);
             }
 
             // print strings
