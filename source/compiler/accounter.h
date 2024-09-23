@@ -324,6 +324,26 @@ typedef struct COMPILER__accountling_statement {
     ANVIL__counted_list function_call__outputs; // COMPILER__accountling_statement_argument
 } COMPILER__accountling_statement;
 
+// create null accountling statement
+COMPILER__accountling_statement COMPILER__create_null__accountling_statement() {
+    COMPILER__accountling_statement output;
+
+    // setup output
+    output.statement_type = COMPILER__ast__invalid;
+    output.associated_header= COMPILER__create__accountling_function_header_location(0, 0);
+    output.set_cell__raw_value = -1;
+    output.set_cell__variable_index = -1;
+    output.set_string__string_value_index = -1;
+    output.set_string__variable_index = -1;
+    output.offset_index = -1;
+    output.scope_index = -1;
+    output.scope_data.statements = ANVIL__create_null__counted_list();
+    output.function_call__inputs = ANVIL__create_null__counted_list();
+    output.function_call__outputs = ANVIL__create_null__counted_list();
+
+    return output;
+}
+
 // append accountling statement
 void COMPILER__append__accountling_statement(ANVIL__list* list, COMPILER__accountling_statement data, COMPILER__error* error) {
     // request space
@@ -1461,7 +1481,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__set
     // setup valid name
     COMPILER__namespace valid_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".set", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
-        return ANVIL__bt__false;
+        goto failure;
     }
 
     // check for name & argument counts
@@ -1473,14 +1493,14 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__set
             // get index
             COMPILER__variable_index variable_ID = COMPILER__account__functions__mark_variable(accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_buffer, error);
             if (COMPILER__check__error_occured(error)) {
-                return ANVIL__bt__false;
+                goto failure;
             }
 
             // add string to library
             COMPILER__append__buffer_with_error(&(*accountling_function).strings.list, COMPILER__translate__string_literal_to_translated_buffer(COMPILER__get__lexling_by_index(COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).name.lexlings, 0), error), error);
             (*accountling_function).strings.count++;
             if (COMPILER__check__error_occured(error)) {
-                return ANVIL__bt__false;
+                goto failure;
             }
 
             // setup output statement
@@ -1489,7 +1509,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__set
             (*accountling_statement).statement_type = COMPILER__ast__predefined__set__string;
 
             // variable declared / reused
-            return ANVIL__bt__true;
+                goto match;
         // check for integer literal
         } else if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__name) {
             // temporaries
@@ -1499,31 +1519,44 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__set
             // get index
             COMPILER__variable_index variable_ID = COMPILER__account__functions__mark_variable(accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, error);
             if (COMPILER__check__error_occured(error)) {
-                return ANVIL__bt__false;
+                goto failure;
             }
 
             // attempt translation
-            if (COMPILER__translate__string_to_boolean(integer_string, &integer_value) || COMPILER__translate__string_to_binary(integer_string, &integer_value)) {
+            if (COMPILER__translate__string_to_boolean(integer_string, &integer_value) || COMPILER__translate__string_to_binary(integer_string, &integer_value) || COMPILER__translate__string_to_integer(integer_string, &integer_value) || COMPILER__translate__string_to_hexedecimal(integer_string, &integer_value)) {
                 // create statement
                 (*accountling_statement).statement_type = COMPILER__ast__predefined__set__cell;
                 (*accountling_statement).set_cell__raw_value = integer_value;
                 (*accountling_statement).set_cell__variable_index = variable_ID;
 
                 // valid variable declaration
-                return ANVIL__bt__true;
+                goto match;
             }
         }
     }
 
     // not a match
+    failure:
+    COMPILER__close__parsling_namespace(valid_name);
     return ANVIL__bt__false;
+
+    // match!
+    match:
+    COMPILER__close__parsling_namespace(valid_name);
+    return ANVIL__bt__true;
 }
 
 // get all statements & variables
-void COMPILER__account__functions__function_sequential_information__one_scope(COMPILER__accountling_function* accountling_function, ANVIL__counted_list* accountling_scope, COMPILER__parsling_scope scope, COMPILER__error* error) {
+void COMPILER__account__functions__function_sequential_information__one_scope(COMPILER__accountling_function* accountling_function, COMPILER__accountling_scope* accountling_scope, COMPILER__parsling_scope scope, COMPILER__error* error) {
     // translate all statements
     // setup current statement
     ANVIL__current current_statement = ANVIL__calculate__current_from_list_filled_index(&scope.statements.list);
+
+    // setup statements
+    (*accountling_scope).statements = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_statement) * 32, error);
+    if (COMPILER__check__error_occured(error)) {
+        return;
+    }
 
     // for each statement
     while (ANVIL__check__current_within_range(current_statement)) {
@@ -1533,18 +1566,55 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
         // setup accountling statement
         COMPILER__accountling_statement accountling_statement;
 
+        // null init type
+        accountling_statement = COMPILER__create_null__accountling_statement();
+
         // determine statement type
         if (parsling_statement.type == COMPILER__stt__function_call) {
             // find definition
             // find sets
             if (COMPILER__account__functions__check_and_get_statement_translation__set(accountling_function, parsling_statement, &accountling_statement, error)) {
                 // append statement
-                COMPILER__append__accountling_statement(&(*accountling_scope).list, accountling_statement, error);
+                COMPILER__append__accountling_statement(&(*accountling_scope).statements.list, accountling_statement, error);
                 if (COMPILER__check__error_occured(error)) {
                     return;
                 }
-                (*accountling_scope).count++;
+                (*accountling_scope).statements.count++;
+            // find prints
+            } /*else if () {
+
+            }*/
+        } else if (parsling_statement.type == COMPILER__stt__offset) {
+            // setup offset data
+            accountling_statement.offset_index = COMPILER__account__functions__get_offset_index(accountling_function, parsling_statement.name.name);
+            accountling_statement.statement_type = COMPILER__ast__offset;
+            
+            // append statement
+            COMPILER__append__accountling_statement(&(*accountling_scope).statements.list, accountling_statement, error);
+            if (COMPILER__check__error_occured(error)) {
+                return;
             }
+            (*accountling_scope).statements.count++;
+        } else if (parsling_statement.type == COMPILER__stt__subscope) {
+            // get scope data
+            COMPILER__account__functions__function_sequential_information__one_scope(accountling_function, &accountling_statement.scope_data, parsling_statement.subscope, error);
+            if (COMPILER__check__error_occured(error)) {
+                return;
+            }
+            accountling_statement.scope_index = COMPILER__account__functions__get_scope_index(accountling_function, parsling_statement.name.name);
+            accountling_statement.statement_type = COMPILER__ast__scope;
+
+            // append statement
+            COMPILER__append__accountling_statement(&(*accountling_scope).statements.list, accountling_statement, error);
+            if (COMPILER__check__error_occured(error)) {
+                return;
+            }
+            (*accountling_scope).statements.count++;
+        // unrecognized statement type
+        } else {
+            *error = COMPILER__open__error("Internal Error: Unrecognized statement type in accounter, oops.", COMPILER__get__namespace_lexling_location(parsling_statement.name.name));
+
+            return;
         }
 
         // next statement
@@ -1552,21 +1622,6 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
     }
 
     return;
-}
-
-// open accountling scope
-COMPILER__accountling_scope COMPILER__open__accountling_scope(COMPILER__error* error) {
-    COMPILER__accountling_scope output;
-
-    // setup output
-    output.statements = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_statement) * 32, error);
-    if (COMPILER__check__error_occured(error)) {
-        return output;
-    }
-    output.condition.type = COMPILER__ast__scope;
-    output.condition.scope_index = -1;
-
-    return output;
 }
 
 // account all functions
@@ -1624,14 +1679,8 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
                     return functions;
                 }
 
-                // open statements
-                accountling_function.scope = COMPILER__open__accountling_scope(error);
-                if (COMPILER__check__error_occured(error)) {
-                    return functions;
-                }
-
                 // get variables
-                COMPILER__account__functions__function_sequential_information__one_scope(&accountling_function, &accountling_function.scope.statements, parsling_function.scope, error);
+                COMPILER__account__functions__function_sequential_information__one_scope(&accountling_function, &accountling_function.scope, parsling_function.scope, error);
                 if (COMPILER__check__error_occured(error)) {
                     return functions;
                 }
@@ -1848,6 +1897,14 @@ void COMPILER__print__accountling_scope(COMPILER__accountling_scope statements, 
             printf("COMPILER__ast__predefined__set__cell(raw_value: %lu, variable_index: %lu)", statement.set_cell__raw_value, statement.set_cell__variable_index);
         } else if (statement.statement_type == COMPILER__ast__predefined__set__string) {
             printf("COMPILER__ast__predefined__set__string(string_index: %lu, variable_index: %lu)", statement.set_string__string_value_index, statement.set_string__variable_index);
+        } else if (statement.statement_type == COMPILER__ast__offset) {
+            printf("COMPILER__ast__offset(offset_index: %lu)", statement.offset_index);
+        } else if (statement.statement_type == COMPILER__ast__scope) {
+            printf("COMPILER__ast__scope(scope_index: %lu)", statement.scope_index);
+            if (statement.scope_data.statements.count > 0) {
+                printf("\n");
+            }
+            COMPILER__print__accountling_scope(statement.scope_data, tab_depth + 1);
         } else {
             printf("[ Internal Issue: Debug info not implemented for statement type %lu ]", (ANVIL__u64)statement.statement_type);
         }

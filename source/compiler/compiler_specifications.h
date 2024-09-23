@@ -112,12 +112,15 @@ typedef enum COMPILER__ast {
     // built in calls
     COMPILER__ast__predefined__set__cell,
     COMPILER__ast__predefined__set__string,
+    COMPILER__ast__predefined__print__buffer_as_string,
 
     // user defined call
     COMPILER__ast__user_defined_function_call,
 
-    // offset data
+    // offsets
     COMPILER__ast__offset,
+
+    // scopes
     COMPILER__ast__scope,
     
     // invalid
