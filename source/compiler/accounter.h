@@ -275,31 +275,36 @@ typedef struct COMPILER__accountling_statement_argument {
     // type
     COMPILER__aat type;
 
-    // cell value data
-    ANVIL__cell cell_value;
-
     // offset
     COMPILER__offset_index offset_index;
 
     // scope index
     COMPILER__scope_index scope_index;
 
-    // string literal
-    COMPILER__string_index string_index;
-
     // variable member
     COMPILER__variable_index variable__variable_index;
     COMPILER__variable_member_index variable__member_index;
+
+    // cell value data
+    // ANVIL__cell cell_value; // now declared directly in statements
+
+    // string literal
+    // COMPILER__string_index string_index; // declared directly in statements
 } COMPILER__accountling_statement_argument;
 
 // one statement
 typedef struct COMPILER__accountling_statement {
     // type
-    COMPILER__ast type;
+    COMPILER__ast statement_type;
+    COMPILER__accountling_function_header_location associated_header;
 
-    // function call inputs and outputs
-    ANVIL__counted_list inputs; // COMPILER__accountling_statement_argument
-    ANVIL__counted_list outputs; // COMPILER__accountling_statement_argument
+    // set cell data
+    ANVIL__cell_integer_value set_cell__raw_value;
+    COMPILER__variable_index set_cell__variable_index;
+
+    // set string data
+    COMPILER__string_index set_string__string_value_index;
+    COMPILER__variable_index set_string__variable_index;
 
     // offset data
     COMPILER__offset_index offset_index; // if the statement is a regular offset, use this
@@ -307,7 +312,25 @@ typedef struct COMPILER__accountling_statement {
     // scope data
     COMPILER__scope_index scope_index;
     ANVIL__counted_list scope_data; // COMPILER__accountling_statement
+
+    // user defined function call inputs and outputs
+    ANVIL__counted_list function_call__inputs; // COMPILER__accountling_statement_argument
+    ANVIL__counted_list function_call__outputs; // COMPILER__accountling_statement_argument
 } COMPILER__accountling_statement;
+
+// append accountling statement
+void COMPILER__append__accountling_statement(ANVIL__list* list, COMPILER__accountling_statement data, COMPILER__error* error) {
+    // request space
+    ANVIL__list__request__space(list, sizeof(COMPILER__accountling_statement), &(*error).memory_error_occured);
+
+    // append data
+    (*(COMPILER__accountling_statement*)ANVIL__calculate__list_current_address(list)) = data;
+
+    // increase fill
+    (*list).filled_index += sizeof(COMPILER__accountling_statement);
+
+    return;
+}
 
 // scope header
 typedef struct COMPILER__accountling_scope_header {
@@ -315,7 +338,7 @@ typedef struct COMPILER__accountling_scope_header {
     COMPILER__variable_index condition;
 } COMPILER__accountling_scope_header;
 
-// append accountling structure
+// append accountling scope header
 void COMPILER__append__accountling_scope_header(ANVIL__list* list, COMPILER__accountling_scope_header data, COMPILER__error* error) {
     // request space
     ANVIL__list__request__space(list, sizeof(COMPILER__accountling_scope_header), &(*error).memory_error_occured);
@@ -329,10 +352,30 @@ void COMPILER__append__accountling_scope_header(ANVIL__list* list, COMPILER__acc
     return;
 }
 
+// variable
+typedef struct COMPILER__accountling_variable {
+    COMPILER__namespace name;
+    COMPILER__variable_type_index type;
+} COMPILER__accountling_variable;
+
+// append accountling variable
+void COMPILER__append__accountling_variable(ANVIL__list* list, COMPILER__accountling_variable data, COMPILER__error* error) {
+    // request space
+    ANVIL__list__request__space(list, sizeof(COMPILER__accountling_variable), &(*error).memory_error_occured);
+
+    // append data
+    (*(COMPILER__accountling_variable*)ANVIL__calculate__list_current_address(list)) = data;
+
+    // increase fill
+    (*list).filled_index += sizeof(COMPILER__accountling_variable);
+
+    return;
+}
+
 // one function
 typedef struct COMPILER__accountling_function {
-    ANVIL__counted_list variables; // COMPILER__variable_type_index
-    ANVIL__counted_list strings;
+    ANVIL__counted_list variables; // COMPILER__accountling_variable
+    ANVIL__counted_list strings; // ANVIL__buffer
     ANVIL__counted_list offsets; // COMPILER__namespace
     ANVIL__counted_list scope_headers; // COMPILER__accountling_scope_header
     ANVIL__counted_list statements; // COMPILER__accountling_statement
@@ -1213,6 +1256,246 @@ void COMPILER__account__functions__get_function_level_data(COMPILER__accountling
     return;
 }
 
+// convert string to converted string
+ANVIL__buffer COMPILER__translate__string_literal_to_translated_buffer(COMPILER__lexling string_literal, COMPILER__error* error) {
+    ANVIL__buffer output = ANVIL__create_null__buffer();
+    ANVIL__length character_count = 0;
+
+    // count characters
+    for (ANVIL__character_index i = 1; i < ANVIL__calculate__buffer_length(string_literal.value) - 1; i++) {
+        // check for escape sequence
+        if (((ANVIL__character*)string_literal.value.start)[i] == '%') {
+            // check for characters available
+            if (i + 3 <= ANVIL__calculate__buffer_length(string_literal.value) - 1) {
+                // validate characters
+                ANVIL__bt invalid_hexadecimal_character_1;
+                ANVIL__bt invalid_hexadecimal_character_2;
+                ANVIL__bt semi_colon_missing;
+                COMPILER__translate__character_to_hexadecimal(((ANVIL__character*)string_literal.value.start)[i + 1], &invalid_hexadecimal_character_1);
+                COMPILER__translate__character_to_hexadecimal(((ANVIL__character*)string_literal.value.start)[i + 2], &invalid_hexadecimal_character_2);
+                semi_colon_missing = (ANVIL__bt)(((ANVIL__character*)string_literal.value.start)[i + 3] != ';');
+
+                // determine validity
+                if (invalid_hexadecimal_character_1 != ANVIL__bt__false || invalid_hexadecimal_character_2 != ANVIL__bt__false || semi_colon_missing != ANVIL__bt__false) {
+                    // invalid escape sequence
+                    *error = COMPILER__open__error("Accounting Error: String literal has invalid escape sequences.", string_literal.location);
+                    
+                    return output;
+                }
+
+                // skip past characters
+                i += 3;
+            // error
+            } else {
+                *error = COMPILER__open__error("Accounting Error: String literal has invalid escape sequences.", string_literal.location);
+
+                return output;
+            }
+        }
+
+        // next character
+        character_count++;
+    }
+
+    // check for empty string
+    if (character_count == 0) {
+        // return empty string
+        return output;
+    }
+
+    // allocate string
+    output = ANVIL__open__buffer(character_count);
+    if (ANVIL__check__empty_buffer(output)) {
+        *error = COMPILER__open__internal_memory_error();
+
+        return output;
+    }
+
+    // translate string
+    character_count = 0;
+    for (ANVIL__character_index i = 1; i < ANVIL__calculate__buffer_length(string_literal.value) - 1; i++) {
+        // check for escape sequence
+        if (((ANVIL__character*)string_literal.value.start)[i] == '%') {
+            // validate characters
+            ANVIL__bt invalid_hexadecimal_character_1;
+            ANVIL__bt invalid_hexadecimal_character_2;
+            ANVIL__character a = COMPILER__translate__character_to_hexadecimal(((ANVIL__character*)string_literal.value.start)[i + 1], &invalid_hexadecimal_character_1);
+            ANVIL__character b = COMPILER__translate__character_to_hexadecimal(((ANVIL__character*)string_literal.value.start)[i + 2], &invalid_hexadecimal_character_2);
+
+            // write character
+            ((ANVIL__character*)output.start)[character_count] = b + (a << 4);
+            
+            // skip past characters
+            i += 3;
+        } else {
+            // write character
+            ((ANVIL__character*)output.start)[character_count] = ((ANVIL__character*)string_literal.value.start)[i];
+        }
+
+        // next character
+        character_count++;
+    }
+
+    return output;
+}
+
+// get a variable by index
+COMPILER__accountling_variable COMPILER__account__functions__get_variable_by_index(ANVIL__counted_list variables, COMPILER__variable_index index) {
+    return ((COMPILER__accountling_variable*)variables.list.buffer.start)[index];
+}
+
+// get a variable index by name
+COMPILER__variable_index COMPILER__account__functions__get_variable_index_by_name(ANVIL__counted_list variables, COMPILER__namespace name) {
+    COMPILER__variable_index index = 0;
+
+    // search for variable
+    while (index < variables.count) {
+        // get variable
+        COMPILER__accountling_variable variable = COMPILER__account__functions__get_variable_by_index(variables, index);
+
+        // check name
+        if (COMPILER__check__identical_namespaces(variable.name, name)) {
+            // match!
+            return index;
+        }
+
+        // next name
+        index++;
+    }
+
+    // not a match
+    return index;
+}
+
+// mark variable
+COMPILER__variable_index COMPILER__account__functions__mark_variable(COMPILER__accountling_function* accountling_function, COMPILER__parsling_argument name, COMPILER__variable_type_index expected_type, COMPILER__error* error) {
+    // check for variable declaration
+    COMPILER__variable_index index = COMPILER__account__functions__get_variable_index_by_name((*accountling_function).variables, name.name);
+    
+    // already declared
+    if (index < (*accountling_function).variables.count) {
+        // check type
+        if (COMPILER__account__functions__get_variable_by_index((*accountling_function).variables, index).type != expected_type) {
+            // error
+            *error = COMPILER__open__error("Accounting Error: A variable is declared again with a different variable type.", COMPILER__get__namespace_lexling_location(name.name));
+
+            // return invalid index
+            return (*accountling_function).variables.count;
+        }
+
+        // nothing to do, variable is correct type and already made, so just return
+    // not yet declared, declare now
+    } else {
+        // setup new variable
+        COMPILER__accountling_variable variable;
+        variable.name = name.name;
+        variable.type = expected_type;
+
+        // append variable
+        COMPILER__append__accountling_variable(&(*accountling_function).variables.list, variable, error);
+    }
+
+    return index;
+}
+
+// check for set
+ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__set(COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
+    // setup valid name
+    COMPILER__namespace valid_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".set", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        return ANVIL__bt__false;
+    }
+
+    // check for name & argument counts
+    if (COMPILER__check__identical_namespaces(parsling_statement.name.name, valid_name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 1) {
+        // check for literal type
+        // check for string literal
+        if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__string_literal) {
+            // check output variable type
+            // get index
+            COMPILER__variable_index variable_ID = COMPILER__account__functions__mark_variable(accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_buffer, error);
+            if (COMPILER__check__error_occured(error)) {
+                return ANVIL__bt__false;
+            }
+
+            // add string to library
+            COMPILER__append__buffer_with_error(&(*accountling_function).strings.list, COMPILER__translate__string_literal_to_translated_buffer(COMPILER__get__lexling_by_index(COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).name.lexlings, 0), error), error);
+            (*accountling_function).strings.count++;
+            if (COMPILER__check__error_occured(error)) {
+                return ANVIL__bt__false;
+            }
+
+            // setup output statement
+            (*accountling_statement).set_string__variable_index = variable_ID;
+            (*accountling_statement).set_string__string_value_index = (*accountling_function).strings.count - 1;
+            (*accountling_statement).statement_type = COMPILER__ast__predefined__set__string;
+
+            // variable declared / reused
+            return ANVIL__bt__true;
+        // check for integer literal
+        } else if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__name) {
+            // temporaries
+            ANVIL__cell_integer_value integer_value = 0;
+            ANVIL__buffer integer_string = COMPILER__get__lexling_by_index(COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).name.lexlings, 0).value;
+
+            // get index
+            COMPILER__variable_index variable_ID = COMPILER__account__functions__mark_variable(accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, error);
+            if (COMPILER__check__error_occured(error)) {
+                return ANVIL__bt__false;
+            }
+
+            // attempt translation
+            if (COMPILER__translate__string_to_boolean(integer_string, &integer_value) || COMPILER__translate__string_to_binary(integer_string, &integer_value)) {
+                // create statement
+                (*accountling_statement).statement_type = COMPILER__ast__predefined__set__cell;
+                (*accountling_statement).set_cell__raw_value = integer_value;
+                (*accountling_statement).set_cell__variable_index = variable_ID;
+
+                // valid variable declaration
+                return ANVIL__bt__true;
+            }
+        }
+    }
+
+    // not a match
+    return ANVIL__bt__false;
+}
+
+// get all statements & variables
+void COMPILER__account__functions__function_sequential_information__one_scope(COMPILER__accountling_function* accountling_function, ANVIL__counted_list* accountling_scope, COMPILER__parsling_scope scope, COMPILER__error* error) {
+    // translate all statements
+    // setup current statement
+    ANVIL__current current_statement = ANVIL__calculate__current_from_list_filled_index(&scope.statements.list);
+
+    // for each statement
+    while (ANVIL__check__current_within_range(current_statement)) {
+        // get parsling statement
+        COMPILER__parsling_statement parsling_statement = *(COMPILER__parsling_statement*)current_statement.start;
+
+        // setup accountling statement
+        COMPILER__accountling_statement accountling_statement;
+
+        // determine statement type
+        if (parsling_statement.type == COMPILER__stt__function_call) {
+            // find definition
+            // find sets
+            if (COMPILER__account__functions__check_and_get_statement_translation__set(accountling_function, parsling_statement, &accountling_statement, error)) {
+                // append statement
+                COMPILER__append__accountling_statement(&(*accountling_scope).list, accountling_statement, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return;
+                }
+                (*accountling_scope).count++;
+            }
+        }
+
+        // next statement
+        current_statement.start += sizeof(COMPILER__parsling_statement);
+    }
+
+    return;
+}
+
 // account all functions
 COMPILER__accountling_functions COMPILER__account__functions__user_defined_function_bodies(COMPILER__accountling_functions functions, ANVIL__list parsling_programs, COMPILER__error* error) {
     // open function body list
@@ -1256,7 +1539,29 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
                     return functions;
                 }
 
-                // get 
+                // allocate variables list
+                accountling_function.variables = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_variable) * 64, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return functions;
+                }
+
+                // open strings
+                accountling_function.strings = COMPILER__open__counted_list_with_error(sizeof(ANVIL__buffer) * 16, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return functions;
+                }
+
+                // open statements
+                accountling_function.statements = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_statement) * 32, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return functions;
+                }
+
+                // get variables
+                COMPILER__account__functions__function_sequential_information__one_scope(&accountling_function, &accountling_function.statements, parsling_function.scope, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return functions;
+                }
 
                 // append function
                 COMPILER__append__accountling_function(&functions.bodies.list, accountling_function, error);
@@ -1455,6 +1760,32 @@ void COMPILER__print__accountling_function_header(COMPILER__accountling_function
     return;
 }
 
+// print an accountling scope
+void COMPILER__print__accountling_scope(ANVIL__counted_list statements, ANVIL__tab_count tab_depth) {
+    // print each statement
+    for (COMPILER__statement_index statement_index = 0; statement_index < statements.count; statement_index++) {
+        // get statement
+        COMPILER__accountling_statement statement = ((COMPILER__accountling_statement*)statements.list.buffer.start)[statement_index];
+
+        // print statement start
+        ANVIL__print__tabs(tab_depth + 1);
+
+        // print statement data based on type
+        if (statement.statement_type == COMPILER__ast__predefined__set__cell) {
+            printf("COMPILER__ast__predefined__set__cell(raw_value: %lu, variable_index: %lu)", statement.set_cell__raw_value, statement.set_cell__variable_index);
+        } else if (statement.statement_type == COMPILER__ast__predefined__set__string) {
+            printf("COMPILER__ast__predefined__set__string(string_index: %lu, variable_index: %lu)", statement.set_string__string_value_index, statement.set_string__variable_index);
+        } else {
+            printf("[ Internal Issue: Debug info not implemented for statement type %lu ]", (ANVIL__u64)statement.statement_type);
+        }
+
+        // statement finisher
+        printf("\n");
+    }
+
+    return;
+}
+
 // print accountling functions
 void COMPILER__print__accountling_functions(COMPILER__accountling_functions functions, ANVIL__tab_count tab_depth) {
     // print section header
@@ -1539,6 +1870,35 @@ void COMPILER__print__accountling_functions(COMPILER__accountling_functions func
                     ANVIL__print__tabs(tab_depth + 3);
                     COMPILER__print__namespace(offset);
                     printf("\n");
+                }
+            }
+
+            // print statements
+            if (function.statements.count > 0) {
+                // print statements header
+                ANVIL__print__tabs(tab_depth + 2);
+                printf("Statements:\n");
+                
+                // print statements
+                COMPILER__print__accountling_scope(function.statements, tab_depth + 2);
+            }
+
+            // print strings
+            if (function.strings.count > 0) {
+                // print strings header
+                ANVIL__print__tabs(tab_depth + 2);
+                printf("Strings:\n");
+                
+                // print each string
+                for (COMPILER__string_index string_index = 0; string_index < function.strings.count; string_index++) {
+                    // get string
+                    ANVIL__buffer string = ((ANVIL__buffer*)function.strings.list.buffer.start)[string_index];
+
+                    // print string data
+                    ANVIL__print__tabs(tab_depth + 3);
+                    printf("[ %lu ] \"", string_index);
+                    ANVIL__print__buffer(string);
+                    printf("\"\n");
                 }
             }
         }

@@ -99,6 +99,12 @@ COMPILER__parsling_argument COMPILER__create__parsling_argument(COMPILER__pat ca
     return output;
 }
 
+// get a parsling argument from a counted list by index
+COMPILER__parsling_argument COMPILER__get__parsling_argument_by_index(ANVIL__counted_list arguments, COMPILER__argument_index index) {
+    // return find
+    return ((COMPILER__parsling_argument*)arguments.list.buffer.start)[index];
+}
+
 // setup null argument
 COMPILER__parsling_argument COMPILER__create_null__parsling_argument() {
     return COMPILER__create__parsling_argument(COMPILER__pat__invalid, COMPILER__create_null__namespace(), COMPILER__create_null__namespace());
@@ -951,7 +957,7 @@ COMPILER__parsling_program COMPILER__parse__program(COMPILER__lexlings lexlings,
     ANVIL__current current;
 
     // setup current
-    current = ANVIL__calculate__current_from_list_filled_index(&lexlings.data);
+    current = ANVIL__calculate__current_from_list_filled_index(&lexlings.data.list);
 
     // open the function list
     output.functions = COMPILER__open__counted_list_with_error(sizeof(COMPILER__parsling_function) * 64, error);

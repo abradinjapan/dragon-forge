@@ -28,6 +28,7 @@ typedef COMPILER__index COMPILER__stack_index;
 typedef COMPILER__index COMPILER__offset_index;
 typedef COMPILER__index COMPILER__scope_index;
 typedef COMPILER__index COMPILER__string_index;
+typedef COMPILER__index COMPILER__statement_index;
 
 // definitions
 #define COMPILER__define__variable_is_internal_type -1
@@ -42,7 +43,7 @@ typedef enum COMPILER__abt {
     COMPILER__abt__define_function_call,
 } COMPILER__abt;
 
-// accountling function header type
+// accountling function header type (a category, NOT the individual built in instructions)
 typedef enum COMPILER__afht {
     COMPILER__afht__user_defined,
     COMPILER__afht__sets,
@@ -108,14 +109,20 @@ typedef enum COMPILER__stt {
 
 // accountling statement type
 typedef enum COMPILER__ast {
-    // invalid
-    COMPILER__ast__invalid,
+    // built in calls
+    COMPILER__ast__predefined__set__cell,
+    COMPILER__ast__predefined__set__string,
 
-    // types
-    COMPILER__ast__function_call,
+    // user defined call
+    COMPILER__ast__user_defined_function_call,
+
+    // offset data
     COMPILER__ast__offset,
     COMPILER__ast__scope,
     
+    // invalid
+    COMPILER__ast__invalid,
+
     // COUNT
     COMPILER__ast__COUNT,
 } COMPILER__ast;
@@ -235,7 +242,7 @@ typedef enum COMPILER__pfct {
     // calls
     COMPILER__pfct__set__cell_value = 0,
     COMPILER__pfct__set__string,
-    COMPILER__pfct__print__buffer_as_string,
+    COMPILER__pfct__print__integer_unsigned,
 
     // user defined
     COMPILER__pfct__USER_DEFINED,
@@ -513,8 +520,6 @@ ANVIL__bt COMPILER__translate__string_to_binary(ANVIL__buffer string, ANVIL__cel
     // check for prefix
     if (ANVIL__calculate__buffer_starts_with_buffer(string, prefix) == ANVIL__bt__false) {
         // not a binary literal
-        *value = ANVIL__define__null_address;
-
         return ANVIL__bt__false;
     }
 
@@ -526,8 +531,6 @@ ANVIL__bt COMPILER__translate__string_to_binary(ANVIL__buffer string, ANVIL__cel
         // check character
         if ((ANVIL__check__character_range_at_current(current, '0', '1') || ANVIL__check__character_range_at_current(current, '_', '_')) == ANVIL__bt__false) {
             // not a binary literal
-            *value = ANVIL__define__null_address;
-
             return ANVIL__bt__false;
         }
 
@@ -543,8 +546,6 @@ ANVIL__bt COMPILER__translate__string_to_binary(ANVIL__buffer string, ANVIL__cel
     // check for sane character limit
     if (character_count > character_count_limit) {
         // binary literal to large, conversion failed
-        *value = ANVIL__define__null_address;
-
         return ANVIL__bt__false;
     }
 
@@ -580,8 +581,6 @@ ANVIL__bt COMPILER__translate__string_to_integer(ANVIL__buffer string, ANVIL__ce
     // check for prefix
     if (ANVIL__calculate__buffer_starts_with_buffer(string, prefix) == ANVIL__bt__false) {
         // not an integer literal
-        *value = ANVIL__define__null_address;
-
         return ANVIL__bt__false;
     }
 
@@ -596,8 +595,6 @@ ANVIL__bt COMPILER__translate__string_to_integer(ANVIL__buffer string, ANVIL__ce
             // check for valid character
             if (((((ANVIL__character*)suffix.start)[i - 1] >= '0' && ((ANVIL__character*)suffix.start)[i - 1] <= '9') || ((ANVIL__character*)suffix.start)[i - 1] == '_') == ANVIL__bt__false) {
                 // invalid character
-                *value = ANVIL__define__null_address;
-
                 return ANVIL__bt__false;
             }
 
@@ -621,8 +618,6 @@ ANVIL__bt COMPILER__translate__string_to_integer(ANVIL__buffer string, ANVIL__ce
             // check for valid character
             if (((((ANVIL__character*)suffix.start)[i - 1] >= '0' && ((ANVIL__character*)suffix.start)[i - 1] <= '9') || ((ANVIL__character*)suffix.start)[i - 1] == '_') == ANVIL__bt__false) {
                 // invalid character
-                *value = ANVIL__define__null_address;
-
                 return ANVIL__bt__false;
             }
 
@@ -671,8 +666,6 @@ ANVIL__bt COMPILER__translate__string_to_hexedecimal(ANVIL__buffer string, ANVIL
     // check for prefix
     if (ANVIL__calculate__buffer_starts_with_buffer(string, prefix) == ANVIL__bt__false) {
         // not a hexadecimal literal
-        *value = ANVIL__define__null_address;
-
         return ANVIL__bt__false;
     }
 
@@ -682,10 +675,7 @@ ANVIL__bt COMPILER__translate__string_to_hexedecimal(ANVIL__buffer string, ANVIL
     // create current
     current = suffix;
 
-    // setup value
-    *value = ANVIL__define__null_address;
-
-    // translate number
+    // validate number
     while (ANVIL__check__current_within_range(current)) {
         // check separator
         if (*(ANVIL__character*)current.start == '_') {
@@ -699,10 +689,28 @@ ANVIL__bt COMPILER__translate__string_to_hexedecimal(ANVIL__buffer string, ANVIL
         hex_digit = COMPILER__translate__character_to_hexadecimal(*(ANVIL__character*)current.start, &invalid_character);
         if (invalid_character == ANVIL__bt__true) {
             // invalid digit, invalid hex string
-            *value = ANVIL__define__null_address;
-
             return ANVIL__bt__false;
         }
+
+        // next character
+        current.start += sizeof(ANVIL__character);
+    }
+
+    // create current
+    current = suffix;
+
+    // translate number
+    while (ANVIL__check__current_within_range(current)) {
+        // check separator
+        if (*(ANVIL__character*)current.start == '_') {
+            // skip
+            current.start += sizeof(ANVIL__character);
+
+            continue;
+        }
+
+        // check digit
+        hex_digit = COMPILER__translate__character_to_hexadecimal(*(ANVIL__character*)current.start, &invalid_character);
 
         // append digit
         *value = (*value) << 4;

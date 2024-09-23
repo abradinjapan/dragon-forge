@@ -727,7 +727,7 @@ void ANVIL__print__tabs(ANVIL__tab_count tab_count) {
     // print tabs
     while (tab_count > 0) {
         // print tab
-        printf("\t");
+        printf("|   ");
 
         // next tab
         tab_count--;
