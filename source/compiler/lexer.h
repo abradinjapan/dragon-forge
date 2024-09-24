@@ -386,7 +386,8 @@ void COMPILER__debug__print_lexlings(COMPILER__lexlings lexlings) {
         current.start += sizeof(COMPILER__lexling);
 
         // print lexling type
-        printf("\t%lu [ %lu, %lu ] [ file_index: %lu, line_number: %lu, character_index: %lu ] : ", (ANVIL__u64)temp.type, (ANVIL__u64)temp.value.start, (ANVIL__u64)temp.value.end, temp.location.file_index, (ANVIL__u64)temp.location.line_number, (ANVIL__u64)temp.location.character_index);
+        ANVIL__print__tabs(1);
+        printf("%lu [ %lu, %lu ] [ file_index: %lu, line_number: %lu, character_index: %lu ] : ", (ANVIL__u64)temp.type, (ANVIL__u64)temp.value.start, (ANVIL__u64)temp.value.end, temp.location.file_index, (ANVIL__u64)temp.location.line_number, (ANVIL__u64)temp.location.character_index);
         fflush(stdout);
 
         // print lexling string

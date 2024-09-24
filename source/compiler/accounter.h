@@ -199,7 +199,7 @@ COMPILER__accountling_function_header_location COMPILER__create__accountling_fun
 
 // all function headers
 typedef struct COMPILER__accountling_function_headers {
-    ANVIL__counted_list category[COMPILER__afht__COUNT]; // all headers categories, COMPILER__accountling_function_header
+    ANVIL__counted_list category[COMPILER__afht__COUNT]; // all headers categories, COMPILER__accountling_function_header, COMPILER__afht
 } COMPILER__accountling_function_headers;
 
 // open function headers
@@ -284,12 +284,6 @@ typedef struct COMPILER__accountling_statement_argument {
     // variable member
     COMPILER__variable_index variable__variable_index;
     COMPILER__variable_member_index variable__member_index;
-
-    // cell value data
-    // ANVIL__cell cell_value; // now declared directly in statements
-
-    // string literal
-    // COMPILER__string_index string_index; // declared directly in statements
 } COMPILER__accountling_statement_argument;
 
 // one function scope
@@ -379,7 +373,7 @@ void COMPILER__append__accountling_scope_header(ANVIL__list* list, COMPILER__acc
 
 // variable
 typedef struct COMPILER__accountling_variable {
-    COMPILER__namespace name;
+    COMPILER__lexling name;
     COMPILER__variable_type_index type;
 } COMPILER__accountling_variable;
 
@@ -1423,7 +1417,7 @@ COMPILER__accountling_variable COMPILER__account__functions__get_variable_by_ind
 }
 
 // get a variable index by name
-COMPILER__variable_index COMPILER__account__functions__get_variable_index_by_name(ANVIL__counted_list variables, COMPILER__namespace name) {
+COMPILER__variable_index COMPILER__account__functions__get_variable_index_by_name(ANVIL__counted_list variables, COMPILER__lexling name) {
     COMPILER__variable_index index = 0;
 
     // search for variable
@@ -1432,7 +1426,7 @@ COMPILER__variable_index COMPILER__account__functions__get_variable_index_by_nam
         COMPILER__accountling_variable variable = COMPILER__account__functions__get_variable_by_index(variables, index);
 
         // check name
-        if (COMPILER__check__identical_namespaces(variable.name, name)) {
+        if (ANVIL__calculate__buffer_contents_equal(variable.name.value, name.value)) {
             // match!
             return index;
         }
@@ -1448,7 +1442,7 @@ COMPILER__variable_index COMPILER__account__functions__get_variable_index_by_nam
 // mark variable
 COMPILER__variable_index COMPILER__account__functions__mark_variable(COMPILER__accountling_function* accountling_function, COMPILER__parsling_argument name, COMPILER__variable_type_index expected_type, COMPILER__error* error) {
     // check for variable declaration
-    COMPILER__variable_index index = COMPILER__account__functions__get_variable_index_by_name((*accountling_function).variables, name.name);
+    COMPILER__variable_index index = COMPILER__account__functions__get_variable_index_by_name((*accountling_function).variables, COMPILER__get__lexling_by_index(name.name.lexlings, COMPILER__define__variable_name_index_from_name_list));
     
     // already declared
     if (index < (*accountling_function).variables.count) {
@@ -1466,11 +1460,12 @@ COMPILER__variable_index COMPILER__account__functions__mark_variable(COMPILER__a
     } else {
         // setup new variable
         COMPILER__accountling_variable variable;
-        variable.name = name.name;
+        variable.name = COMPILER__get__lexling_by_index(name.name.lexlings, COMPILER__define__variable_name_index_from_name_list);
         variable.type = expected_type;
 
         // append variable
         COMPILER__append__accountling_variable(&(*accountling_function).variables.list, variable, error);
+        (*accountling_function).variables.count++;
     }
 
     return index;
@@ -2000,6 +1995,25 @@ void COMPILER__print__accountling_functions(COMPILER__accountling_functions func
                     ANVIL__print__tabs(tab_depth + 3);
                     COMPILER__print__namespace(offset);
                     printf("\n");
+                }
+            }
+
+            // print variables
+            if (function.variables.count > 0) {
+                // print header
+                ANVIL__print__tabs(tab_depth + 2);
+                printf("Variables:\n");
+
+                // print each variable
+                for (COMPILER__variable_index index = 0; index < function.variables.count; index++) {
+                    // get variable
+                    COMPILER__accountling_variable variable = ((COMPILER__accountling_variable*)function.variables.list.buffer.start)[index];
+
+                    // print variable
+                    ANVIL__print__tabs(tab_depth + 3);
+                    printf("[ index: %lu, type: %lu, name: '", index, variable.type);
+                    ANVIL__print__buffer(variable.name.value);
+                    printf("' ]\n");
                 }
             }
 
