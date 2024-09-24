@@ -2146,7 +2146,7 @@ void COMPILER__print__accountling_functions(COMPILER__accountling_functions func
                         ANVIL__print__tabs(tab_depth + 3);
                         printf("[ index: %lu, type: %lu, name: '", index, variable.type);
                         COMPILER__print__namespace(variable.name);
-                        printf("'\n");
+                        printf("' ]\n");
                     }
                 }
 
