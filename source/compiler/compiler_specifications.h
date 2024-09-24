@@ -87,7 +87,7 @@ char* COMPILER__global__general_argument_type_names[] = {
 
 // all predefined cell names
 char* COMPILER__global__predefined_cell_names[] = {
-    COMPILER__define__master_namespace ".error_code",
+    COMPILER__define__master_namespace ".error",
 };
 
 // statement type type
@@ -271,6 +271,23 @@ COMPILER__blueprintling COMPILER__global__predefined_function_calls[] = {
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
     COMPILER__abt__end_blueprint,
 };
+
+// cell ranges
+typedef struct COMPILER__cell_range {
+    ANVIL__cell_ID start;
+    ANVIL__cell_ID end;
+} COMPILER__cell_range;
+
+// create custom cell range
+COMPILER__cell_range COMPILER__create__cell_range(ANVIL__cell_ID start, ANVIL__cell_ID end) {
+    COMPILER__cell_range output;
+
+    // setup output
+    output.start = start;
+    output.end = end;
+
+    return output;
+}
 
 /* Blueprints */
 // advance blueprintling by one
