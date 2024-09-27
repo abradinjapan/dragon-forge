@@ -177,13 +177,13 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt print_debug, A
         COMPILER__print__accountling_program(compilation_unit.accountlings);
     }
 
-    /*// inform user of code generation
+    // inform user of code generation
     if (print_debug) {
         printf("Generating code...\n");
     }
 
     // generate program
-    COMPILER__forge__anvil_program(final_program, compilation_unit.accountlings, 65536, error);*/
+    COMPILER__generate__program(final_program, compilation_unit.accountlings, 65536, error);
 
     // quit label
     quit:

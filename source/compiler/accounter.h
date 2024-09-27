@@ -565,6 +565,7 @@ void COMPILER__close__accountling_functions(COMPILER__accountling_functions func
 typedef struct COMPILER__accountling_program {
     COMPILER__accountling_structures structures;
     COMPILER__accountling_functions functions;
+    COMPILER__function_index entry_point;
 } COMPILER__accountling_program;
 
 // close a program
@@ -2045,15 +2046,54 @@ COMPILER__accountling_functions COMPILER__account__functions(ANVIL__list parslin
     return output;
 }
 
+// search for main
+COMPILER__function_index COMPILER__find__entry_point(COMPILER__accountling_functions functions, COMPILER__error* error) {
+    // setup main name
+    COMPILER__namespace searching_for = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".main", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        return -1;
+    }
+
+    // search for main
+    for (COMPILER__function_index index = 0; index < functions.headers.category[COMPILER__afht__user_defined].count; index++) {
+        // get header
+        COMPILER__accountling_function_header header = ((COMPILER__accountling_function_header*)functions.headers.category[COMPILER__afht__user_defined].list.buffer.start)[index];
+
+        // check header
+        if (COMPILER__check__identical_namespaces(header.name, searching_for) == ANVIL__bt__true && header.input_types.count == 0 && header.output_types.count == 0) {
+            // match!
+            COMPILER__close__parsling_namespace(searching_for);
+            return index;
+        }
+    }
+
+    // not found
+    *error = COMPILER__open__error("Accounting Error: The entry point '" COMPILER__define__master_namespace ".main()()' could not be found.", COMPILER__create_null__character_location());
+    
+    // return
+    COMPILER__close__parsling_namespace(searching_for);
+
+    return -1;
+}
+
 // account all files into one accountling program
 COMPILER__accountling_program COMPILER__account__program(ANVIL__list parsling_programs, COMPILER__error* error) {
     COMPILER__accountling_program output;
 
     // get all structures
     output.structures = COMPILER__account__structures(parsling_programs, error);
+    if (COMPILER__check__error_occured(error)) {
+        return output;
+    }
 
     // get all functions & function headers
     output.functions = COMPILER__account__functions(parsling_programs, output.structures, error);
+    if (COMPILER__check__error_occured(error)) {
+        return output;
+    }
+
+    // search for main
+    output.entry_point = COMPILER__find__entry_point(output.functions, error);
 
     return output;
 }
