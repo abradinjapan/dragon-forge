@@ -37,6 +37,13 @@ typedef COMPILER__index COMPILER__statement_index;
 // master namespace
 #define COMPILER__define__master_namespace "dragon"
 
+// accountling statement variable type (used for distinguishing statement inputs and outputs)
+typedef enum COMPILER__asvt {
+    COMPILER__asvt__input,
+    COMPILER__asvt__output,
+    COMPILER__asvt__COUNT,
+} COMPILER__asvt;
+
 // accounting blueprintling types
 typedef enum COMPILER__abt {
     COMPILER__abt__end_blueprint,
@@ -287,6 +294,11 @@ COMPILER__cell_range COMPILER__create__cell_range(ANVIL__cell_ID start, ANVIL__c
     output.end = end;
 
     return output;
+}
+
+// create null cell range
+COMPILER__cell_range COMPILER__create_null__cell_range() {
+    return COMPILER__create__cell_range(0, 0);
 }
 
 /* Blueprints */

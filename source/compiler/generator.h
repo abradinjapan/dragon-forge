@@ -8,28 +8,6 @@
 // blank
 
 /* Generation */
-// one cell range
-typedef struct COMPILER__generation_cell_range {
-    ANVIL__cell_ID start;
-    ANVIL__cell_ID end;
-} COMPILER__generation_cell_range;
-
-// create custom cell range
-COMPILER__generation_cell_range COMPILER__create__generation_cell_range(ANVIL__cell_ID start, ANVIL__cell_ID end) {
-    COMPILER__generation_cell_range output;
-
-    // setup output
-    output.start = start;
-    output.end = end;
-
-    return output;
-}
-
-// create null cell range
-COMPILER__generation_cell_range COMPILER__create_null__generation_cell_range() {
-    return COMPILER__create__generation_cell_range(ANVIL__unused_cell_ID, ANVIL__unused_cell_ID);
-}
-
 // one function
 typedef struct COMPILER__generation_function {
     // offsets
@@ -41,10 +19,10 @@ typedef struct COMPILER__generation_function {
     ANVIL__counted_list data_offsets;
 
     // cell ranges
-    COMPILER__generation_cell_range cells__inputs; // inputs
-    COMPILER__generation_cell_range cells__outputs; // outputs
-    COMPILER__generation_cell_range cells__body; // all cells in the workspace of a function
-    COMPILER__generation_cell_range cells__workspace; // the input, output & body cells
+    COMPILER__cell_range cells__inputs; // inputs
+    COMPILER__cell_range cells__outputs; // outputs
+    COMPILER__cell_range cells__body; // all cells in the workspace of a function
+    COMPILER__cell_range cells__workspace; // the input, output & body cells
 
     // data
     ANVIL__counted_list data__user_defined_strings; // copied from accounting, DO NOT FREE!
