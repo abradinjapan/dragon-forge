@@ -15,8 +15,8 @@ typedef struct COMPILER__generation_function {
     ANVIL__offset offset__function_start;
     ANVIL__offset offset__function_return;
     ANVIL__offset offset__function_data;
-    ANVIL__counted_list statement_offsets;
-    ANVIL__counted_list scope_offsets;
+    ANVIL__counted_list statement_offsets; // ANVIL__offset
+    ANVIL__counted_list scope_offsets; // ANVIL__offset
     ANVIL__counted_list data_offsets; // ANVIL__offset
 
     // cell ranges
@@ -34,7 +34,7 @@ typedef struct COMPILER__generation_workspace {
     ANVIL__workspace workspace;
 
     // functions
-    ANVIL__counted_list user_defined_functions;
+    ANVIL__counted_list user_defined_functions; // COMPILER__generation_function
     //ANVIL__counted_list packer_functions; // TODO
     STANDARD__offsets standard_offsets;
 } COMPILER__generation_workspace;
@@ -80,6 +80,7 @@ COMPILER__generation_workspace COMPILER__open__generation_workspace(ANVIL__buffe
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
+    output.user_defined_functions.count = accountlings.functions.bodies.count;
     for (COMPILER__function_index index = 0; index < accountlings.functions.headers.category[COMPILER__afht__user_defined].count; index++) {
         // open one function
         ((COMPILER__generation_function*)output.user_defined_functions.list.buffer.start)[index] = COMPILER__open__generation_function(((COMPILER__accountling_function*)accountlings.functions.bodies.list.buffer.start)[index], error);

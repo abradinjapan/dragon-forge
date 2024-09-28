@@ -1317,10 +1317,10 @@ COMPILER__accountling_function_headers COMPILER__account__functions__user_define
 
                 // append header
                 COMPILER__append__accountling_function_header(&headers.category[COMPILER__afht__user_defined].list, header, error);
-                headers.category[COMPILER__afht__user_defined].count++;
                 if (COMPILER__check__error_occured((error))) {
                     return headers;
                 }
+                headers.category[COMPILER__afht__user_defined].count++;
             }
 
             // next function
@@ -2495,7 +2495,7 @@ void COMPILER__print__accountling_functions(COMPILER__accountling_structures str
 
                     // print header
                     ANVIL__print__tabs(tab_depth + 2);
-                    printf("Variables [ cells_used: %lu/%lu (%lu->%lu) ]:\n", function.next_available_workspace_cell - (ANVIL__u64)ANVIL__srt__start__workspace, (ANVIL__u64)ANVIL__srt__workspace__COUNT, (ANVIL__u64)ANVIL__srt__start__workspace, (ANVIL__u64)ANVIL__srt__start__function_io - 1);
+                    printf("Variables [ cells_used: %lu/%lu (%lu->%lu) ]:\n", function.next_available_workspace_cell - (ANVIL__u64)ANVIL__srt__start__workspace, (ANVIL__u64)ANVIL__srt__workspace__COUNT, (ANVIL__u64)ANVIL__srt__start__workspace, (ANVIL__u64)function.next_available_workspace_cell - 1);
 
                     // print each master & member variables
                     for (COMPILER__variable_index index = 0; index < function.variables.lists[COMPILER__avat__master].count; index++) {
