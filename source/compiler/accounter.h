@@ -1705,15 +1705,11 @@ COMPILER__accountling_variable_argument COMPILER__account__functions__mark_varia
 
     // if variable is a master namespace only
     if (name.name.lexlings.count < 2) {
-        // DEBUG
-        printf("Is a master variable.\n");
-
         // check for variable declaration
         // is already declared
         if (COMPILER__check__accountling_variable_argument_is_valid((*accountling_function).variables, argument) == ANVIL__bt__true) {
             // if types match, found correct function
             if (COMPILER__account__functions__get_variable_by_variable_argument((*accountling_function).variables, argument).type == expected_type) {
-                printf("Variable already exists.\n");
                 goto success;
             // if types don't match, maybe another function matches
             } else {
@@ -1726,9 +1722,6 @@ COMPILER__accountling_variable_argument COMPILER__account__functions__mark_varia
         } else {
             // if argument is in an output slot
             if (argument_location == COMPILER__asvt__output) {
-                // DEBUG
-                printf("Declaring variable.\n");
-
                 // declare variable and all its sub-variables
                 COMPILER__account__functions__mark_variable__generate_master_variable_and_sub_variables(structures, accountling_function, name, expected_type, error);
 
@@ -1792,9 +1785,6 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__set
         goto failure;
     }
 
-    // DEBUG
-    printf("IO: [ %lu, %lu ]", parsling_statement.inputs.count, parsling_statement.outputs.count);
-
     // check for name & argument counts
     if (COMPILER__check__identical_namespaces(parsling_statement.name.name, valid_name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 1) {
         // check for literal type
@@ -1804,7 +1794,6 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__set
             // get index
             COMPILER__accountling_variable_argument variable_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_buffer, COMPILER__asvt__output, error);
             if (COMPILER__check__error_occured(error) || variable_argument.type >= COMPILER__avat__COUNT) {
-                printf("Failure 1.\n");
                 goto failure;
             }
 
@@ -1833,7 +1822,6 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__set
                 // get index
                 COMPILER__accountling_variable_argument variable_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, error);
                 if (COMPILER__check__error_occured(error) || variable_argument.type >= COMPILER__avat__COUNT) {
-                    printf("Failure 2.\n");
                     goto failure;
                 }
                 
@@ -1986,6 +1974,11 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
             if (COMPILER__check__error_occured(error)) {
                 return;
             }
+
+            // error, no statement was matched
+            *error = COMPILER__open__error("Accounting Error: A function call was not valid.", COMPILER__get__namespace_lexling_location(parsling_statement.name.name));
+
+            return;
         } else if (parsling_statement.type == COMPILER__stt__offset) {
             // setup offset data
             accountling_statement.offset_index = COMPILER__account__functions__get_offset_index(accountling_function, parsling_statement.name.name);
