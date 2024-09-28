@@ -1,31 +1,6 @@
 #ifndef DRAGON__compiler__accounter
 #define DRAGON__compiler__accounter
 
-/* Notes */
-// Compiler backends are just statement translators. Not program understanders.
-// Accounting is about setting up your data for how you wanna generate code.
-/*
-    Steps of accounting everything:
-        1) Validate and get structure table.
-        2) Get all function call headers.
-        3) Validate and account all functions.
-    Steps of accounting a function:
-        1) Collect all function relevant data (variables, strings, scopes, normal offsets, scoped offsets, statement map, etc).
-        2) Translate syntactic data into an indexable blueprint of the function.
-*/
-/*
-    How to access and work with structures:
-        Since structures contain sub-structures and the like, it is important to lay out how they work.
-        A structure will be itself and all sub-structure-variables layed out in order.
-        Structure paths like "data.stuff.oof" are simply names given to the sub-structure-variables.
-        So all structures are effectively just multiple variables with each grouping also getting its own name.
-    Updated notes:
-        Structures are not expanded in accounting, they are expanded in generation.
-            Since you only need to know if variable types align, and not what variables go where, you don't need to mark every single sub-structure down.
-    Possible new name:
-        Descripting.
-*/
-
 /* Include */
 #include "compiler_specifications.h"
 #include "parser.h"
@@ -271,6 +246,27 @@ void COMPILER__close__accountling_function_headers(COMPILER__accountling_functio
     return;
 }
 
+// one accountling variable argument
+typedef struct COMPILER__accountling_variable_argument {
+    COMPILER__avat type;
+    COMPILER__variable_index index;
+} COMPILER__accountling_variable_argument;
+
+// create variable argument
+COMPILER__accountling_variable_argument COMPILER__create__accountling_variable_argument(COMPILER__avat type, COMPILER__variable_index index) {
+    COMPILER__accountling_variable_argument output;
+
+    output.type = type;
+    output.index = index;
+
+    return output;
+}
+
+// create null variable argument
+COMPILER__accountling_variable_argument COMPILER__create_null__accountling_variable_argument() {
+    return COMPILER__create__accountling_variable_argument(COMPILER__avat__COUNT, -1);
+}
+
 // one statement argument
 typedef struct COMPILER__accountling_statement_argument {
     // type
@@ -283,8 +279,7 @@ typedef struct COMPILER__accountling_statement_argument {
     COMPILER__scope_index scope_index;
 
     // variable member
-    COMPILER__variable_index variable__variable_index;
-    COMPILER__variable_member_index variable__member_index;
+    COMPILER__accountling_variable_argument variable;
 } COMPILER__accountling_statement_argument;
 
 // one function scope
@@ -301,14 +296,14 @@ typedef struct COMPILER__accountling_statement {
 
     // set cell data
     ANVIL__cell_integer_value set_cell__raw_value;
-    COMPILER__variable_index set_cell__variable_index;
+    COMPILER__accountling_variable_argument set_cell__variable_argument;
 
     // set string data
     COMPILER__string_index set_string__string_value_index;
-    COMPILER__variable_index set_string__variable_index;
+    COMPILER__accountling_variable_argument set_string__variable_argument;
 
     // printing data
-    COMPILER__variable_index print__variable_index;
+    COMPILER__accountling_variable_argument print__variable_argument;
 
     // offset data
     COMPILER__offset_index offset_index; // if the statement is a regular offset, use this
@@ -330,9 +325,10 @@ COMPILER__accountling_statement COMPILER__create_null__accountling_statement() {
     output.statement_type = COMPILER__ast__invalid;
     output.associated_header= COMPILER__create__accountling_function_header_location(0, 0);
     output.set_cell__raw_value = -1;
-    output.set_cell__variable_index = -1;
+    output.set_cell__variable_argument = COMPILER__create_null__accountling_variable_argument();
     output.set_string__string_value_index = -1;
-    output.set_string__variable_index = -1;
+    output.set_string__variable_argument = COMPILER__create_null__accountling_variable_argument();
+    output.print__variable_argument = COMPILER__create_null__accountling_variable_argument();
     output.offset_index = -1;
     output.scope_index = -1;
     output.scope_data.statements = ANVIL__create_null__counted_list();
@@ -434,8 +430,7 @@ void COMPILER__append__accountling_variable(ANVIL__list* list, COMPILER__account
 
 // all variable data for one function
 typedef struct COMPILER__accountling_variables {
-    ANVIL__counted_list masters; // COMPILER__accountling_variable
-    ANVIL__counted_list members; // COMPILER__accountling_variable
+    ANVIL__counted_list lists[COMPILER__avat__COUNT]; // COMPILER__accountling_variable
 } COMPILER__accountling_variables;
 
 // open variables
@@ -443,11 +438,11 @@ COMPILER__accountling_variables COMPILER__open__variables(COMPILER__error* error
     COMPILER__accountling_variables output;
 
     // open function level variable lists
-    output.masters = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_variable) * 256, error);
+    output.lists[COMPILER__avat__master] = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_variable) * 256, error);
     if (COMPILER__check__error_occured(error)) {
         return output;
     }
-    output.members = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_variable) * 1024, error);
+    output.lists[COMPILER__avat__member] = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_variable) * 1024, error);
     if (COMPILER__check__error_occured(error)) {
         return output;
     }
@@ -458,8 +453,9 @@ COMPILER__accountling_variables COMPILER__open__variables(COMPILER__error* error
 // close variables
 void COMPILER__close__accountling_variables(COMPILER__accountling_variables variables) {
     // close data
-    ANVIL__close__counted_list(variables.masters);
-    ANVIL__close__counted_list(variables.members);
+    for (COMPILER__avat index = COMPILER__avat__master; index < COMPILER__avat__COUNT; index++) {
+        ANVIL__close__counted_list(variables.lists[index]);
+    }
 
     return;
 }
@@ -1536,31 +1532,78 @@ ANVIL__buffer COMPILER__translate__string_literal_to_translated_buffer(COMPILER_
 }
 
 // get a variable by index
-COMPILER__accountling_variable COMPILER__account__functions__get_variable_by_variable_index(ANVIL__counted_list variables, COMPILER__variable_index index) {
-    return ((COMPILER__accountling_variable*)variables.list.buffer.start)[index];
+COMPILER__accountling_variable COMPILER__account__functions__get_variable_by_variable_argument(COMPILER__accountling_variables variables, COMPILER__accountling_variable_argument index) {
+    return ((COMPILER__accountling_variable*)variables.lists[index.type].list.buffer.start)[index.index];
+}
+
+// check variable argument is valid
+ANVIL__bt COMPILER__check__accountling_variable_argument_is_valid(COMPILER__accountling_variables variables, COMPILER__accountling_variable_argument index) {
+    if (index.type == COMPILER__avat__master) {
+        return (index.index < variables.lists[COMPILER__avat__master].count);
+    } else if (index.type == COMPILER__avat__member) {
+        return (index.index < variables.lists[COMPILER__avat__member].count);
+    } else {
+        return ANVIL__bt__false;
+    }
+}
+
+// search a variable for a match
+ANVIL__bt COMPILER__account__functions__get_variable_by_variable_argument__recursively(COMPILER__accountling_variables variables, COMPILER__accountling_variable_argument variable, COMPILER__namespace name, COMPILER__lexling_index sub_name_index, COMPILER__accountling_variable_argument* output) {
+    // search each member
+    for (COMPILER__variable_member_index member_index = COMPILER__account__functions__get_variable_by_variable_argument(variables, variable).members.start; member_index <= COMPILER__account__functions__get_variable_by_variable_argument(variables, variable).members.end; member_index++) {
+        // get member variable
+        COMPILER__accountling_variable member = COMPILER__account__functions__get_variable_by_variable_argument(variables, COMPILER__create__accountling_variable_argument(COMPILER__avat__member, member_index));
+        
+        // if names match
+        if (ANVIL__calculate__buffer_contents_equal(member.name.value, COMPILER__get__lexling_by_index(name.lexlings, sub_name_index).value) == ANVIL__bt__true) {
+            // name matches
+            // if there are more names
+            if (sub_name_index < name.lexlings.count) {
+                // search for new name
+                ANVIL__bt found = COMPILER__account__functions__get_variable_by_variable_argument__recursively(variables, COMPILER__create__accountling_variable_argument(COMPILER__avat__member, member_index), name, sub_name_index + 1, output);
+
+                // if found is true
+                if (found) {
+                    return ANVIL__bt__true;
+                }
+            // full namespace matches!
+            } else {
+                // setup output
+                *output = COMPILER__create__accountling_variable_argument(COMPILER__avat__member, member_index);
+
+                return ANVIL__bt__true;
+            }
+        }
+    }
+
+    // no matches
+    return ANVIL__bt__false;
 }
 
 // get a variable index by name
-COMPILER__variable_index COMPILER__account__functions__get_variable_index_by_name(ANVIL__counted_list variables, COMPILER__lexling name) {
-    COMPILER__variable_index index = 0;
+COMPILER__accountling_variable_argument COMPILER__account__functions__get_variable_argument_by_name(COMPILER__accountling_variables variables, COMPILER__namespace name) {
+    COMPILER__accountling_variable_argument output = COMPILER__create_null__accountling_variable_argument();
 
     // search for variable
-    while (index < variables.count) {
-        // get variable
-        COMPILER__accountling_variable variable = COMPILER__account__functions__get_variable_by_variable_index(variables, index);
-
-        // check name
-        if (ANVIL__calculate__buffer_contents_equal(variable.name.value, name.value)) {
-            // match!
-            return index;
+    for (COMPILER__variable_index index = 0; index < variables.lists[COMPILER__avat__master].count; index++) {
+        // check master names
+        if (ANVIL__calculate__buffer_contents_equal(((COMPILER__accountling_variable*)variables.lists[COMPILER__avat__master].list.buffer.start)[index].name.value, COMPILER__get__lexling_by_index(name.lexlings, 0).value)) {
+            // check for master variable only
+            if (name.lexlings.count < 2) {
+                // match!
+                return COMPILER__create__accountling_variable_argument(COMPILER__avat__master, index);
+            // variable name is longer than just master
+            } else {
+                // get variable
+                if (COMPILER__account__functions__get_variable_by_variable_argument__recursively(variables, COMPILER__create__accountling_variable_argument(COMPILER__avat__master, index), name, 1, &output) == ANVIL__bt__true) {
+                    return output;
+                }
+            }
         }
-
-        // next name
-        index++;
     }
 
     // not a match
-    return index;
+    return output;
 }
 
 // calculate cell range
@@ -1585,30 +1628,27 @@ COMPILER__accountling_variable_range COMPILER__account__functions__mark_variable
     COMPILER__accountling_structure structure = ((COMPILER__accountling_structure*)structures.data_table.list.buffer.start)[type];
 
     // setup output
-    output = COMPILER__create__accountling_variable_range((*accountling_function).variables.members.count, (*accountling_function).variables.members.count + structure.members.count - 1);
-
-    // advance members
-    // TODO
+    output = COMPILER__create__accountling_variable_range((*accountling_function).variables.lists[COMPILER__avat__member].count, (*accountling_function).variables.lists[COMPILER__avat__member].count + structure.members.count - 1);
 
     // reserve members
     for (COMPILER__variable_member_index index = output.start; index <= output.end; index++) {
         // reserve member
-        COMPILER__append__accountling_variable(&(*accountling_function).variables.members.list, COMPILER__create_null__accountling_variable(), error);
+        COMPILER__append__accountling_variable(&(*accountling_function).variables.lists[COMPILER__avat__member].list, COMPILER__create_null__accountling_variable(), error);
         if (COMPILER__check__error_occured(error)) {
             return output;
         }
-        (*accountling_function).variables.members.count++;
+        (*accountling_function).variables.lists[COMPILER__avat__member].count++;
     }
 
     // for each member
-    for (COMPILER__structure_member_index index = 0; index < structure.members.count; index++) {
+    for (COMPILER__structure_member_index index = output.start; index <= output.end; index++) {
         // get member
-        COMPILER__accountling_structure_member member = ((COMPILER__accountling_structure_member*)structure.members.list.buffer.start)[index];
+        COMPILER__accountling_structure_member member = ((COMPILER__accountling_structure_member*)structure.members.list.buffer.start)[index - output.start];
 
-        // recurse through types or declare new variable
+        // declare new variable
         if (member.structure_ID >= structures.data_table.count) {
             // declare variable
-            ((COMPILER__accountling_variable*)(*accountling_function).variables.members.list.buffer.start)[output.start + index] = COMPILER__create__accountling_variable(COMPILER__get__lexling_by_index(member.name.lexlings, 0), member.structure_ID, COMPILER__create__accountling_variable_range(output.start + index, output.start + index), COMPILER__create__cell_range(*current_sub_cell, *current_sub_cell));
+            ((COMPILER__accountling_variable*)(*accountling_function).variables.lists[COMPILER__avat__member].list.buffer.start)[index] = COMPILER__create__accountling_variable(COMPILER__get__lexling_by_index(member.name.lexlings, 0), member.structure_ID, COMPILER__create__accountling_variable_range(-1, -1), COMPILER__create__cell_range(*current_sub_cell, *current_sub_cell));
 
             // next cell
             (*current_sub_cell)++;
@@ -1619,13 +1659,13 @@ COMPILER__accountling_variable_range COMPILER__account__functions__mark_variable
             cell_range.start = *current_sub_cell;
 
             // recurse
-            COMPILER__accountling_variable_range variable_range = COMPILER__account__functions__mark_variable__generate_structure_variable_members(structures, accountling_function, current_sub_cell, member.structure_ID, error);
+            COMPILER__accountling_variable_range member_range = COMPILER__account__functions__mark_variable__generate_structure_variable_members(structures, accountling_function, current_sub_cell, member.structure_ID, error);
 
             // set range end
             cell_range.end = (*current_sub_cell) - 1;
 
             // append variable
-            ((COMPILER__accountling_variable*)(*accountling_function).variables.members.list.buffer.start)[output.start + index] = COMPILER__create__accountling_variable(COMPILER__get__lexling_by_index(member.name.lexlings, 0), member.structure_ID, variable_range, cell_range);
+            ((COMPILER__accountling_variable*)(*accountling_function).variables.lists[COMPILER__avat__member].list.buffer.start)[index] = COMPILER__create__accountling_variable(COMPILER__get__lexling_by_index(member.name.lexlings, 0), member.structure_ID, member_range, cell_range);
         }
     }
 
@@ -1633,47 +1673,66 @@ COMPILER__accountling_variable_range COMPILER__account__functions__mark_variable
 }
 
 // generate variables from source variable
-void COMPILER__account__functions__mark_variable__generate_master_variable_and_sub_variables(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_argument name, COMPILER__variable_type_index type, COMPILER__error* error) {
+void COMPILER__account__functions__mark_variable__generate_master_variable_and_sub_variables(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_argument name, COMPILER__variable_type_index master_type, COMPILER__error* error) {
     // reserve cells
-    COMPILER__cell_range cell_range = COMPILER__calculate_and_advance__cells(structures, accountling_function, type);
+    COMPILER__cell_range cell_range = COMPILER__calculate_and_advance__cells(structures, accountling_function, master_type);
 
     // declare sub-variables
     ANVIL__cell_ID current_sub_cell = cell_range.start;
-    COMPILER__accountling_variable_range member_range = COMPILER__account__functions__mark_variable__generate_structure_variable_members(structures, accountling_function, &current_sub_cell, type, error);
+
+    // ensure type is valid
+    COMPILER__accountling_variable_range member_range;
+    if (master_type < structures.data_table.count) {
+        member_range = COMPILER__account__functions__mark_variable__generate_structure_variable_members(structures, accountling_function, &current_sub_cell, master_type, error);
+    } else {
+        member_range = COMPILER__create__accountling_variable_range(-1, -1);
+    }
 
     // declare master variable
-    COMPILER__append__accountling_variable(&(*accountling_function).variables.masters.list, COMPILER__create__accountling_variable(COMPILER__get__lexling_by_index(name.name.lexlings, 0), type, member_range, cell_range), error);
+    COMPILER__append__accountling_variable(&(*accountling_function).variables.lists[COMPILER__avat__master].list, COMPILER__create__accountling_variable(COMPILER__get__lexling_by_index(name.name.lexlings, 0), master_type, member_range, cell_range), error);
     if (COMPILER__check__error_occured(error)) {
         return;
     }
-    (*accountling_function).variables.masters.count++;
+    (*accountling_function).variables.lists[COMPILER__avat__master].count++;
 
     return;
 }
 
 // mark variable
-COMPILER__variable_index COMPILER__account__functions__mark_variable(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_argument name, COMPILER__variable_type_index expected_type, COMPILER__asvt argument_location, COMPILER__error* error) {
+COMPILER__accountling_variable_argument COMPILER__account__functions__mark_variable(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_argument name, COMPILER__variable_type_index expected_type, COMPILER__asvt argument_location, COMPILER__error* error) {
     // search for master variable
-    COMPILER__variable_index index = COMPILER__account__functions__get_variable_index_by_name((*accountling_function).variables.masters, COMPILER__get__lexling_by_index(name.name.lexlings, 0));
+    COMPILER__accountling_variable_argument argument = COMPILER__account__functions__get_variable_argument_by_name((*accountling_function).variables, name.name);
 
     // if variable is a master namespace only
     if (name.name.lexlings.count < 2) {
+        // DEBUG
+        printf("Is a master variable.\n");
+
         // check for variable declaration
         // is already declared
-        if (index < (*accountling_function).variables.masters.count) {
+        if (COMPILER__check__accountling_variable_argument_is_valid((*accountling_function).variables, argument) == ANVIL__bt__true) {
             // if types match, found correct function
-            if (COMPILER__account__functions__get_variable_by_variable_index((*accountling_function).variables.masters, index).type == expected_type) {
+            if (COMPILER__account__functions__get_variable_by_variable_argument((*accountling_function).variables, argument).type == expected_type) {
+                printf("Variable already exists.\n");
                 goto success;
-            // if types don't match, maybe another function matches.
+            // if types don't match, maybe another function matches
             } else {
+                // DEBUG
+                printf("\tAlready declared but types dont match.\n");
+                
                 goto failure;
             }
         // is not declared
         } else {
             // if argument is in an output slot
             if (argument_location == COMPILER__asvt__output) {
+                // DEBUG
+                printf("Declaring variable.\n");
+
                 // declare variable and all its sub-variables
                 COMPILER__account__functions__mark_variable__generate_master_variable_and_sub_variables(structures, accountling_function, name, expected_type, error);
+
+                // check error
                 if (COMPILER__check__error_occured(error)) {
                     goto failure;
                 }
@@ -1692,15 +1751,18 @@ COMPILER__variable_index COMPILER__account__functions__mark_variable(COMPILER__a
                 goto failure;
             }
 
-            // return index
+            // update argument
+            argument = COMPILER__account__functions__get_variable_argument_by_name((*accountling_function).variables, name.name);
+
+            // return argument
             goto success;
         }
     // otherwise, the variable MUST already be declared to access its members
     } else {
         // if already declared
-        if (index < (*accountling_function).variables.masters.count) {
+        if (COMPILER__check__accountling_variable_argument_is_valid((*accountling_function).variables, argument)) {
             // if types match, found correct function
-            if (COMPILER__account__functions__get_variable_by_variable_index((*accountling_function).variables.masters, index).type == expected_type) {
+            if (COMPILER__account__functions__get_variable_by_variable_argument((*accountling_function).variables, argument).type == expected_type) {
                 goto success;
             // if types don't match, maybe another function matches
             } else {
@@ -1716,10 +1778,10 @@ COMPILER__variable_index COMPILER__account__functions__mark_variable(COMPILER__a
     }
 
     success:
-    return index;
+    return argument;
 
     failure:
-    return (*accountling_function).variables.masters.count;
+    return COMPILER__create_null__accountling_variable_argument();
 }
 
 // check for set
@@ -1730,15 +1792,19 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__set
         goto failure;
     }
 
+    // DEBUG
+    printf("IO: [ %lu, %lu ]", parsling_statement.inputs.count, parsling_statement.outputs.count);
+
     // check for name & argument counts
     if (COMPILER__check__identical_namespaces(parsling_statement.name.name, valid_name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 1) {
         // check for literal type
         // check for string literal
-        if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__string_literal) {
+        if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__string_literal && COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0).category == COMPILER__pat__name) {
             // check output variable type
             // get index
-            COMPILER__variable_index variable_ID = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_buffer, COMPILER__asvt__output, error);
-            if (COMPILER__check__error_occured(error) || variable_ID >= (*accountling_function).variables.masters.count) {
+            COMPILER__accountling_variable_argument variable_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_buffer, COMPILER__asvt__output, error);
+            if (COMPILER__check__error_occured(error) || variable_argument.type >= COMPILER__avat__COUNT) {
+                printf("Failure 1.\n");
                 goto failure;
             }
 
@@ -1750,30 +1816,31 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__set
             }
 
             // setup output statement
-            (*accountling_statement).set_string__variable_index = variable_ID;
-            (*accountling_statement).set_string__string_value_index = (*accountling_function).strings.count - 1;
             (*accountling_statement).statement_type = COMPILER__ast__predefined__set__string;
+            (*accountling_statement).set_string__variable_argument = variable_argument;
+            (*accountling_statement).set_string__string_value_index = (*accountling_function).strings.count - 1;
 
             // variable declared / reused
             goto match;
         // check for integer literal
-        } else if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__name) {
+        } else if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__name && COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0).category == COMPILER__pat__name) {
             // temporaries
             ANVIL__cell_integer_value integer_value = 0;
             ANVIL__buffer integer_string = COMPILER__get__lexling_by_index(COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).name.lexlings, 0).value;
 
-            // get index
-            COMPILER__variable_index variable_ID = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, error);
-            if (COMPILER__check__error_occured(error) || variable_ID >= (*accountling_function).variables.masters.count) {
-                goto failure;
-            }
-
             // attempt translation
             if (COMPILER__translate__string_to_boolean(integer_string, &integer_value) || COMPILER__translate__string_to_binary(integer_string, &integer_value) || COMPILER__translate__string_to_integer(integer_string, &integer_value) || COMPILER__translate__string_to_hexedecimal(integer_string, &integer_value)) {
+                // get index
+                COMPILER__accountling_variable_argument variable_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, error);
+                if (COMPILER__check__error_occured(error) || variable_argument.type >= COMPILER__avat__COUNT) {
+                    printf("Failure 2.\n");
+                    goto failure;
+                }
+                
                 // create statement
                 (*accountling_statement).statement_type = COMPILER__ast__predefined__set__cell;
                 (*accountling_statement).set_cell__raw_value = integer_value;
-                (*accountling_statement).set_cell__variable_index = variable_ID;
+                (*accountling_statement).set_cell__variable_argument = variable_argument;
 
                 // valid variable declaration
                 goto match;
@@ -1781,6 +1848,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__set
 
             // no valid literal was found, error
             *error = COMPILER__open__error("Accounting Error: A set function call did not have a valid literal.", COMPILER__get__namespace_lexling_location(COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).name));
+
             goto failure;
         }
 
@@ -1801,8 +1869,12 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__set
 
 // check for printing
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__print(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
-    // setup valid name
+    // setup valid names
     COMPILER__namespace print_buffer_as_string_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".print.buffer_as_string", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+    COMPILER__namespace print_debug_cell_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".print.debug_cell", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -1813,14 +1885,35 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
         if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__name) {
             // check input variable type
             // get index
-            COMPILER__variable_index variable_ID = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_buffer, COMPILER__asvt__input, error);
-            if (COMPILER__check__error_occured(error) || variable_ID >= (*accountling_function).variables.masters.count) {
+            COMPILER__accountling_variable_argument variable_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_buffer, COMPILER__asvt__input, error);
+            if (COMPILER__check__error_occured(error) || variable_argument.type >= COMPILER__avat__COUNT) {
                 goto failure;
             }
 
             // setup output statement
             (*accountling_statement).statement_type = COMPILER__ast__predefined__print__buffer_as_string;
-            (*accountling_statement).print__variable_index = variable_ID;
+            (*accountling_statement).print__variable_argument = variable_argument;
+
+            // match
+            goto match;
+        // not the right argument type
+        } else {
+            goto failure;
+        }
+    // if print is a debug print
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, print_debug_cell_name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 0) {
+        // if inputs are correct parsing type
+        if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__name) {
+            // check input variable type
+            // get index
+            COMPILER__accountling_variable_argument variable_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, error);
+            if (COMPILER__check__error_occured(error) || variable_argument.type >= COMPILER__avat__COUNT) {
+                goto failure;
+            }
+
+            // setup output statement
+            (*accountling_statement).statement_type = COMPILER__ast__predefined__print__debug_cell;
+            (*accountling_statement).print__variable_argument = variable_argument;
 
             // match
             goto match;
@@ -1833,11 +1926,13 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
     // not a match
     failure:
     COMPILER__close__parsling_namespace(print_buffer_as_string_name);
+    COMPILER__close__parsling_namespace(print_debug_cell_name);
     return ANVIL__bt__false;
 
     // match!
     match:
     COMPILER__close__parsling_namespace(print_buffer_as_string_name);
+    COMPILER__close__parsling_namespace(print_debug_cell_name);
     return ANVIL__bt__true;
 }
 
@@ -1859,10 +1954,7 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
         COMPILER__parsling_statement parsling_statement = *(COMPILER__parsling_statement*)current_statement.start;
 
         // setup accountling statement
-        COMPILER__accountling_statement accountling_statement;
-
-        // null init type
-        accountling_statement = COMPILER__create_null__accountling_statement();
+        COMPILER__accountling_statement accountling_statement = COMPILER__create_null__accountling_statement();
 
         // determine statement type
         if (parsling_statement.type == COMPILER__stt__function_call) {
@@ -2235,22 +2327,35 @@ void COMPILER__print__accountling_function_header(COMPILER__accountling_function
     return;
 }
 
+// print an accountling variable argument
+void COMPILER__print__accountling_variable_argument(COMPILER__accountling_variable_argument argument) {
+    // print data
+    printf("[ list_ID: %lu, index: %lu ]", (ANVIL__u64)argument.type, (ANVIL__u64)argument.index);
+
+    return;
+}
+
 // print an accounting variable
-void COMPILER__print__accountling_variable(COMPILER__accountling_function function, COMPILER__accountling_structures structures, COMPILER__accountling_variable variable, COMPILER__variable_index master_variable_index, ANVIL__tab_count tab_depth) {
+void COMPILER__print__accountling_variable(COMPILER__accountling_function function, COMPILER__accountling_structures structures, COMPILER__accountling_variable variable, COMPILER__variable_member_index* member_index, ANVIL__bt is_in_member_list, COMPILER__variable_index master_variable_index, ANVIL__tab_count tab_depth) {
     // print variable data
     ANVIL__print__tabs(tab_depth);
+    if (is_in_member_list == ANVIL__bt__true) {
+        printf("[ member_index: %lu ] ", (*member_index));
+        (*member_index)++;
+    }
     printf("[ master_index: %lu, type: %lu, name: '", master_variable_index, variable.type);
     ANVIL__print__buffer(variable.name.value);
-    printf("' cells: [ %lu->%lu ]]\n", (ANVIL__u64)variable.cells.start, (ANVIL__u64)variable.cells.end);
+    printf("', cells: [ %lu->%lu ], member_range: [ %lu->%lu ]]\n", (ANVIL__u64)variable.cells.start, (ANVIL__u64)variable.cells.end, variable.members.start, variable.members.end);
 
     // print all members
     for (COMPILER__variable_member_index index = variable.members.start; index <= variable.members.end; index++) {
         // get member variable
-        COMPILER__accountling_variable member_variable = ((COMPILER__accountling_variable*)function.variables.members.list.buffer.start)[index];
+        COMPILER__accountling_variable member_variable = ((COMPILER__accountling_variable*)function.variables.lists[COMPILER__avat__member].list.buffer.start)[index];
+
         // only print if variable is not end node
         if (member_variable.type < structures.data_table.count) {
             // print member
-            COMPILER__print__accountling_variable(function, structures, member_variable, master_variable_index, tab_depth + 1);
+            COMPILER__print__accountling_variable(function, structures, member_variable, member_index, master_variable_index, ANVIL__bt__true, tab_depth + 1);
         }
     }
 
@@ -2269,24 +2374,23 @@ void COMPILER__print__accountling_scope(COMPILER__accountling_scope statements, 
 
         // print statement data based on type
         if (statement.statement_type == COMPILER__ast__predefined__set__cell) {
-            printf("COMPILER__ast__predefined__set__cell(raw_value: %lu, variable_index: %lu)", statement.set_cell__raw_value, statement.set_cell__variable_index);
-
-            // statement finisher
-            printf("\n");
+            printf("COMPILER__ast__predefined__set__cell(raw_value: %lu, variable_argument: ", statement.set_cell__raw_value);
+            COMPILER__print__accountling_variable_argument(statement.set_cell__variable_argument);
+            printf(");\n");
         } else if (statement.statement_type == COMPILER__ast__predefined__set__string) {
-            printf("COMPILER__ast__predefined__set__string(string_index: %lu, variable_index: %lu)", statement.set_string__string_value_index, statement.set_string__variable_index);
-
-            // statement finisher
-            printf("\n");
+            printf("COMPILER__ast__predefined__set__string(string_index: %lu, variable_argument: ", statement.set_string__string_value_index);
+            COMPILER__print__accountling_variable_argument(statement.set_string__variable_argument);
+            printf(");\n");
         } else if (statement.statement_type == COMPILER__ast__predefined__print__buffer_as_string) {
-            printf("COMPILER__ast__predefined__print__buffer_as_string(variable_index: %lu)", statement.print__variable_index);
-
-            // statement finisher
-            printf("\n");
+            printf("COMPILER__ast__predefined__print__buffer_as_string(variable_argument: ");
+            COMPILER__print__accountling_variable_argument(statement.print__variable_argument);
+            printf(");\n");
+        } else if (statement.statement_type == COMPILER__ast__predefined__print__debug_cell) {
+            printf("COMPILER__ast__predefined__print__debug_cell(variable_argument: ");
+            COMPILER__print__accountling_variable_argument(statement.print__variable_argument);
+            printf(");\n");
         } else if (statement.statement_type == COMPILER__ast__offset) {
             printf("COMPILER__ast__offset(offset_index: %lu)", statement.offset_index);
-
-            // statement finisher
             printf("\n");
         } else if (statement.statement_type == COMPILER__ast__scope) {
             printf("COMPILER__ast__scope(scope_index: %lu)", statement.scope_index);
@@ -2392,18 +2496,21 @@ void COMPILER__print__accountling_functions(COMPILER__accountling_structures str
                 }
 
                 // print variable declarations
-                if (function.variables.masters.count > 0) {
+                if (function.variables.lists[COMPILER__avat__master].count > 0) {
+                    // setup member index
+                    COMPILER__variable_member_index member_index = 0;
+
                     // print header
                     ANVIL__print__tabs(tab_depth + 2);
                     printf("Variables [ cells_used: %lu/%lu (%lu->%lu) ]:\n", function.next_available_workspace_cell - (ANVIL__u64)ANVIL__srt__start__workspace, (ANVIL__u64)ANVIL__srt__workspace__COUNT, (ANVIL__u64)ANVIL__srt__start__workspace, (ANVIL__u64)ANVIL__srt__start__function_io - 1);
 
                     // print each master & member variables
-                    for (COMPILER__variable_index index = 0; index < function.variables.masters.count; index++) {
+                    for (COMPILER__variable_index index = 0; index < function.variables.lists[COMPILER__avat__master].count; index++) {
                         // get variable
-                        COMPILER__accountling_variable master_variable = ((COMPILER__accountling_variable*)function.variables.masters.list.buffer.start)[index];
+                        COMPILER__accountling_variable master_variable = ((COMPILER__accountling_variable*)function.variables.lists[COMPILER__avat__master].list.buffer.start)[index];
 
                         // print master & member variables
-                        COMPILER__print__accountling_variable(function, structures, master_variable, index, tab_depth + 3);
+                        COMPILER__print__accountling_variable(function, structures, master_variable, &member_index, ANVIL__bt__false, index, tab_depth + 3);
                     }
                 }
 

@@ -67,7 +67,34 @@ void COMPILER__close__generation_workspace(COMPILER__generation_workspace worksp
 }
 
 // generate user defined function statement
-void COMPILER__generate__user_defined_function_statement(COMPILER__generation_workspace* workspace, COMPILER__accountling_statement statement, COMPILER__error* error) {
+void COMPILER__generate__user_defined_function_scope(COMPILER__generation_workspace* workspace, COMPILER__accountling_function accountling_function, COMPILER__function_index user_defined_function_index, COMPILER__accountling_scope scope, COMPILER__error* error) {
+    // setup helper variables
+    COMPILER__generation_function* function = &((COMPILER__generation_function*)(*workspace).user_defined_functions.list.buffer.start)[user_defined_function_index];
+    ANVIL__workspace* anvil = &(*workspace).workspace;
+
+    // for each statement
+    for (COMPILER__statement_index index = 0; index < scope.statements.count; index++) {
+        // get statement
+        COMPILER__accountling_statement statement = ((COMPILER__accountling_statement*)scope.statements.list.buffer.start)[index];
+
+        // build statement
+        // if statement is function call
+        switch (statement.statement_type) {
+        case COMPILER__ast__predefined__set__cell:
+            // generate statement
+            ANVIL__code__write_cell(anvil, (ANVIL__cell)statement.set_cell__raw_value, COMPILER__account__functions__get_variable_by_variable_argument(accountling_function.variables, statement.set_cell__variable_argument).cells.start);
+
+            break;
+        case COMPILER__ast__predefined__print__debug_cell:
+            // generate statement
+            ANVIL__code__debug__print_cell_as_decimal(anvil, COMPILER__account__functions__get_variable_by_variable_argument(accountling_function.variables, statement.print__variable_argument).cells.start);
+
+            break;
+        default:
+            break;
+        }
+    }
+
     return;
 }
 
@@ -83,9 +110,11 @@ void COMPILER__generate__user_defined_function(COMPILER__generation_workspace* w
     // setup function prologue
     ANVIL__code__preserve_workspace(anvil, ANVIL__sft__always_run, (*function).cells__workspace.start, (*function).cells__workspace.end);
 
-    // setup random statement for debugging
-    ANVIL__code__write_cell(anvil, (ANVIL__cell)12345, ANVIL__srt__start__workspace);
-    ANVIL__code__debug__print_cell_as_decimal(anvil, ANVIL__srt__start__workspace);
+    // generate function body code
+    COMPILER__generate__user_defined_function_scope(workspace, accountling_function, user_defined_function_index, accountling_function.scope, error);
+    if (COMPILER__check__error_occured(error)) {
+        return;
+    }
 
     // setup function return offset
     (*function).offset__function_return = ANVIL__get__offset(anvil);
@@ -122,6 +151,9 @@ void COMPILER__generate__program(ANVIL__buffer* final_program, COMPILER__account
         for (COMPILER__function_index index = 0; index < program.functions.headers.category[COMPILER__afht__user_defined].count; index++) {
             // build abstraction
             COMPILER__generate__user_defined_function(&workspace, ((COMPILER__accountling_function*)program.functions.bodies.list.buffer.start)[index], index, error);
+            if (COMPILER__check__error_occured(error)) {
+                return;
+            }
         }
 
         // build built in functions

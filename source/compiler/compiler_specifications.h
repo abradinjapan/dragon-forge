@@ -44,6 +44,13 @@ typedef enum COMPILER__asvt {
     COMPILER__asvt__COUNT,
 } COMPILER__asvt;
 
+// accountling variable argument type
+typedef enum COMPILER__avat {
+    COMPILER__avat__master,
+    COMPILER__avat__member,
+    COMPILER__avat__COUNT,
+} COMPILER__avat;
+
 // accounting blueprintling types
 typedef enum COMPILER__abt {
     COMPILER__abt__end_blueprint,
@@ -120,6 +127,7 @@ typedef enum COMPILER__ast {
     // built in calls
     COMPILER__ast__predefined__set__cell,
     COMPILER__ast__predefined__set__string,
+    COMPILER__ast__predefined__print__debug_cell,
     COMPILER__ast__predefined__print__buffer_as_string,
 
     // user defined call

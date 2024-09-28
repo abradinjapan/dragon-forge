@@ -177,6 +177,11 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt print_debug, A
         COMPILER__print__accountling_program(compilation_unit.accountlings);
     }
 
+    // check for errors
+    if (COMPILER__check__error_occured(error)) {
+        goto quit;
+    }
+
     // inform user of code generation
     if (print_debug) {
         printf("Generating code...\n");
