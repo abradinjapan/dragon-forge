@@ -109,6 +109,9 @@ void COMPILER__close__generation_workspace(COMPILER__generation_workspace worksp
     return;
 }
 
+// variable macro
+#define COMPILER__generate__use_variable(value) COMPILER__account__functions__get_variable_by_variable_argument(accountling_function.variables, statement.value)
+
 // generate user defined function statement
 void COMPILER__generate__user_defined_function_scope(COMPILER__generation_workspace* workspace, COMPILER__accountling_function accountling_function, COMPILER__function_index user_defined_function_index, COMPILER__accountling_scope scope, COMPILER__error* error) {
     // setup helper variables
@@ -117,6 +120,9 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
 
     // for each statement
     for (COMPILER__statement_index index = 0; index < scope.statements.count; index++) {
+        // define variables
+        ANVIL__cell_ID pack__output_to;
+
         // get statement
         COMPILER__accountling_statement statement = ((COMPILER__accountling_statement*)scope.statements.list.buffer.start)[index];
 
@@ -124,20 +130,40 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
         // if statement is function call
         switch (statement.statement_type) {
         case COMPILER__ast__predefined__set__cell:
-            ANVIL__code__write_cell(anvil, (ANVIL__cell)statement.set_cell__raw_value, COMPILER__account__functions__get_variable_by_variable_argument(accountling_function.variables, statement.set_cell__variable_argument).cells.start);
+            ANVIL__code__write_cell(anvil, (ANVIL__cell)statement.set_cell__raw_value, COMPILER__generate__use_variable(set_cell__variable_argument).cells.start);
 
             break;
         case COMPILER__ast__predefined__set__string:
             ANVIL__code__write_cell(anvil, (ANVIL__cell)((ANVIL__offset*)(*function).data_offsets.list.buffer.start)[statement.set_string__string_value_index], ANVIL__srt__temp__offset);
-            ANVIL__code__retrieve_embedded_buffer(anvil, ANVIL__sft__always_run, ANVIL__srt__temp__offset, COMPILER__account__functions__get_variable_by_variable_argument(accountling_function.variables, statement.set_string__variable_argument).cells.start, COMPILER__account__functions__get_variable_by_variable_argument(accountling_function.variables, statement.set_string__variable_argument).cells.end);
+            ANVIL__code__retrieve_embedded_buffer(anvil, ANVIL__sft__always_run, ANVIL__srt__temp__offset, COMPILER__generate__use_variable(set_string__variable_argument).cells.start, COMPILER__generate__use_variable(set_string__variable_argument).cells.end);
 
             break;
         case COMPILER__ast__predefined__print__debug_cell:
-            ANVIL__code__debug__print_cell_as_decimal(anvil, COMPILER__account__functions__get_variable_by_variable_argument(accountling_function.variables, statement.print__variable_argument).cells.start);
+            ANVIL__code__debug__print_cell_as_decimal(anvil, COMPILER__generate__use_variable(print__variable_argument).cells.start);
 
             break;
         case COMPILER__ast__predefined__print__buffer_as_string:
-            STANDARD__code__call__print_buffer_as_string(anvil, &(*workspace).standard_offsets, ANVIL__sft__always_run, COMPILER__account__functions__get_variable_by_variable_argument(accountling_function.variables, statement.print__variable_argument).cells.start, COMPILER__account__functions__get_variable_by_variable_argument(accountling_function.variables, statement.print__variable_argument).cells.end);
+            STANDARD__code__call__print_buffer_as_string(anvil, &(*workspace).standard_offsets, ANVIL__sft__always_run, COMPILER__generate__use_variable(print__variable_argument).cells.start, COMPILER__generate__use_variable(print__variable_argument).cells.end);
+
+            break;
+        case COMPILER__ast__predefined__pack__anything:
+            // setup variables
+            pack__output_to = COMPILER__generate__use_variable(pack__output).cells.start;
+
+            // pack variables
+            for (COMPILER__variable_index variable_index = 0; variable_index < statement.pack__inputs.count; variable_index++) {
+                // get one input variable
+                COMPILER__accountling_variable packer_input = COMPILER__account__functions__get_variable_by_variable_argument(accountling_function.variables, ((COMPILER__accountling_variable_argument*)statement.pack__inputs.list.buffer.start)[variable_index]);
+                
+                // pass variables for one structure
+                for (ANVIL__cell_index cell_index = packer_input.cells.start; cell_index <= packer_input.cells.end; cell_index++) {
+                    // pass one cell
+                    ANVIL__code__cell_to_cell(anvil, ANVIL__sft__always_run, cell_index, pack__output_to);
+
+                    // next output cell
+                    pack__output_to++;
+                }
+            }
 
             break;
         default:
