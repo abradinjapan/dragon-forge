@@ -163,17 +163,6 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt print_debug, A
 
     // account
     compilation_unit.accountlings = COMPILER__account__program(compilation_unit.parsling_buffers, error);
-    if (COMPILER__check__error_occured(error)) {
-        goto quit;
-    }
-
-    // mark as done
-    compilation_unit.stages_completed = COMPILER__pst__accounting;
-
-    // check for errors
-    if (COMPILER__check__error_occured(error)) {
-        goto quit;
-    }
 
     // print accountlings
     if (print_debug) {
@@ -184,6 +173,9 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt print_debug, A
     if (COMPILER__check__error_occured(error)) {
         goto quit;
     }
+
+    // mark as done
+    compilation_unit.stages_completed = COMPILER__pst__accounting;
 
     // inform user of code generation
     if (print_debug) {
