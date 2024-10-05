@@ -529,6 +529,20 @@ void COMPILER__append__structure_index(ANVIL__list* list, COMPILER__structure_in
     return;
 }
 
+// append function header index
+void COMPILER__append__function_header_index(ANVIL__list* list, COMPILER__function_header_index data, COMPILER__error* error) {
+    // request space
+    ANVIL__list__request__space(list, sizeof(COMPILER__function_header_index), &(*error).memory_error_occured);
+
+    // append data
+    (*(COMPILER__function_header_index*)ANVIL__calculate__list_current_address(list)) = data;
+
+    // increase fill
+    (*list).filled_index += sizeof(COMPILER__function_header_index);
+
+    return;
+}
+
 /* Counted List Functions With Errors */
 ANVIL__counted_list COMPILER__open__counted_list_with_error(ANVIL__list_increase increase, COMPILER__error* error) {
     return ANVIL__create__counted_list(COMPILER__open__list_with_error(increase, error), 0);

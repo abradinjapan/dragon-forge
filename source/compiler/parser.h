@@ -72,6 +72,11 @@ ANVIL__bt COMPILER__check__identical_namespaces(COMPILER__namespace a, COMPILER_
     return ANVIL__bt__true;
 }
 
+// check if namespace is null
+ANVIL__bt COMPILER__check__empty_namespace(COMPILER__namespace name) {
+    return name.lexlings.count == 0;
+}
+
 // get lexling location from namespace
 COMPILER__character_location COMPILER__get__namespace_lexling_location(COMPILER__namespace name) {
     return ((COMPILER__lexling*)name.lexlings.list.buffer.start)[0].location;
@@ -584,7 +589,6 @@ COMPILER__namespace COMPILER__parse__namespace(ANVIL__current* current, COMPILER
 // parse one argument
 COMPILER__parsling_argument COMPILER__parse__function_argument(ANVIL__current* current, ANVIL__bt is_function_header_argument, COMPILER__error* error) {
     COMPILER__parsling_argument output = COMPILER__create_null__parsling_argument();
-    //ANVIL__cell_integer_value value = 0;
 
     // check type
     // is variable / literal
@@ -605,22 +609,10 @@ COMPILER__parsling_argument COMPILER__parse__function_argument(ANVIL__current* c
             *error = COMPILER__open__error("Parsing Error: Missing type in function header argument.", COMPILER__read__lexling_from_current(*current).location);
 
             return output;
+        } else {
+            // setup blank type
+            output.type = COMPILER__create_null__namespace();
         }
-
-        /*// translate literal information for accounting to translate
-        // boolean
-        if (ANVIL__translate__string_to_boolean(ANVIL__read__lexling_from_current(*current).value, &value)) {
-            argument = ANVIL__create__parsling_argument(ANVIL__pat__literal__boolean, ANVIL__parse__namespace__one_name_only(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), value);
-        // binary
-        } else if (ANVIL__translate__string_to_binary(ANVIL__read__lexling_from_current(*current).value, &value)) {
-            argument = ANVIL__create__parsling_argument(ANVIL__pat__literal__binary, ANVIL__parse__namespace__one_name_only(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), value);
-        // integer
-        } else if (ANVIL__translate__string_to_integer(ANVIL__read__lexling_from_current(*current).value, &value)) {
-            argument = ANVIL__create__parsling_argument(ANVIL__pat__literal__integer, ANVIL__parse__namespace__one_name_only(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), value);
-        // hexadecimal
-        } else if (ANVIL__translate__string_to_hexedecimal(ANVIL__read__lexling_from_current(*current).value, &value)) {
-            argument = ANVIL__create__parsling_argument(ANVIL__pat__literal__hexadecimal, ANVIL__parse__namespace__one_name_only(current, error), ANVIL__bt__false, ANVIL__create_null__namespace(), value);
-        }*/
     // offset
     } else if (COMPILER__read__lexling_from_current(*current).type == COMPILER__lt__at) {
         // advance current past at
