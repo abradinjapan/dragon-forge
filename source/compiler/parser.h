@@ -593,8 +593,14 @@ COMPILER__parsling_argument COMPILER__parse__function_argument(ANVIL__current* c
     // check type
     // is variable / literal
     if (COMPILER__read__lexling_from_current(*current).type == COMPILER__lt__name) {
-        // parse namespace
-        output = COMPILER__create__parsling_argument(COMPILER__pat__name, COMPILER__parse__namespace(current, error), COMPILER__create_null__namespace());
+        // parse name
+        if (is_function_header_argument == ANVIL__bt__false) {
+            // parse namespace for call argument
+            output = COMPILER__create__parsling_argument(COMPILER__pat__name, COMPILER__parse__namespace(current, error), COMPILER__create_null__namespace());
+        } else {
+            // parse namespace for header
+            output = COMPILER__create__parsling_argument(COMPILER__pat__name, COMPILER__parse__namespace__one_name_only(current, error), COMPILER__create_null__namespace());
+        }
         
         // check for type
         // is type definition
