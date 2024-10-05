@@ -122,6 +122,7 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
     for (COMPILER__statement_index index = 0; index < scope.statements.count; index++) {
         // define variables
         ANVIL__cell_ID pack__output_to;
+        ANVIL__cell_ID user_defined_function_call__current_function_io_register;
 
         // get statement
         COMPILER__accountling_statement statement = ((COMPILER__accountling_statement*)scope.statements.list.buffer.start)[index];
@@ -166,6 +167,47 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             }
 
             break;
+        case COMPILER__ast__user_defined_function_call:
+            // setup counter
+            user_defined_function_call__current_function_io_register = ANVIL__srt__start__function_io;
+
+            // pass inputs
+            for (COMPILER__variable_index input_variables = 0; input_variables < statement.function_call__inputs.count; input_variables++) {
+                // get variable
+                COMPILER__accountling_variable variable = COMPILER__account__functions__get_variable_by_variable_argument(accountling_function.variables, ((COMPILER__accountling_variable_argument*)statement.function_call__inputs.list.buffer.start)[input_variables]);
+
+                // pass one variable
+                for (ANVIL__cell_index input_cell = variable.cells.start; input_cell <= variable.cells.end; input_cell++) {
+                    // code cell passing
+                    ANVIL__code__cell_to_cell(anvil, ANVIL__sft__always_run, input_cell, user_defined_function_call__current_function_io_register);
+
+                    // next cell
+                    user_defined_function_call__current_function_io_register++;
+                }
+            }
+
+            // call function
+            ANVIL__code__call__static(anvil, ANVIL__sft__always_run, ((COMPILER__generation_function*)(*workspace).user_defined_functions.list.buffer.start)[statement.function_call__calling_function_header_index].offset__function_start);
+
+            // setup counter
+            user_defined_function_call__current_function_io_register = ANVIL__srt__start__function_io;
+
+            // get outputs
+            for (COMPILER__variable_index output_variables = 0; output_variables < statement.function_call__outputs.count; output_variables++) {
+                // get variable
+                COMPILER__accountling_variable variable = COMPILER__account__functions__get_variable_by_variable_argument(accountling_function.variables, ((COMPILER__accountling_variable_argument*)statement.function_call__outputs.list.buffer.start)[output_variables]);
+
+                // pass one variable
+                for (ANVIL__cell_index output_cell = variable.cells.start; output_cell <= variable.cells.end; output_cell++) {
+                    // code cell passing
+                    ANVIL__code__cell_to_cell(anvil, ANVIL__sft__always_run, user_defined_function_call__current_function_io_register, output_cell);
+
+                    // next cell
+                    user_defined_function_call__current_function_io_register++;
+                }
+            }
+
+            break;
         default:
             break;
         }
@@ -179,12 +221,31 @@ void COMPILER__generate__user_defined_function(COMPILER__generation_workspace* w
     // setup helper variables
     COMPILER__generation_function* function = &((COMPILER__generation_function*)(*workspace).user_defined_functions.list.buffer.start)[user_defined_function_index];
     ANVIL__workspace* anvil = &(*workspace).workspace;
+    ANVIL__cell_ID current_function_io_register;
 
     // setup function start offset
     (*function).offset__function_start = ANVIL__get__offset(anvil);
 
     // setup function prologue
     ANVIL__code__preserve_workspace(anvil, ANVIL__sft__always_run, (*function).cells__workspace.start, (*function).cells__workspace.end);
+
+    // setup function io index
+    current_function_io_register = ANVIL__srt__start__function_io;
+
+    // get inputs
+    for (COMPILER__variable_index input_variables = 0; input_variables < accountling_function.function_inputs.count; input_variables++) {
+        // get variable
+        COMPILER__accountling_variable variable = COMPILER__account__functions__get_variable_by_variable_argument(accountling_function.variables, ((COMPILER__accountling_variable_argument*)accountling_function.function_inputs.list.buffer.start)[input_variables]);
+
+        // pass one variable
+        for (ANVIL__cell_index input_cell = variable.cells.start; input_cell <= variable.cells.end; input_cell++) {
+            // code cell passing
+            ANVIL__code__cell_to_cell(anvil, ANVIL__sft__always_run, current_function_io_register, input_cell);
+
+            // next cell
+            current_function_io_register++;
+        }
+    }
 
     // generate function body code
     COMPILER__generate__user_defined_function_scope(workspace, accountling_function, user_defined_function_index, accountling_function.scope, error);
@@ -194,6 +255,24 @@ void COMPILER__generate__user_defined_function(COMPILER__generation_workspace* w
 
     // setup function return offset
     (*function).offset__function_return = ANVIL__get__offset(anvil);
+
+    // setup function io index
+    current_function_io_register = ANVIL__srt__start__function_io;
+
+    // pass outputs
+    for (COMPILER__variable_index output_variables = 0; output_variables < accountling_function.function_outputs.count; output_variables++) {
+        // get variable
+        COMPILER__accountling_variable variable = COMPILER__account__functions__get_variable_by_variable_argument(accountling_function.variables, ((COMPILER__accountling_variable_argument*)accountling_function.function_outputs.list.buffer.start)[output_variables]);
+
+        // pass one variable
+        for (ANVIL__cell_index output_cell = variable.cells.start; output_cell <= variable.cells.end; output_cell++) {
+            // code cell passing
+            ANVIL__code__cell_to_cell(anvil, ANVIL__sft__always_run, output_cell, current_function_io_register);
+
+            // next cell
+            current_function_io_register++;
+        }
+    }
 
     // setup function epilogue
     ANVIL__code__restore_workspace(anvil, ANVIL__sft__always_run, (*function).cells__workspace.start, (*function).cells__workspace.end);

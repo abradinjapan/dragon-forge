@@ -281,21 +281,6 @@ void COMPILER__append__accountling_variable_argument(ANVIL__list* list, COMPILER
     return;
 }
 
-/*// one statement argument
-typedef struct COMPILER__accountling_statement_argument {
-    // type
-    COMPILER__aat type;
-
-    // offset
-    COMPILER__offset_index offset_index;
-
-    // scope index
-    COMPILER__scope_index scope_index;
-
-    // variable member
-    COMPILER__accountling_variable_argument variable;
-} COMPILER__accountling_statement_argument;*/
-
 // one function scope
 typedef struct COMPILER__accountling_scope {
     COMPILER__accountling_variable_argument condition;
@@ -331,6 +316,7 @@ typedef struct COMPILER__accountling_statement {
     COMPILER__accountling_variable_argument pack__output;
 
     // user defined function call inputs and outputs
+    COMPILER__function_header_index function_call__calling_function_header_index;
     ANVIL__counted_list function_call__inputs; // COMPILER__accountling_variable_argument
     ANVIL__counted_list function_call__outputs; // COMPILER__accountling_variable_argument
 } COMPILER__accountling_statement;
@@ -2136,6 +2122,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__use
     // only one match, success!
     // setup statement
     (*accountling_statement).statement_type = COMPILER__ast__user_defined_function_call;
+    (*accountling_statement).function_call__calling_function_header_index = match_index;
     (*accountling_statement).function_call__inputs = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_variable_argument) * parsling_statement.inputs.count, error);
     (*accountling_statement).function_call__outputs = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_variable_argument) * parsling_statement.outputs.count, error);
     for (COMPILER__argument_index io_index = 0; io_index < parsling_statement.inputs.count; io_index++) {
