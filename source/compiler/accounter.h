@@ -359,6 +359,7 @@ void COMPILER__append__accountling_statement(ANVIL__list* list, COMPILER__accoun
 // scope header
 typedef struct COMPILER__accountling_scope_header {
     COMPILER__namespace name;
+    COMPILER__accountling_variable_argument argument;
 } COMPILER__accountling_scope_header;
 
 // append accountling scope header
@@ -2155,10 +2156,10 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__use
 }
 
 // get all statements & variables
-void COMPILER__account__functions__function_sequential_information__one_scope(COMPILER__accountling_structures structures, COMPILER__accountling_function_headers function_headers, COMPILER__accountling_function* accountling_function, COMPILER__accountling_scope* accountling_scope, COMPILER__parsling_scope scope, COMPILER__error* error) {
+void COMPILER__account__functions__function_sequential_information__one_scope(COMPILER__accountling_structures structures, COMPILER__accountling_function_headers function_headers, COMPILER__accountling_function* accountling_function, COMPILER__accountling_scope* accountling_scope, COMPILER__parsling_scope parsling_scope, COMPILER__error* error) {
     // translate all statements
     // setup current statement
-    ANVIL__current current_statement = ANVIL__calculate__current_from_list_filled_index(&scope.statements.list);
+    ANVIL__current current_statement = ANVIL__calculate__current_from_list_filled_index(&parsling_scope.statements.list);
 
     // setup statements
     (*accountling_scope).statements = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_statement) * 32, error);
@@ -2357,6 +2358,24 @@ void COMPILER__account__functions__function_io_variables(COMPILER__accountling_s
     return;
 }
 
+// generate predefined variables
+void COMPILER__account__functions__predefined_variables(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__error* error) {
+    COMPILER__accountling_variable variable;
+
+    // create dragon.always_run
+    variable.cells = COMPILER__create__cell_range(ANVIL__srt__always_run, ANVIL__srt__always_run);
+    variable.members = COMPILER__create__accountling_variable_range(-1, -1);
+    variable.name = COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)(COMPILER__define__master_namespace ".always_run"), ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location());
+    variable.type = COMPILER__ptt__dragon_cell;
+    COMPILER__append__accountling_variable(&(*accountling_function).variables.lists[COMPILER__avat__master].list, variable, error);
+    if (COMPILER__check__error_occured(error)) {
+        return;
+    }
+    (*accountling_function).variables.lists[COMPILER__avat__master].count++;
+
+    return;
+}
+
 // account all functions
 COMPILER__accountling_functions COMPILER__account__functions__user_defined_function_bodies(COMPILER__accountling_functions functions, COMPILER__accountling_structures structures, ANVIL__list parsling_programs, COMPILER__error* error) {
     // open function body list
@@ -2417,6 +2436,12 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
 
                 // get function IO
                 COMPILER__account__functions__function_io_variables(structures, &accountling_function, parsling_function, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return functions;
+                }
+
+                // generate predefined variables
+                COMPILER__account__functions__predefined_variables(structures, &accountling_function, error);
                 if (COMPILER__check__error_occured(error)) {
                     return functions;
                 }
