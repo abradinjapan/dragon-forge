@@ -35,7 +35,6 @@ typedef struct COMPILER__generation_workspace {
 
     // functions
     ANVIL__counted_list user_defined_functions; // COMPILER__generation_function
-    //ANVIL__counted_list packer_functions; // TODO
     STANDARD__offsets standard_offsets;
 } COMPILER__generation_workspace;
 
@@ -167,6 +166,18 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             }
 
             break;
+        case COMPILER__ast__predefined__jump__top:
+            // code jump
+            //ANVIL__code__operate__jump__static(anvil, ANVIL__sft__always_run, ANVIL__srt__constant__false, COMPILER__generate__use_variable(jump__variable_argument).cells.start, ANVIL__srt__constant__false, ANVIL__sft__always_run, ((ANVIL__offset*)(((COMPILER__generation_function*)(*workspace).user_defined_functions.list.buffer.start)[user_defined_function_index].statement_offsets.list.buffer.start))[statement.offset_index]);
+            ANVIL__code__operate__jump__static(anvil, ANVIL__sft__always_run, ANVIL__srt__constant__false, COMPILER__generate__use_variable(jump__variable_argument).cells.start, ANVIL__srt__constant__false, ANVIL__sft__always_run, ((COMPILER__accountling_scope_header*)accountling_function.scope_headers.list.buffer.start)[statement.scope_index].starting_offset);
+
+            break;
+        case COMPILER__ast__predefined__jump__bottom:
+            // code jump
+            //ANVIL__code__operate__jump__static(anvil, ANVIL__sft__always_run, ANVIL__srt__constant__false, COMPILER__generate__use_variable(jump__variable_argument).cells.start, ANVIL__srt__constant__false, ANVIL__sft__always_run, ((ANVIL__offset*)(((COMPILER__generation_function*)(*workspace).user_defined_functions.list.buffer.start)[user_defined_function_index].statement_offsets.list.buffer.start))[statement.offset_index]);
+            ANVIL__code__operate__jump__static(anvil, ANVIL__sft__always_run, ANVIL__srt__constant__false, COMPILER__generate__use_variable(jump__variable_argument).cells.start, ANVIL__srt__constant__false, ANVIL__sft__always_run, ((COMPILER__accountling_scope_header*)accountling_function.scope_headers.list.buffer.start)[statement.scope_index].ending_offset);
+
+            break;
         case COMPILER__ast__user_defined_function_call:
             // setup counter
             user_defined_function_call__current_function_io_register = ANVIL__srt__start__function_io;
@@ -223,6 +234,8 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
 
             // setup statement ending offset
             ((COMPILER__accountling_scope_header*)accountling_function.scope_headers.list.buffer.start)[statement.scope_index].ending_offset = ANVIL__get__offset(anvil);
+
+            break;
         default:
             break;
         }

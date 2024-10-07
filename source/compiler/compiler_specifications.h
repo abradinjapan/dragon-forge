@@ -130,6 +130,9 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__print__debug_cell,
     COMPILER__ast__predefined__print__buffer_as_string,
     COMPILER__ast__predefined__pack__anything,
+    COMPILER__ast__predefined__jump__top,
+    COMPILER__ast__predefined__jump__bottom,
+    COMPILER__ast__predefined__jump__offset,
 
     // user defined call
     COMPILER__ast__user_defined_function_call,

@@ -305,6 +305,7 @@ typedef struct COMPILER__accountling_statement {
     COMPILER__accountling_variable_argument print__variable_argument;
 
     // offset data
+    COMPILER__accountling_variable_argument jump__variable_argument;
     COMPILER__offset_index offset_index; // if the statement is a regular offset, use this
 
     // scope data
@@ -2061,6 +2062,83 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pac
     return ANVIL__bt__true;
 }
 
+// check for scope jumping
+ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__jumping(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
+    // setup valid names
+    COMPILER__namespace jump_top_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".jump.top", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+    COMPILER__namespace jump_bottom_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".jump.bottom", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+
+    // if is a top jump
+    if (COMPILER__check__identical_namespaces(parsling_statement.name.name, jump_top_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 0) {
+        // if inputs are correct parsing type
+        if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__name && COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1).category == COMPILER__pat__offset) {
+            // check input variable type
+            // get index
+            ANVIL__bt is_valid_argument;
+            COMPILER__accountling_variable_argument variable_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__true, &is_valid_argument, error);
+            if (COMPILER__check__error_occured(error) || variable_argument.type >= COMPILER__avat__COUNT) {
+                goto failure;
+            }
+            
+            // get offset ID by name
+            (*accountling_statement).scope_index = COMPILER__account__functions__get_scope_index(accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1).name);
+
+            // setup output statement
+            (*accountling_statement).statement_type = COMPILER__ast__predefined__jump__top;
+            (*accountling_statement).jump__variable_argument = variable_argument;
+
+            // match
+            goto match;
+        // not the right argument type
+        } else {
+            goto failure;
+        }
+    // if is a bottom jump
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, jump_bottom_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 0) {
+        // if inputs are correct parsing type
+        if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__name && COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1).category == COMPILER__pat__offset) {
+            // check input variable type
+            // get index
+            ANVIL__bt is_valid_argument;
+            COMPILER__accountling_variable_argument variable_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__true, &is_valid_argument, error);
+            if (COMPILER__check__error_occured(error) || variable_argument.type >= COMPILER__avat__COUNT) {
+                goto failure;
+            }
+            
+            // get offset ID by name
+            (*accountling_statement).scope_index = COMPILER__account__functions__get_scope_index(accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1).name);
+
+            // setup output statement
+            (*accountling_statement).statement_type = COMPILER__ast__predefined__jump__bottom;
+            (*accountling_statement).jump__variable_argument = variable_argument;
+
+            // match
+            goto match;
+        // not the right argument type
+        } else {
+            goto failure;
+        }
+    }
+
+    // not a match
+    failure:
+    COMPILER__close__parsling_namespace(jump_top_name);
+    COMPILER__close__parsling_namespace(jump_bottom_name);
+    return ANVIL__bt__false;
+
+    // match!
+    match:
+    COMPILER__close__parsling_namespace(jump_top_name);
+    COMPILER__close__parsling_namespace(jump_bottom_name);
+    return ANVIL__bt__true;
+}
+
 // check for user defined function calls
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__user_defined_function_calls(COMPILER__accountling_structures structures, COMPILER__accountling_function_headers function_headers, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     COMPILER__function_header_index match_count = 0;
@@ -2243,6 +2321,19 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
 
             // find packers
             if (COMPILER__account__functions__check_and_get_statement_translation__packers(structures, accountling_function, parsling_statement, &accountling_statement, error)) {
+                // append statement
+                COMPILER__append__accountling_statement(&(*accountling_scope).statements.list, accountling_statement, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return;
+                }
+                goto next_statement;
+            }
+            if (COMPILER__check__error_occured(error)) {
+                return;
+            }
+
+            // find jumps
+            if (COMPILER__account__functions__check_and_get_statement_translation__jumping(structures, accountling_function, parsling_statement, &accountling_statement, error)) {
                 // append statement
                 COMPILER__append__accountling_statement(&(*accountling_scope).statements.list, accountling_statement, error);
                 if (COMPILER__check__error_occured(error)) {
@@ -2808,6 +2899,10 @@ void COMPILER__print__accountling_scope(COMPILER__accountling_scope statements, 
             }
             printf(")(output_argument: ");
             COMPILER__print__accountling_variable_argument(statement.pack__output);
+            printf(");\n");
+        } else if (statement.statement_type == COMPILER__ast__predefined__jump__top) {
+            printf("COMPILER__ast__predefined__jump__top(scope_index: %lu, condition: ", statement.scope_index);
+            COMPILER__print__accountling_variable_argument(statement.jump__variable_argument);
             printf(");\n");
         } else if (statement.statement_type == COMPILER__ast__user_defined_function_call) {
             printf("COMPILER__ast__user_defined_function_call(input_arguments: ");
