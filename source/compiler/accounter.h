@@ -360,6 +360,8 @@ void COMPILER__append__accountling_statement(ANVIL__list* list, COMPILER__accoun
 typedef struct COMPILER__accountling_scope_header {
     COMPILER__namespace name;
     COMPILER__accountling_variable_argument argument;
+    ANVIL__offset starting_offset;
+    ANVIL__offset ending_offset;
 } COMPILER__accountling_scope_header;
 
 // append accountling scope header
@@ -1421,6 +1423,8 @@ void COMPILER__account__functions__get_function_level_data(COMPILER__accountling
             // create new scope header
             COMPILER__accountling_scope_header scope_header;
             scope_header.name = parsling_statement.name.name;
+            scope_header.starting_offset = ANVIL__invalid_offset;
+            scope_header.ending_offset = ANVIL__invalid_offset;
 
             // if scope name does not exist, append
             COMPILER__append__accountling_scope_header(&(*accountling_function).scope_headers.list, scope_header, error);
@@ -2156,15 +2160,48 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__use
 }
 
 // get all statements & variables
-void COMPILER__account__functions__function_sequential_information__one_scope(COMPILER__accountling_structures structures, COMPILER__accountling_function_headers function_headers, COMPILER__accountling_function* accountling_function, COMPILER__accountling_scope* accountling_scope, COMPILER__parsling_scope parsling_scope, COMPILER__error* error) {
+void COMPILER__account__functions__function_sequential_information__one_scope(COMPILER__accountling_structures structures, COMPILER__accountling_function_headers function_headers, COMPILER__accountling_function* accountling_function, COMPILER__accountling_scope* accountling_scope, COMPILER__parsling_statement parsling_source_statement, COMPILER__error* error) {
     // translate all statements
     // setup current statement
-    ANVIL__current current_statement = ANVIL__calculate__current_from_list_filled_index(&parsling_scope.statements.list);
+    ANVIL__current current_statement = ANVIL__calculate__current_from_list_filled_index(&parsling_source_statement.subscope.statements.list);
 
     // setup statements
     (*accountling_scope).statements = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_statement) * 32, error);
     if (COMPILER__check__error_occured(error)) {
         return;
+    }
+
+    // get condition
+    // if scope is not master scope
+    if (COMPILER__check__empty_namespace(parsling_source_statement.name.name) == ANVIL__bt__false) {
+        ANVIL__bt is_valid_argument;
+        (*accountling_scope).condition = COMPILER__account__functions__mark_variable(structures, accountling_function, parsling_source_statement.subscope_flag_name, COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error)) {
+            return;
+        }
+        if (is_valid_argument == ANVIL__bt__false) {
+            // set error
+            *error = COMPILER__open__error("Accounting Error: A scope condition variable does not exist or is of the wrong type.", COMPILER__get__namespace_lexling_location(parsling_source_statement.subscope_flag_name.name));
+
+            return;
+        }
+
+        // copy condition
+        ((COMPILER__accountling_scope_header*)(*accountling_function).scope_headers.list.buffer.start)[COMPILER__account__functions__get_scope_index(accountling_function, parsling_source_statement.name.name)].argument = (*accountling_scope).condition;
+    // otherwise, a master scope requires a manual condition
+    } else {
+        // setup name
+        COMPILER__namespace temp_search_name = COMPILER__open__namespace_from_single_lexling(COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)(COMPILER__define__master_namespace ".always"), ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location()), error);
+        if (COMPILER__check__error_occured(error)) {
+            return;
+        }
+
+        // setup condition
+        (*accountling_scope).condition = COMPILER__account__functions__get_variable_argument_by_name((*accountling_function).variables, temp_search_name);
+        ((COMPILER__accountling_scope_header*)(*accountling_function).scope_headers.list.buffer.start)[COMPILER__account__functions__get_scope_index(accountling_function, parsling_source_statement.name.name)].argument = (*accountling_scope).condition;
+
+        // free temp name
+        COMPILER__close__parsling_namespace(temp_search_name);
     }
 
     // for each statement
@@ -2246,7 +2283,7 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
             }
         } else if (parsling_statement.type == COMPILER__stt__subscope) {
             // get scope data
-            COMPILER__account__functions__function_sequential_information__one_scope(structures, function_headers, accountling_function, &accountling_statement.scope_data, parsling_statement.subscope, error);
+            COMPILER__account__functions__function_sequential_information__one_scope(structures, function_headers, accountling_function, &accountling_statement.scope_data, parsling_statement, error);
             if (COMPILER__check__error_occured(error)) {
                 return;
             }
@@ -2363,9 +2400,20 @@ void COMPILER__account__functions__predefined_variables(COMPILER__accountling_st
     COMPILER__accountling_variable variable;
 
     // create dragon.always_run
-    variable.cells = COMPILER__create__cell_range(ANVIL__srt__always_run, ANVIL__srt__always_run);
+    variable.cells = COMPILER__create__cell_range(ANVIL__srt__always_run__flag_ID, ANVIL__srt__always_run__flag_ID);
     variable.members = COMPILER__create__accountling_variable_range(-1, -1);
-    variable.name = COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)(COMPILER__define__master_namespace ".always_run"), ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location());
+    variable.name = COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)(COMPILER__define__master_namespace ".always"), ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location());
+    variable.type = COMPILER__ptt__dragon_cell;
+    COMPILER__append__accountling_variable(&(*accountling_function).variables.lists[COMPILER__avat__master].list, variable, error);
+    if (COMPILER__check__error_occured(error)) {
+        return;
+    }
+    (*accountling_function).variables.lists[COMPILER__avat__master].count++;
+
+    // create dragon.never_run
+    variable.cells = COMPILER__create__cell_range(ANVIL__srt__never_run__flag_ID, ANVIL__srt__never_run__flag_ID);
+    variable.members = COMPILER__create__accountling_variable_range(-1, -1);
+    variable.name = COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)(COMPILER__define__master_namespace ".never"), ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location());
     variable.type = COMPILER__ptt__dragon_cell;
     COMPILER__append__accountling_variable(&(*accountling_function).variables.lists[COMPILER__avat__master].list, variable, error);
     if (COMPILER__check__error_occured(error)) {
@@ -2410,6 +2458,7 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
                 if (COMPILER__check__error_occured(error)) {
                     return functions;
                 }
+
                 // allocate offsets list
                 accountling_function.offsets = COMPILER__open__counted_list_with_error(sizeof(COMPILER__namespace) * 16, error);
                 if (COMPILER__check__error_occured(error)) {
@@ -2417,7 +2466,7 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
                 }
 
                 // get scope headers & offsets
-                COMPILER__account__functions__get_function_level_data(&accountling_function, parsling_function.scope, error);
+                COMPILER__account__functions__get_function_level_data(&accountling_function, parsling_function.scope.subscope, error);
                 if (COMPILER__check__error_occured(error)) {
                     return functions;
                 }
@@ -2774,9 +2823,8 @@ void COMPILER__print__accountling_scope(COMPILER__accountling_scope statements, 
             printf("COMPILER__ast__offset(offset_index: %lu)", statement.offset_index);
             printf("\n");
         } else if (statement.statement_type == COMPILER__ast__scope) {
-            printf("COMPILER__ast__scope(scope_index: %lu)", statement.scope_index);
+            printf("COMPILER__ast__scope(scope_index: %lu)\n", statement.scope_index);
             if (statement.scope_data.statements.count > 0) {
-                printf("\n");
                 COMPILER__print__accountling_scope(statement.scope_data, tab_depth + 1);
             }
         } else {
@@ -2840,7 +2888,7 @@ void COMPILER__print__accountling_functions(COMPILER__accountling_structures str
                 COMPILER__print__accountling_function_header(((COMPILER__accountling_function_header*)functions.headers.category[COMPILER__afht__user_defined].list.buffer.start)[function_index]);
                 printf("':\n");
 
-                // print scopes
+                // print scope headers
                 if (function.scope_headers.count > 0) {
                     // print scope headers header
                     ANVIL__print__tabs(tab_depth + 2);
@@ -2854,6 +2902,8 @@ void COMPILER__print__accountling_functions(COMPILER__accountling_structures str
                         // print scope data
                         ANVIL__print__tabs(tab_depth + 3);
                         COMPILER__print__namespace(scope_header.name);
+                        printf(": ");
+                        COMPILER__print__accountling_variable_argument(scope_header.argument);
                         printf("\n");
                     }
                 }

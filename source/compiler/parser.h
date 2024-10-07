@@ -200,11 +200,11 @@ COMPILER__parsling_structure COMPILER__create_null__parsling_structure() {
 // one function
 typedef struct COMPILER__parsling_function {
     COMPILER__parsling_statement header;
-    COMPILER__parsling_scope scope;
+    COMPILER__parsling_statement scope;
 } COMPILER__parsling_function;
 
 // create a custom function
-COMPILER__parsling_function COMPILER__create__parsling_function(COMPILER__parsling_statement header, COMPILER__parsling_scope scope) {
+COMPILER__parsling_function COMPILER__create__parsling_function(COMPILER__parsling_statement header, COMPILER__parsling_statement scope) {
     COMPILER__parsling_function output;
 
     // setup output
@@ -217,7 +217,7 @@ COMPILER__parsling_function COMPILER__create__parsling_function(COMPILER__parsli
 // create a null function
 COMPILER__parsling_function COMPILER__create_null__parsling_function() {
     // return empty
-    return COMPILER__create__parsling_function(COMPILER__create_null__parsling_statement(), COMPILER__create_null__parsling_scope());
+    return COMPILER__create__parsling_function(COMPILER__create_null__parsling_statement(), COMPILER__create_null__parsling_statement());
 }
 
 // one program
@@ -328,9 +328,9 @@ void COMPILER__append__parsling_program(ANVIL__list* list, COMPILER__parsling_pr
 }
 
 // close namespace
-void COMPILER__close__parsling_namespace(COMPILER__namespace namespace) {
+void COMPILER__close__parsling_namespace(COMPILER__namespace name) {
     // close list
-    ANVIL__close__counted_list(namespace.lexlings);
+    ANVIL__close__counted_list(name.lexlings);
 
     return;
 }
@@ -433,7 +433,7 @@ void COMPILER__close__parsling_function(COMPILER__parsling_function function) {
     COMPILER__close__parsling_statement(function.header);
     
     // close scope
-    COMPILER__close__parsling_scope(function.scope);
+    COMPILER__close__parsling_statement(function.scope);
 
     return;
 }
@@ -942,7 +942,12 @@ COMPILER__parsling_function COMPILER__parse__function(ANVIL__current* current, C
     }
 
     // parse scope
-    output.scope = COMPILER__parse__scope(current, error);
+    output.scope.subscope = COMPILER__parse__scope(current, error);
+    output.scope.inputs = ANVIL__create_null__counted_list();
+    output.scope.outputs = ANVIL__create_null__counted_list();
+    output.scope.type = COMPILER__stt__subscope;
+    output.scope.subscope_flag_name = COMPILER__create__parsling_argument(COMPILER__pat__name, COMPILER__create_null__namespace(), COMPILER__create_null__namespace());
+    output.scope.name = COMPILER__create__parsling_argument(COMPILER__pat__name, COMPILER__create_null__namespace(), COMPILER__create_null__namespace());
 
     return output;
 }
@@ -1109,9 +1114,13 @@ void COMPILER__print__parsed_statement(COMPILER__parsling_statement statement, A
     } else if (statement.type == COMPILER__stt__subscope) {
         // print scope
         printf("@[subscope]");
-        COMPILER__print__namespace(statement.name.name);
+        if (COMPILER__check__empty_namespace(statement.name.name) == ANVIL__bt__false) {
+            COMPILER__print__namespace(statement.name.name);
+        }
         printf(" ");
+        if (COMPILER__check__empty_namespace(statement.name.name) == ANVIL__bt__false) {
         COMPILER__print__namespace(statement.subscope_flag_name.name);
+        }
         printf(":\n");
         COMPILER__print__parsed_scope(statement.subscope, tab_depth + 1);
     }
@@ -1147,7 +1156,7 @@ void COMPILER__print__parsed_function(COMPILER__parsling_function function, ANVI
         COMPILER__print__parsed_statement(function.header, 0);
 
         // print scope(s)
-        COMPILER__print__parsed_scope(function.scope, tab_depth + 1);
+        COMPILER__print__parsed_statement(function.scope, tab_depth + 1);
     }
 
     return;
