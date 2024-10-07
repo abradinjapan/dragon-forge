@@ -134,6 +134,11 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__jump__bottom,
     COMPILER__ast__predefined__jump__offset,
     COMPILER__ast__predefined__check__integer_within_range,
+    COMPILER__ast__predefined__integer__addition,
+    COMPILER__ast__predefined__integer__subtraction,
+    COMPILER__ast__predefined__integer__multiplication,
+    COMPILER__ast__predefined__integer__division,
+    COMPILER__ast__predefined__integer__modulous,
 
     // user defined call
     COMPILER__ast__user_defined_function_call,

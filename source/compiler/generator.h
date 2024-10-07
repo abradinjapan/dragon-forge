@@ -202,6 +202,31 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__flag_get, ANVIL__srt__temp__flag_ID_2, ANVIL__unused_cell_ID, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(within_range__output).cells.start);
 
             break;
+        case COMPILER__ast__predefined__integer__addition:
+            // do calculation
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, COMPILER__generate__use_variable(integer_operation__first_argument).cells.start, COMPILER__generate__use_variable(integer_operation__second_argument).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(integer_operation__output_argument).cells.start);
+
+            break;
+        case COMPILER__ast__predefined__integer__subtraction:
+            // do calculation
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_subtract, COMPILER__generate__use_variable(integer_operation__first_argument).cells.start, COMPILER__generate__use_variable(integer_operation__second_argument).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(integer_operation__output_argument).cells.start);
+
+            break;
+        case COMPILER__ast__predefined__integer__multiplication:
+            // do calculation
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_multiply, COMPILER__generate__use_variable(integer_operation__first_argument).cells.start, COMPILER__generate__use_variable(integer_operation__second_argument).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(integer_operation__output_argument).cells.start);
+
+            break;
+        case COMPILER__ast__predefined__integer__division:
+            // do calculation
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_division, COMPILER__generate__use_variable(integer_operation__first_argument).cells.start, COMPILER__generate__use_variable(integer_operation__second_argument).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(integer_operation__output_argument).cells.start);
+
+            break;
+        case COMPILER__ast__predefined__integer__modulous:
+            // do calculation
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_modulous, COMPILER__generate__use_variable(integer_operation__first_argument).cells.start, COMPILER__generate__use_variable(integer_operation__second_argument).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(integer_operation__output_argument).cells.start);
+
+            break;
         case COMPILER__ast__user_defined_function_call:
             // setup counter
             user_defined_function_call__current_function_io_register = ANVIL__srt__start__function_io;
