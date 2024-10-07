@@ -129,6 +129,7 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__set__string,
     COMPILER__ast__predefined__print__debug_cell,
     COMPILER__ast__predefined__print__buffer_as_string,
+    COMPILER__ast__predefined__copy__anything,
     COMPILER__ast__predefined__pack__anything,
     COMPILER__ast__predefined__jump__top,
     COMPILER__ast__predefined__jump__bottom,

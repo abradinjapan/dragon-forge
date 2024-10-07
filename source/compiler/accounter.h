@@ -312,6 +312,10 @@ typedef struct COMPILER__accountling_statement {
     COMPILER__scope_index scope_index;
     COMPILER__accountling_scope scope_data; // COMPILER__accountling_statement
 
+    // copy data
+    COMPILER__accountling_variable_argument copy__input;
+    COMPILER__accountling_variable_argument copy__output;
+
     // packer data
     ANVIL__counted_list pack__inputs; // COMPILER__accountling_variable_argument
     COMPILER__accountling_variable_argument pack__output;
@@ -1985,6 +1989,62 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
 }
 
 // check for packers
+ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__copy(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
+    // setup valid name
+    COMPILER__namespace valid_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".copy", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+
+    // if is a copy
+    if (COMPILER__check__identical_namespaces(parsling_statement.name.name, valid_name) && parsling_statement.inputs.count == 1 && COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__name && parsling_statement.outputs.count == 1 && COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0).category == COMPILER__pat__name) {
+        // get argument for type
+        COMPILER__accountling_variable_argument argument_type = COMPILER__account__functions__get_variable_argument_by_name((*accountling_function).variables, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).name);
+        if (argument_type.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // get variable arguments
+        ANVIL__bt is_valid_argument;
+        COMPILER__accountling_variable_argument input_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__account__functions__get_variable_by_variable_argument((*accountling_function).variables, argument_type).type, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || input_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument output_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__account__functions__get_variable_by_variable_argument((*accountling_function).variables, argument_type).type, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || output_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // check if both types are the same
+        if (COMPILER__account__functions__get_variable_by_variable_argument((*accountling_function).variables, input_argument).type != COMPILER__account__functions__get_variable_by_variable_argument((*accountling_function).variables, output_argument).type) {
+            // not a match
+            goto failure;
+        }
+
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__copy__anything;
+        (*accountling_statement).copy__input = input_argument;
+        (*accountling_statement).copy__output = output_argument;
+
+        // match
+        goto match;
+    // not the right argument type
+    } else {
+        goto failure;
+    }
+
+    // not a match
+    failure:
+    COMPILER__close__parsling_namespace(valid_name);
+    return ANVIL__bt__false;
+
+    // match!
+    match:
+    COMPILER__close__parsling_namespace(valid_name);
+    return ANVIL__bt__true;
+}
+
+// check for packers
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__packers(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid name
     COMPILER__namespace valid_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".pack", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
@@ -2530,6 +2590,19 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
 
             // find prints
             if (COMPILER__account__functions__check_and_get_statement_translation__prints(structures, accountling_function, parsling_statement, &accountling_statement, error)) {
+                // append statement
+                COMPILER__append__accountling_statement(&(*accountling_scope).statements.list, accountling_statement, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return;
+                }
+                goto next_statement;
+            }
+            if (COMPILER__check__error_occured(error)) {
+                return;
+            }
+
+            // find copiers
+            if (COMPILER__account__functions__check_and_get_statement_translation__copy(structures, accountling_function, parsling_statement, &accountling_statement, error)) {
                 // append statement
                 COMPILER__append__accountling_statement(&(*accountling_scope).statements.list, accountling_statement, error);
                 if (COMPILER__check__error_occured(error)) {
