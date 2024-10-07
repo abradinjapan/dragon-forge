@@ -16,7 +16,6 @@ typedef struct COMPILER__generation_function {
     ANVIL__offset offset__function_return;
     ANVIL__offset offset__function_data;
     ANVIL__counted_list statement_offsets; // ANVIL__offset
-    ANVIL__counted_list scope_offsets; // ANVIL__offset
     ANVIL__counted_list data_offsets; // ANVIL__offset
 
     // cell ranges
@@ -51,6 +50,14 @@ COMPILER__generation_function COMPILER__open__generation_function(COMPILER__acco
         // append blank offset
         ((ANVIL__offset*)output.data_offsets.list.buffer.start)[index] = ANVIL__define__null_offset_ID;
     }
+    output.statement_offsets = COMPILER__open__counted_list_with_error(sizeof(ANVIL__offset) * accountlings.offsets.count, error);
+    if (COMPILER__check__error_occured(error)) {
+        return output;
+    }
+    for (COMPILER__offset_index index = 0; index < accountlings.offsets.count; index++) {
+        // append blank offset
+        ((ANVIL__offset*)output.statement_offsets.list.buffer.start)[index] = ANVIL__define__null_offset_ID;
+    }
 
     // setup cells
     output.cells__workspace.start = (ANVIL__u64)ANVIL__srt__start__workspace;
@@ -63,6 +70,7 @@ COMPILER__generation_function COMPILER__open__generation_function(COMPILER__acco
 void COMPILER__close__generation_function(COMPILER__generation_function function) {
     // close lists
     ANVIL__close__counted_list(function.data_offsets);
+    ANVIL__close__counted_list(function.statement_offsets);
 
     return;
 }
@@ -168,13 +176,17 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             break;
         case COMPILER__ast__predefined__jump__top:
             // code jump
-            //ANVIL__code__operate__jump__static(anvil, ANVIL__sft__always_run, ANVIL__srt__constant__false, COMPILER__generate__use_variable(jump__variable_argument).cells.start, ANVIL__srt__constant__false, ANVIL__sft__always_run, ((ANVIL__offset*)(((COMPILER__generation_function*)(*workspace).user_defined_functions.list.buffer.start)[user_defined_function_index].statement_offsets.list.buffer.start))[statement.offset_index]);
             ANVIL__code__operate__jump__static(anvil, ANVIL__sft__always_run, ANVIL__srt__constant__false, COMPILER__generate__use_variable(jump__variable_argument).cells.start, ANVIL__srt__constant__false, ANVIL__sft__always_run, ((COMPILER__accountling_scope_header*)accountling_function.scope_headers.list.buffer.start)[statement.scope_index].starting_offset);
 
             break;
         case COMPILER__ast__predefined__jump__bottom:
             // code jump
             ANVIL__code__operate__jump__static(anvil, ANVIL__sft__always_run, ANVIL__srt__constant__false, COMPILER__generate__use_variable(jump__variable_argument).cells.start, ANVIL__srt__constant__false, ANVIL__sft__always_run, ((COMPILER__accountling_scope_header*)accountling_function.scope_headers.list.buffer.start)[statement.scope_index].ending_offset);
+
+            break;
+        case COMPILER__ast__predefined__jump__offset:
+            // code jump
+            ANVIL__code__operate__jump__static(anvil, ANVIL__sft__always_run, ANVIL__srt__constant__false, COMPILER__generate__use_variable(jump__variable_argument).cells.start, ANVIL__srt__constant__false, ANVIL__sft__always_run, ((ANVIL__offset*)(((COMPILER__generation_function*)(*workspace).user_defined_functions.list.buffer.start)[user_defined_function_index].statement_offsets.list.buffer.start))[statement.offset_index]);
 
             break;
         case COMPILER__ast__user_defined_function_call:
@@ -216,6 +228,11 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
                     user_defined_function_call__current_function_io_register++;
                 }
             }
+
+            break;
+        case COMPILER__ast__offset:
+            // set offset
+            ((ANVIL__offset*)(((COMPILER__generation_function*)(*workspace).user_defined_functions.list.buffer.start)[user_defined_function_index].statement_offsets.list.buffer.start))[statement.offset_index] = ANVIL__get__offset(anvil);
 
             break;
         case COMPILER__ast__scope:
