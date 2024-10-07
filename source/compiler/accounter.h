@@ -316,6 +316,13 @@ typedef struct COMPILER__accountling_statement {
     ANVIL__counted_list pack__inputs; // COMPILER__accountling_variable_argument
     COMPILER__accountling_variable_argument pack__output;
 
+    // within range data
+    COMPILER__accountling_variable_argument within_range__lower_bound;
+    COMPILER__accountling_variable_argument within_range__checking;
+    COMPILER__accountling_variable_argument within_range__higher_bound;
+    COMPILER__accountling_variable_argument within_range__invert_result;
+    COMPILER__accountling_variable_argument within_range__output;
+
     // user defined function call inputs and outputs
     COMPILER__function_header_index function_call__calling_function_header_index;
     ANVIL__counted_list function_call__inputs; // COMPILER__accountling_variable_argument
@@ -2170,6 +2177,69 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__jum
     return ANVIL__bt__true;
 }
 
+// check for checking
+ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__data_checking(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
+    // setup valid names
+    COMPILER__namespace integer_range_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".integer.within_range", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+
+    // if is a top jump
+    if (COMPILER__check__identical_namespaces(parsling_statement.name.name, integer_range_name) && parsling_statement.inputs.count == 4 && parsling_statement.outputs.count == 1) {
+        // if io names are correct parsing type
+        if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__name && COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1).category == COMPILER__pat__name && COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 2).category == COMPILER__pat__name && COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 3).category == COMPILER__pat__name && COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0).category == COMPILER__pat__name) {
+            // check input variable types
+            // get index
+            ANVIL__bt is_valid_argument;
+            COMPILER__accountling_variable_argument lower_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+            if (COMPILER__check__error_occured(error) || lower_argument.type >= COMPILER__avat__COUNT) {
+                goto failure;
+            }
+            COMPILER__accountling_variable_argument checking_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+            if (COMPILER__check__error_occured(error) || checking_argument.type >= COMPILER__avat__COUNT) {
+                goto failure;
+            }
+            COMPILER__accountling_variable_argument higher_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 2), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+            if (COMPILER__check__error_occured(error) || higher_argument.type >= COMPILER__avat__COUNT) {
+                goto failure;
+            }
+            COMPILER__accountling_variable_argument inversion_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 3), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+            if (COMPILER__check__error_occured(error) || inversion_argument.type >= COMPILER__avat__COUNT) {
+                goto failure;
+            }
+            COMPILER__accountling_variable_argument result_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+            if (COMPILER__check__error_occured(error) || result_argument.type >= COMPILER__avat__COUNT) {
+                goto failure;
+            }
+
+            // setup output statement
+            (*accountling_statement).statement_type = COMPILER__ast__predefined__check__integer_within_range;
+            (*accountling_statement).within_range__lower_bound = lower_argument;
+            (*accountling_statement).within_range__checking = checking_argument;
+            (*accountling_statement).within_range__higher_bound = higher_argument;
+            (*accountling_statement).within_range__invert_result = inversion_argument;
+            (*accountling_statement).within_range__output = result_argument;
+
+            // match
+            goto match;
+        // not the right argument type
+        } else {
+            goto failure;
+        }
+    }
+
+    // not a match
+    failure:
+    COMPILER__close__parsling_namespace(integer_range_name);
+    return ANVIL__bt__false;
+
+    // match!
+    match:
+    COMPILER__close__parsling_namespace(integer_range_name);
+    return ANVIL__bt__true;
+}
+
 // check for user defined function calls
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__user_defined_function_calls(COMPILER__accountling_structures structures, COMPILER__accountling_function_headers function_headers, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     COMPILER__function_header_index match_count = 0;
@@ -2365,6 +2435,19 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
 
             // find jumps
             if (COMPILER__account__functions__check_and_get_statement_translation__jumping(structures, accountling_function, parsling_statement, &accountling_statement, error)) {
+                // append statement
+                COMPILER__append__accountling_statement(&(*accountling_scope).statements.list, accountling_statement, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return;
+                }
+                goto next_statement;
+            }
+            if (COMPILER__check__error_occured(error)) {
+                return;
+            }
+
+            // find checks
+            if (COMPILER__account__functions__check_and_get_statement_translation__data_checking(structures, accountling_function, parsling_statement, &accountling_statement, error)) {
                 // append statement
                 COMPILER__append__accountling_statement(&(*accountling_scope).statements.list, accountling_statement, error);
                 if (COMPILER__check__error_occured(error)) {

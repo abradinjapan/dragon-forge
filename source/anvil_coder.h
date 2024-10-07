@@ -512,7 +512,9 @@ typedef enum ANVIL__sft {
     // flags
     ANVIL__sft__always_run = ANVIL__sft__START,
     ANVIL__sft__never_run,
-    ANVIL__sft__temp,
+    ANVIL__sft__temp_0,
+    ANIVL__sft__temp_1,
+    ANIVL__sft__temp_2,
 
     // end of stack flags
     ANVIL__sft__END,
@@ -746,13 +748,13 @@ void ANVIL__code__operate__flag(ANVIL__workspace* workspace, ANVIL__flag_ID flag
 // operate jump explicitly
 void ANVIL__code__operate__jump__explicit(ANVIL__workspace* workspace, ANVIL__flag_ID flag, ANVIL__cell_ID lower_bound, ANVIL__cell_ID value, ANVIL__cell_ID upper_bound, ANVIL__flag_ID invert_result, ANVIL__cell_ID jump_address) {
     // setup flag temp
-    ANVIL__code__write_cell(workspace, (ANVIL__cell)ANVIL__sft__temp, ANVIL__srt__temp__flag_ID_0);
+    ANVIL__code__write_cell(workspace, (ANVIL__cell)ANVIL__sft__temp_0, ANVIL__srt__temp__flag_ID_0);
 
     // perform comparison
     ANVIL__code__operate__flag(workspace, flag, lower_bound, value, upper_bound, invert_result, ANVIL__srt__temp__flag_ID_0);
 
     // attempt jump
-    ANVIL__code__jump__explicit(workspace, ANVIL__sft__temp, jump_address);
+    ANVIL__code__jump__explicit(workspace, ANVIL__sft__temp_0, jump_address);
 
     return;
 }

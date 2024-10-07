@@ -133,6 +133,7 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__jump__top,
     COMPILER__ast__predefined__jump__bottom,
     COMPILER__ast__predefined__jump__offset,
+    COMPILER__ast__predefined__check__integer_within_range,
 
     // user defined call
     COMPILER__ast__user_defined_function_call,
