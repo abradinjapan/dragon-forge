@@ -182,6 +182,14 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             }
 
             break;
+        case COMPILER__ast__predefined__pack_null__anything:
+            // pack cells
+            for (ANVIL__cell_index cell_index = COMPILER__generate__use_variable(pack__output).cells.start; cell_index <= COMPILER__generate__use_variable(pack__output).cells.end; cell_index++) {
+                // pass one cell
+                ANVIL__code__cell_to_cell(anvil, ANVIL__sft__always_run, ANVIL__srt__constant__0, cell_index);
+            }
+
+            break;
         case COMPILER__ast__predefined__jump__top:
             // code jump
             ANVIL__code__operate__jump__static(anvil, ANVIL__sft__always_run, ANVIL__srt__constant__false, COMPILER__generate__use_variable(jump__variable_argument).cells.start, ANVIL__srt__constant__false, ANVIL__sft__always_run, ((COMPILER__accountling_scope_header*)accountling_function.scope_headers.list.buffer.start)[statement.scope_index].starting_offset);
