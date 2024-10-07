@@ -2400,7 +2400,7 @@ void COMPILER__account__functions__predefined_variables(COMPILER__accountling_st
     COMPILER__accountling_variable variable;
 
     // create dragon.always_run
-    variable.cells = COMPILER__create__cell_range(ANVIL__srt__always_run__flag_ID, ANVIL__srt__always_run__flag_ID);
+    variable.cells = COMPILER__create__cell_range(ANVIL__srt__constant__always_run__value, ANVIL__srt__constant__always_run__value);
     variable.members = COMPILER__create__accountling_variable_range(-1, -1);
     variable.name = COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)(COMPILER__define__master_namespace ".always"), ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location());
     variable.type = COMPILER__ptt__dragon_cell;
@@ -2411,7 +2411,7 @@ void COMPILER__account__functions__predefined_variables(COMPILER__accountling_st
     (*accountling_function).variables.lists[COMPILER__avat__master].count++;
 
     // create dragon.never_run
-    variable.cells = COMPILER__create__cell_range(ANVIL__srt__never_run__flag_ID, ANVIL__srt__never_run__flag_ID);
+    variable.cells = COMPILER__create__cell_range(ANVIL__srt__constant__never_run__value, ANVIL__srt__constant__never_run__value);
     variable.members = COMPILER__create__accountling_variable_range(-1, -1);
     variable.name = COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)(COMPILER__define__master_namespace ".never"), ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location());
     variable.type = COMPILER__ptt__dragon_cell;

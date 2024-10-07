@@ -213,7 +213,7 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ((COMPILER__accountling_scope_header*)accountling_function.scope_headers.list.buffer.start)[statement.scope_index].starting_offset = ANVIL__get__offset(anvil);
 
             // setup conditional jump
-            ANVIL__code__operate__jump__static(anvil, ANVIL__sft__always_run, ANVIL__srt__constant__0, COMPILER__generate__use_variable(scope_data.condition).cells.start, ANVIL__srt__constant__0, ANVIL__sft__always_run, ((COMPILER__accountling_scope_header*)accountling_function.scope_headers.list.buffer.start)[statement.scope_index].ending_offset);
+            ANVIL__code__operate__jump__static(anvil, ANVIL__sft__always_run, ANVIL__srt__constant__false, COMPILER__generate__use_variable(scope_data.condition).cells.start, ANVIL__srt__constant__false, ANVIL__sft__never_run, ((COMPILER__accountling_scope_header*)accountling_function.scope_headers.list.buffer.start)[statement.scope_index].ending_offset);
 
             // build scope
             COMPILER__generate__user_defined_function_scope(workspace, accountling_function, user_defined_function_index, statement.scope_data, error);

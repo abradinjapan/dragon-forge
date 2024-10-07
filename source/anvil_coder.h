@@ -443,6 +443,8 @@ typedef enum ANVIL__srt {
     // aliases
     ANVIL__srt__constant__true = ANVIL__srt__constant__1,
     ANVIL__srt__constant__false = ANVIL__srt__constant__0,
+    ANVIL__srt__constant__always_run__value = ANVIL__srt__constant__true,
+    ANVIL__srt__constant__never_run__value = ANVIL__srt__constant__false,
     ANVIL__srt__constant__cell_byte_count = ANVIL__srt__constant__8,
     ANVIL__srt__constant__cell_bit_count = ANVIL__srt__constant__64,
     ANVIL__srt__constant__bits_in_byte = ANVIL__srt__constant__8,
