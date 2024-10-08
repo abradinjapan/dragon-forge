@@ -576,13 +576,13 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
     // address to cell temps
     ANVIL__flag_ID address_to_cell__flag_ID;
     ANVIL__length address_to_cell__source_cell_ID;
-    ANVIL__length address_to_cell__bit_count_cell_ID;
+    ANVIL__length address_to_cell__byte_count_cell_ID;
     ANVIL__length address_to_cell__destination_cell_ID;
 
     // cell to address temps
     ANVIL__flag_ID cell_to_address__flag_ID;
     ANVIL__length cell_to_address__source_cell_ID;
-    ANVIL__length cell_to_address__bit_count_cell_ID;
+    ANVIL__length cell_to_address__byte_count_cell_ID;
     ANVIL__length cell_to_address__destination_cell_ID;
 
     // file to buffer temps
@@ -786,15 +786,15 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         // get parameters
         address_to_cell__flag_ID = ANVIL__read_next__flag_ID(execution_read_address);
         address_to_cell__source_cell_ID = ANVIL__read_next__cell_ID(execution_read_address);
-        address_to_cell__bit_count_cell_ID = ANVIL__read_next__cell_ID(execution_read_address);
+        address_to_cell__byte_count_cell_ID = ANVIL__read_next__cell_ID(execution_read_address);
         address_to_cell__destination_cell_ID = ANVIL__read_next__cell_ID(execution_read_address);
 
         // if valid address range
-        if (ANVIL__check__valid_address_range_in_allocations(allocations, ANVIL__create__buffer((ANVIL__address)(*context).cells[address_to_cell__source_cell_ID], (ANVIL__address)(*context).cells[address_to_cell__source_cell_ID] + (((ANVIL__length)(*context).cells[address_to_cell__bit_count_cell_ID]) / ANVIL__define__bits_in_byte) - 1))) {
+        if (ANVIL__check__valid_address_range_in_allocations(allocations, ANVIL__create__buffer((ANVIL__address)(*context).cells[address_to_cell__source_cell_ID], (ANVIL__address)(*context).cells[address_to_cell__source_cell_ID] + (((ANVIL__length)(*context).cells[address_to_cell__byte_count_cell_ID])) - 1))) {
             // if flag enabled
             if (ANVIL__get__flag_from_context(context, address_to_cell__flag_ID) == ANVIL__bt__true) {
                 // read data into cell
-                (*context).cells[address_to_cell__destination_cell_ID] = (ANVIL__cell)ANVIL__read__buffer((ANVIL__address)(*context).cells[address_to_cell__source_cell_ID], ((ANVIL__length)(*context).cells[address_to_cell__bit_count_cell_ID]) / ANVIL__define__bits_in_byte);
+                (*context).cells[address_to_cell__destination_cell_ID] = (ANVIL__cell)ANVIL__read__buffer((ANVIL__address)(*context).cells[address_to_cell__source_cell_ID], ((ANVIL__length)(*context).cells[address_to_cell__byte_count_cell_ID]));
             }
         // invalid address range
         } else {
@@ -811,15 +811,15 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         // get parameters
         cell_to_address__flag_ID = ANVIL__read_next__flag_ID(execution_read_address);
         cell_to_address__source_cell_ID = ANVIL__read_next__cell_ID(execution_read_address);
-        cell_to_address__bit_count_cell_ID = ANVIL__read_next__cell_ID(execution_read_address);
+        cell_to_address__byte_count_cell_ID = ANVIL__read_next__cell_ID(execution_read_address);
         cell_to_address__destination_cell_ID = ANVIL__read_next__cell_ID(execution_read_address);
 
         // if valid address range
-        if (ANVIL__check__valid_address_range_in_allocations(allocations, ANVIL__create__buffer((*context).cells[cell_to_address__destination_cell_ID], (*context).cells[cell_to_address__destination_cell_ID] + (((ANVIL__length)(*context).cells[cell_to_address__bit_count_cell_ID]) / ANVIL__define__bits_in_byte) - 1))) {
+        if (ANVIL__check__valid_address_range_in_allocations(allocations, ANVIL__create__buffer((*context).cells[cell_to_address__destination_cell_ID], (*context).cells[cell_to_address__destination_cell_ID] + (((ANVIL__length)(*context).cells[cell_to_address__byte_count_cell_ID])) - 1))) {
             // if flag enabled
             if (ANVIL__get__flag_from_context(context, cell_to_address__flag_ID) == ANVIL__bt__true) {
                 // write data to an address
-                ANVIL__write__buffer((ANVIL__u64)(*context).cells[cell_to_address__source_cell_ID], ((ANVIL__length)(*context).cells[cell_to_address__bit_count_cell_ID]) / ANVIL__define__bits_in_byte, (*context).cells[cell_to_address__destination_cell_ID]);
+                ANVIL__write__buffer((ANVIL__u64)(*context).cells[cell_to_address__source_cell_ID], ((ANVIL__length)(*context).cells[cell_to_address__byte_count_cell_ID]), (*context).cells[cell_to_address__destination_cell_ID]);
             }
         // invalid address range
         } else {

@@ -156,7 +156,7 @@ void STANDARD__code__cell_to_unsigned_integer_string(ANVIL__workspace* workspace
 	ANVIL__code__request_memory(workspace, ANVIL__srt__temp__length, STANDARD__cell_to_unsigned_integer_string__number_start, STANDARD__cell_to_unsigned_integer_string__number_end);
 
 	// init to zero
-	ANVIL__code__cell_to_address(workspace, ANVIL__sft__always_run, STANDARD__cell_to_unsigned_integer_string__base_digit_character, ANVIL__srt__constant__ascii_character_bit_size, STANDARD__cell_to_unsigned_integer_string__number_start);
+	ANVIL__code__cell_to_address(workspace, ANVIL__sft__always_run, STANDARD__cell_to_unsigned_integer_string__base_digit_character, ANVIL__srt__constant__ascii_character_byte_size, STANDARD__cell_to_unsigned_integer_string__number_start);
 
 	// convert to string
 	// setup current
@@ -173,7 +173,7 @@ void STANDARD__code__cell_to_unsigned_integer_string(ANVIL__workspace* workspace
 	ANVIL__code__operate(workspace, ANVIL__sft__always_run, ANVIL__ot__integer_add, STANDARD__cell_to_unsigned_integer_string__base_digit_character, STANDARD__cell_to_unsigned_integer_string__character, ANVIL__unused_cell_ID, STANDARD__cell_to_unsigned_integer_string__character);
 
 	// write character
-	ANVIL__code__cell_to_address(workspace, ANVIL__sft__always_run, STANDARD__cell_to_unsigned_integer_string__character, ANVIL__srt__constant__ascii_character_bit_size, STANDARD__cell_to_unsigned_integer_string__current);
+	ANVIL__code__cell_to_address(workspace, ANVIL__sft__always_run, STANDARD__cell_to_unsigned_integer_string__character, ANVIL__srt__constant__ascii_character_byte_size, STANDARD__cell_to_unsigned_integer_string__current);
 
 	// next character
 	ANVIL__code__operate(workspace, ANVIL__sft__always_run, ANVIL__ot__integer_division, STANDARD__cell_to_unsigned_integer_string__value, STANDARD__cell_to_unsigned_integer_string__ten, ANVIL__unused_cell_ID, STANDARD__cell_to_unsigned_integer_string__value);
@@ -328,7 +328,7 @@ void STANDARD__code__print_buffer_as_string(ANVIL__workspace* workspace, STANDAR
     ANVIL__code__operate__jump__static(workspace, ANVIL__sft__always_run, STANDARD__print_buffer_as_string__buffer_start, STANDARD__print_buffer_as_string__current, STANDARD__print_buffer_as_string__buffer_end, ANVIL__sft__always_run, (*std_offsets).offsets[STANDARD__sot__print_buffer_as_string__loop__end]);
 
     // read character
-    ANVIL__code__address_to_cell(workspace, ANVIL__sft__always_run, STANDARD__print_buffer_as_string__current, ANVIL__srt__constant__ascii_character_bit_size, STANDARD__print_buffer_as_string__character);
+    ANVIL__code__address_to_cell(workspace, ANVIL__sft__always_run, STANDARD__print_buffer_as_string__current, ANVIL__srt__constant__ascii_character_byte_size, STANDARD__print_buffer_as_string__character);
 
     // print character
     ANVIL__code__debug__putchar(workspace, STANDARD__print_buffer_as_string__character);

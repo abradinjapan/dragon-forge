@@ -143,6 +143,8 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__integer__modulous,
     COMPILER__ast__predefined__buffer__request,
     COMPILER__ast__predefined__buffer__return,
+    COMPILER__ast__predefined__mover__address_to_cell,
+    COMPILER__ast__predefined__mover__cell_to_address,
 
     // user defined call
     COMPILER__ast__user_defined_function_call,
@@ -612,7 +614,7 @@ ANVIL__bt COMPILER__translate__string_to_binary(ANVIL__buffer string, ANVIL__cel
         current.start += sizeof(ANVIL__character);
     }
 
-    // check for sane character limit
+    // check for same character limit
     if (character_count > character_count_limit) {
         // binary literal to large, conversion failed
         return ANVIL__bt__false;

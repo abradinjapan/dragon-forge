@@ -251,6 +251,14 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__return_memory(anvil, COMPILER__generate__use_variable(buffer_acquisition__buffer_return).cells.start, COMPILER__generate__use_variable(buffer_acquisition__buffer_return).cells.end);
 
             break;
+        case COMPILER__ast__predefined__mover__address_to_cell:
+            ANVIL__code__address_to_cell(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(cell_address_mover__address).cells.start, COMPILER__generate__use_variable(cell_address_mover__byte_count).cells.start, COMPILER__generate__use_variable(cell_address_mover__cell).cells.start);
+
+            break;
+        case COMPILER__ast__predefined__mover__cell_to_address:
+            ANVIL__code__cell_to_address(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(cell_address_mover__cell).cells.start, COMPILER__generate__use_variable(cell_address_mover__byte_count).cells.start, COMPILER__generate__use_variable(cell_address_mover__address).cells.start);
+
+            break;
         case COMPILER__ast__user_defined_function_call:
             // setup counter
             user_defined_function_call__current_function_io_register = ANVIL__srt__start__function_io;

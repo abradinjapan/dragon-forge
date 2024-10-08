@@ -446,10 +446,8 @@ typedef enum ANVIL__srt {
     ANVIL__srt__constant__always_run__value = ANVIL__srt__constant__true,
     ANVIL__srt__constant__never_run__value = ANVIL__srt__constant__false,
     ANVIL__srt__constant__cell_byte_count = ANVIL__srt__constant__8,
-    ANVIL__srt__constant__cell_bit_count = ANVIL__srt__constant__64,
     ANVIL__srt__constant__bits_in_byte = ANVIL__srt__constant__8,
     ANVIL__srt__constant__ascii_character_byte_size = ANVIL__srt__constant__1,
-    ANVIL__srt__constant__ascii_character_bit_size = ANVIL__srt__constant__8,
 
     // locations
     ANVIL__srt__start__workspace = 8192,
@@ -545,7 +543,7 @@ void ANVIL__code__cell_to_cell(ANVIL__workspace* workspace, ANVIL__flag_ID flag,
 // push a cell onto the stack
 void ANVIL__code__push_cell(ANVIL__workspace* workspace, ANVIL__flag_ID flag, ANVIL__cell_ID source_cell) {
     // write data to stack
-    ANVIL__code__cell_to_address(workspace, flag, source_cell, ANVIL__srt__constant__64, ANVIL__srt__stack__current_address);
+    ANVIL__code__cell_to_address(workspace, flag, source_cell, ANVIL__srt__constant__cell_byte_size, ANVIL__srt__stack__current_address);
 
     // increase stack pointer
     ANVIL__code__operate(workspace, flag, ANVIL__ot__integer_add, ANVIL__srt__stack__current_address, ANVIL__srt__constant__cell_byte_size, ANVIL__unused_cell_ID, ANVIL__srt__stack__current_address);
@@ -559,7 +557,7 @@ void ANVIL__code__pop_cell(ANVIL__workspace* workspace, ANVIL__flag_ID flag, ANV
     ANVIL__code__operate(workspace, flag, ANVIL__ot__integer_subtract, ANVIL__srt__stack__current_address, ANVIL__srt__constant__cell_byte_size, ANVIL__unused_cell_ID, ANVIL__srt__stack__current_address);
 
     // read data from stack
-    ANVIL__code__address_to_cell(workspace, flag, ANVIL__srt__stack__current_address, ANVIL__srt__constant__64, destination_cell);
+    ANVIL__code__address_to_cell(workspace, flag, ANVIL__srt__stack__current_address, ANVIL__srt__constant__cell_byte_size, destination_cell);
 
     return;
 }
@@ -787,7 +785,7 @@ void ANVIL__code__retrieve_embedded_buffer(ANVIL__workspace* workspace, ANVIL__f
     ANVIL__code__calculate_dynamically__offset_address(workspace, flag, program_offset, ANVIL__srt__temp__address);
 
     // get buffer length
-    ANVIL__code__write_cell(workspace, (ANVIL__cell)(ANVIL__define__bits_in_byte * sizeof(ANVIL__length)), ANVIL__srt__temp__bit_count);
+    ANVIL__code__write_cell(workspace, (ANVIL__cell)sizeof(ANVIL__length), ANVIL__srt__temp__bit_count);
     ANVIL__code__address_to_cell(workspace, flag, ANVIL__srt__temp__address, ANVIL__srt__temp__bit_count, ANVIL__srt__temp__length);
 
     // calculate buffer data start
@@ -811,15 +809,15 @@ void ANVIL__code__setup__context(ANVIL__workspace* workspace, ANVIL__cell_ID pro
     // setup skeleton context
     // setup buffer start
     ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, context_buffer_start, ANVIL__srt__temp__address);
-    ANVIL__code__cell_to_address(workspace, ANVIL__sft__always_run, program_buffer_start, ANVIL__srt__constant__cell_bit_count, ANVIL__srt__temp__address);
+    ANVIL__code__cell_to_address(workspace, ANVIL__sft__always_run, program_buffer_start, ANVIL__srt__constant__cell_byte_count, ANVIL__srt__temp__address);
 
     // setup current address
     ANVIL__code__operate(workspace, ANVIL__sft__always_run, ANVIL__ot__integer_add, ANVIL__srt__temp__address, ANVIL__srt__constant__cell_byte_count, ANVIL__unused_cell_ID, ANVIL__srt__temp__address);
-    ANVIL__code__cell_to_address(workspace, ANVIL__sft__always_run, program_buffer_start, ANVIL__srt__constant__cell_bit_count, ANVIL__srt__temp__address);
+    ANVIL__code__cell_to_address(workspace, ANVIL__sft__always_run, program_buffer_start, ANVIL__srt__constant__cell_byte_count, ANVIL__srt__temp__address);
 
     // setup end address
     ANVIL__code__operate(workspace, ANVIL__sft__always_run, ANVIL__ot__integer_add, ANVIL__srt__temp__address, ANVIL__srt__constant__cell_byte_count, ANVIL__unused_cell_ID, ANVIL__srt__temp__address);
-    ANVIL__code__cell_to_address(workspace, ANVIL__sft__always_run, program_buffer_end, ANVIL__srt__constant__cell_bit_count, ANVIL__srt__temp__address);
+    ANVIL__code__cell_to_address(workspace, ANVIL__sft__always_run, program_buffer_end, ANVIL__srt__constant__cell_byte_count, ANVIL__srt__temp__address);
     
     return;
 }
