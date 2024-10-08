@@ -141,6 +141,8 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__integer__multiplication,
     COMPILER__ast__predefined__integer__division,
     COMPILER__ast__predefined__integer__modulous,
+    COMPILER__ast__predefined__buffer__request,
+    COMPILER__ast__predefined__buffer__return,
 
     // user defined call
     COMPILER__ast__user_defined_function_call,
