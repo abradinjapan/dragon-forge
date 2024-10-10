@@ -275,6 +275,10 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__buffer_to_buffer(anvil, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.end, COMPILER__generate__use_variable(file_buffer_mover__buffer_1).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_1).cells.end);
             
             break;
+        case COMPILER__ast__predefined__list__open_list:
+            STANDARD__code__call__open_list(anvil, &(*workspace).standard_offsets, ANVIL__sft__always_run, COMPILER__generate__use_variable(list__increase).cells.start, COMPILER__generate__use_variable(list__output_list).cells.start, COMPILER__generate__use_variable(list__output_list).cells.start + 1, COMPILER__generate__use_variable(list__output_list).cells.start + 2, COMPILER__generate__use_variable(list__output_list).cells.start + 3);
+
+            break;
         case COMPILER__ast__user_defined_function_call:
             // setup counter
             user_defined_function_call__current_function_io_register = ANVIL__srt__start__function_io;

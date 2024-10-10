@@ -125,30 +125,46 @@ typedef enum COMPILER__stt {
 // accountling statement type
 typedef enum COMPILER__ast {
     // built in calls
+    // data insertion
     COMPILER__ast__predefined__set__cell,
     COMPILER__ast__predefined__set__string,
+
+    // print
     COMPILER__ast__predefined__print__debug_cell,
     COMPILER__ast__predefined__print__buffer_as_string,
     COMPILER__ast__predefined__print__cell_as_binary,
+
+    // filling structures
     COMPILER__ast__predefined__copy__anything,
     COMPILER__ast__predefined__pack__anything,
     COMPILER__ast__predefined__pack_null__anything,
+
+    // jumps
     COMPILER__ast__predefined__jump__top,
     COMPILER__ast__predefined__jump__bottom,
     COMPILER__ast__predefined__jump__offset,
+
+    // integers
     COMPILER__ast__predefined__check__integer_within_range,
     COMPILER__ast__predefined__integer__addition,
     COMPILER__ast__predefined__integer__subtraction,
     COMPILER__ast__predefined__integer__multiplication,
     COMPILER__ast__predefined__integer__division,
     COMPILER__ast__predefined__integer__modulous,
+
+    // buffers
     COMPILER__ast__predefined__buffer__request,
     COMPILER__ast__predefined__buffer__return,
+
+    // movers
     COMPILER__ast__predefined__mover__address_to_cell,
     COMPILER__ast__predefined__mover__cell_to_address,
     COMPILER__ast__predefined__mover__file_to_buffer,
     COMPILER__ast__predefined__mover__buffer_to_file,
     COMPILER__ast__predefined__mover__copy_buffer_data,
+
+    // list calls
+    COMPILER__ast__predefined__list__open_list,
 
     // user defined call
     COMPILER__ast__user_defined_function_call,

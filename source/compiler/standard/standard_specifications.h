@@ -28,6 +28,9 @@ typedef enum STANDARD__sot {
     STANDARD__sot__set_inputs_in_context_buffer__start,
     STANDARD__sot__get_outputs_from_context_buffer__start,
 
+    // list functions
+    STANDARD__ot__open_list__start,
+
     // count
     STANDARD__sot__COUNT,
 } STANDARD__sot;
