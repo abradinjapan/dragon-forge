@@ -263,6 +263,18 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__cell_to_address(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(cell_address_mover__cell).cells.start, COMPILER__generate__use_variable(cell_address_mover__byte_count).cells.start, COMPILER__generate__use_variable(cell_address_mover__address).cells.start);
 
             break;
+        case COMPILER__ast__predefined__mover__file_to_buffer:
+            ANVIL__code__file_to_buffer(anvil, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.end, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.end);
+
+            break;
+        case COMPILER__ast__predefined__mover__buffer_to_file:
+            ANVIL__code__buffer_to_file(anvil, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.end, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.end);
+            
+            break;
+        case COMPILER__ast__predefined__mover__copy_buffer_data:
+            ANVIL__code__buffer_to_buffer(anvil, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.end, COMPILER__generate__use_variable(file_buffer_mover__buffer_1).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_1).cells.end);
+            
+            break;
         case COMPILER__ast__user_defined_function_call:
             // setup counter
             user_defined_function_call__current_function_io_register = ANVIL__srt__start__function_io;

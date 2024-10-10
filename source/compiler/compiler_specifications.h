@@ -146,6 +146,9 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__buffer__return,
     COMPILER__ast__predefined__mover__address_to_cell,
     COMPILER__ast__predefined__mover__cell_to_address,
+    COMPILER__ast__predefined__mover__file_to_buffer,
+    COMPILER__ast__predefined__mover__buffer_to_file,
+    COMPILER__ast__predefined__mover__copy_buffer_data,
 
     // user defined call
     COMPILER__ast__user_defined_function_call,
