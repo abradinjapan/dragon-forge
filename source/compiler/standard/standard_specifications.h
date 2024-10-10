@@ -30,6 +30,7 @@ typedef enum STANDARD__sot {
 
     // list functions
     STANDARD__ot__open_list__start,
+    STANDARD__ot__close_list__start,
 
     // count
     STANDARD__sot__COUNT,

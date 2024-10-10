@@ -18,6 +18,7 @@ void STANDARD__code__package(ANVIL__workspace* workspace, STANDARD__offsets* sta
     STANDARD__code__set_inputs_in_context_buffer(workspace, standard_offsets);
     STANDARD__code__get_outputs_from_context_buffer(workspace, standard_offsets);
     STANDARD__code__open_list(workspace, standard_offsets);
+    STANDARD__code__close_list(workspace, standard_offsets);
 
     return;
 }

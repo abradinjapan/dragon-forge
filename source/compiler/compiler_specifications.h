@@ -165,6 +165,7 @@ typedef enum COMPILER__ast {
 
     // list calls
     COMPILER__ast__predefined__list__open_list,
+    COMPILER__ast__predefined__list__close_list,
 
     // user defined call
     COMPILER__ast__user_defined_function_call,
