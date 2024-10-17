@@ -1712,9 +1712,6 @@ COMPILER__accountling_variable_range COMPILER__account__functions__mark_variable
         if (member.structure_ID >= structures.data_table.count) {
             // declare variable
             ((COMPILER__accountling_variable*)(*accountling_function).variables.lists[COMPILER__avat__member].list.buffer.start)[index] = COMPILER__create__accountling_variable(COMPILER__get__lexling_by_index(member.name.lexlings, 0), member.structure_ID, COMPILER__create__accountling_variable_range(-1, -1), COMPILER__create__cell_range(*current_sub_cell, *current_sub_cell));
-
-            // next cell
-            //(*current_sub_cell)++;
         // recurse
         } else {
             // setup range start
@@ -1729,9 +1726,6 @@ COMPILER__accountling_variable_range COMPILER__account__functions__mark_variable
 
                 // set range end
                 cell_range.end = *current_sub_cell - 1;
-
-                // next cell
-                //(*current_sub_cell)++;
             } else {
                 member_range = COMPILER__create__accountling_variable_range(-1, -1);
 
