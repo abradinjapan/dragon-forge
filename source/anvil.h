@@ -654,6 +654,10 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
     // debug mark code section temps
     ANVIL__cell debug__mark_code_section__section_length;
 
+    // debug get current context
+    ANVIL__cell_ID get_current_context__buffer_start;
+    ANVIL__cell_ID get_current_context__buffer_end;
+
     // setup execution read address
     execution_read_address = ANVIL__get__cell_address_from_context(context, ANVIL__rt__program_current_address);
 
@@ -1115,6 +1119,17 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
 
         // useless operation to quiet compiler
         debug__mark_code_section__section_length = debug__mark_code_section__section_length;
+
+        break;
+    // get current context as a buffer
+    case ANVIL__it__debug__get_current_context:
+        // get parameters
+        get_current_context__buffer_start = ANVIL__read_next__cell_ID(execution_read_address);
+        get_current_context__buffer_end = ANVIL__read_next__cell_ID(execution_read_address);
+        
+        // setup output
+        (*context).cells[get_current_context__buffer_start] = context;
+        (*context).cells[get_current_context__buffer_end] = context + sizeof(ANVIL__context) - 1;
 
         break;
     // in case instruction ID was invalid

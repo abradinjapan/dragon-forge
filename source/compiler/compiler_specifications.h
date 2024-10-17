@@ -166,6 +166,8 @@ typedef enum COMPILER__ast {
     // list calls
     COMPILER__ast__predefined__list__open_list,
     COMPILER__ast__predefined__list__close_list,
+    COMPILER__ast__predefined__list__append_structure,
+    COMPILER__ast__predefined__list__append_buffer_data,
 
     // user defined call
     COMPILER__ast__user_defined_function_call,
@@ -220,9 +222,9 @@ const char* COMPILER__global__predefined_type_member_names[] = {
     "value",
     "start",
     "end",
-    "buffer",
+    "allocation",
+    "content",
     "increase",
-    "filled_index",
     "INTERNAL",
 };
 // predefined type member name type
@@ -230,9 +232,9 @@ typedef enum COMPILER__ptmnt {
     COMPILER__ptmnt__value,
     COMPILER__ptmnt__start,
     COMPILER__ptmnt__end,
-    COMPILER__ptmnt__buffer,
+    COMPILER__ptmnt__allocation,
+    COMPILER__ptmnt__content,
     COMPILER__ptmnt__increase,
-    COMPILER__ptmnt__filled_index,
     COMPILER__ptmnt__COUNT,
 } COMPILER__ptmnt;
 // predefined type type
@@ -274,12 +276,12 @@ COMPILER__blueprintling COMPILER__global__predefined_types[] = {
     COMPILER__abt__define_type,
         COMPILER__ptt__dragon_list,
         3,
-        COMPILER__ptt__dragon_buffer, // data buffer
-            COMPILER__ptmnt__buffer,
+        COMPILER__ptt__dragon_buffer, // allocated memory
+            COMPILER__ptmnt__allocation,
+        COMPILER__ptt__dragon_buffer, // filled memory
+            COMPILER__ptmnt__content,
         COMPILER__ptt__dragon_cell, // increase
             COMPILER__ptmnt__increase,
-        COMPILER__ptt__dragon_cell, // filled index
-            COMPILER__ptmnt__filled_index,
     COMPILER__abt__end_blueprint,
 };
 

@@ -383,6 +383,16 @@ void ANVIL__code__debug__mark_code_section(ANVIL__workspace* workspace, ANVIL__c
     return;
 }
 
+// write debug get current context instruction
+void ANVIL__code__debug__get_current_context(ANVIL__workspace* workspace, ANVIL__cell_ID buffer_start, ANVIL__cell_ID buffer_end) {
+    // write instruction
+    ANVIL__write_next__instruction_ID(workspace, ANVIL__it__debug__get_current_context);
+    ANVIL__write_next__cell_ID(workspace, buffer_start);
+    ANVIL__write_next__cell_ID(workspace, buffer_end);
+
+    return;
+}
+
 /* Stack ABI Defines */
 // types
 typedef u64 ANVIL__preserve;
@@ -558,6 +568,17 @@ void ANVIL__code__pop_cell(ANVIL__workspace* workspace, ANVIL__flag_ID flag, ANV
 
     // read data from stack
     ANVIL__code__address_to_cell(workspace, flag, ANVIL__srt__stack__current_address, ANVIL__srt__constant__cell_byte_size, destination_cell);
+
+    return;
+}
+
+// calculate a buffer's length
+void ANVIL__code__calculate__buffer_length(ANVIL__workspace* workspace, ANVIL__flag_ID flag, ANVIL__cell_ID buffer_start, ANVIL__cell_ID buffer_end, ANVIL__cell_ID buffer_length) {
+    // subtract end and start
+	ANVIL__code__operate(workspace, flag, ANVIL__ot__integer_subtract, buffer_end, buffer_start, ANVIL__unused_cell_ID, buffer_length);
+
+    // convert difference to length
+	ANVIL__code__operate(workspace, flag, ANVIL__ot__integer_add, buffer_length, ANVIL__srt__constant__1, ANVIL__unused_cell_ID, buffer_length);
 
     return;
 }
@@ -779,7 +800,7 @@ void ANVIL__code__operate__jump__static(ANVIL__workspace* workspace, ANVIL__flag
     return;
 }
 
-// retrieve an embedded buffer // UNTESTED!
+// retrieve an embedded buffer
 void ANVIL__code__retrieve_embedded_buffer(ANVIL__workspace* workspace, ANVIL__flag_ID flag, ANVIL__cell_ID program_offset, ANVIL__cell_ID buffer_start, ANVIL__cell_ID buffer_end) {
     // calculate buffer start
     ANVIL__code__calculate_dynamically__offset_address(workspace, flag, program_offset, ANVIL__srt__temp__address);

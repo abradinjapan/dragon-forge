@@ -97,6 +97,7 @@ typedef enum ANVIL__it {
     ANVIL__it__debug__fgets, // read one line from stdin
     ANVIL__it__debug__mark_data_section, // mark a section of data (NOP)
     ANVIL__it__debug__mark_code_section, // mark a section of code (NOP)
+    ANVIL__it__debug__get_current_context, // gets the current context as a buffer,
 
     // end of defined instruction types
     ANVIL__it__END,
@@ -124,6 +125,7 @@ typedef enum ANVIL__ilt {
     ANVIL__ilt__debug__fgets = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 2),
     ANVIL__ilt__debug__mark_data_section = sizeof(ANVIL__instruction_ID) + sizeof(ANVIL__cell),
     ANVIL__ilt__debug__mark_code_section = sizeof(ANVIL__instruction_ID) + sizeof(ANVIL__cell),
+    ANVIL__ilt__debug__get_current_context = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 2),
 } ANVIL__ilt;
 
 // error codes
