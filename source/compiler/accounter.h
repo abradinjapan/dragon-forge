@@ -3338,6 +3338,39 @@ void COMPILER__account__functions__predefined_variables(COMPILER__accountling_st
     }
     (*accountling_function).variables.lists[COMPILER__avat__master].count++;
 
+    // create dragon.constant.0
+    variable.cells = COMPILER__create__cell_range(ANVIL__srt__constant__0, ANVIL__srt__constant__0);
+    variable.members = COMPILER__create__accountling_variable_range(-1, -1);
+    variable.name = COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)(COMPILER__define__master_namespace ".constant.0"), ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location());
+    variable.type = COMPILER__ptt__dragon_cell;
+    COMPILER__append__accountling_variable(&(*accountling_function).variables.lists[COMPILER__avat__master].list, variable, error);
+    if (COMPILER__check__error_occured(error)) {
+        return;
+    }
+    (*accountling_function).variables.lists[COMPILER__avat__master].count++;
+
+    // create dragon.constant.1
+    variable.cells = COMPILER__create__cell_range(ANVIL__srt__constant__1, ANVIL__srt__constant__1);
+    variable.members = COMPILER__create__accountling_variable_range(-1, -1);
+    variable.name = COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)(COMPILER__define__master_namespace ".constant.1"), ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location());
+    variable.type = COMPILER__ptt__dragon_cell;
+    COMPILER__append__accountling_variable(&(*accountling_function).variables.lists[COMPILER__avat__master].list, variable, error);
+    if (COMPILER__check__error_occured(error)) {
+        return;
+    }
+    (*accountling_function).variables.lists[COMPILER__avat__master].count++;
+
+    // create dragon.constant.cell.byte_size
+    variable.cells = COMPILER__create__cell_range(ANVIL__srt__constant__cell_byte_size, ANVIL__srt__constant__cell_byte_size);
+    variable.members = COMPILER__create__accountling_variable_range(-1, -1);
+    variable.name = COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)(COMPILER__define__master_namespace ".constant.cell.byte_size"), ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location());
+    variable.type = COMPILER__ptt__dragon_cell;
+    COMPILER__append__accountling_variable(&(*accountling_function).variables.lists[COMPILER__avat__master].list, variable, error);
+    if (COMPILER__check__error_occured(error)) {
+        return;
+    }
+    (*accountling_function).variables.lists[COMPILER__avat__master].count++;
+
     return;
 }
 
