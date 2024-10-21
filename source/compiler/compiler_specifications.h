@@ -163,6 +163,9 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__mover__buffer_to_file,
     COMPILER__ast__predefined__mover__copy_buffer_data,
 
+    // file deleters
+    COMPILER__ast__predefined__delete_file,
+
     // list calls
     COMPILER__ast__predefined__list__open_list,
     COMPILER__ast__predefined__list__close_list,

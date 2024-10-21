@@ -295,6 +295,16 @@ void ANVIL__code__buffer_to_file(ANVIL__workspace* workspace, ANVIL__cell_ID fil
     return;
 }
 
+// write delete file instruction
+void ANVIL__code__delete_file(ANVIL__workspace* workspace, ANVIL__cell_ID file_path_start, ANVIL__cell_ID file_path_end) {
+    // write instruction
+    ANVIL__write_next__instruction_ID(workspace, ANVIL__it__delete_file);
+    ANVIL__write_next__cell_ID(workspace, file_path_start);
+    ANVIL__write_next__cell_ID(workspace, file_path_end);
+
+    return;
+}
+
 // write buffer to buffer instruction
 void ANVIL__code__buffer_to_buffer(ANVIL__workspace* workspace, ANVIL__cell_ID source_start, ANVIL__cell_ID source_end, ANVIL__cell_ID destination_start, ANVIL__cell_ID destination_end) {
     // write instruction

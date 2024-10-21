@@ -2675,6 +2675,10 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__fil
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
+    COMPILER__namespace delete_file_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".delete_file", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
     COMPILER__namespace copy_buffer_data_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".copy_buffer_data", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
@@ -2722,6 +2726,22 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__fil
 
         // match
         goto match;
+    // if is delete file
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, delete_file_name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 0) {
+        // get variables
+        ANVIL__bt is_valid_argument;
+        COMPILER__accountling_variable_argument file_path_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_buffer, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || file_path_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // match
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__delete_file;
+        (*accountling_statement).file_buffer_mover__file_path = file_path_argument;
+
+        // match
+        goto match;
     // if is buffer to buffer
     } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, copy_buffer_data_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 0) {
         // get variables
@@ -2752,6 +2772,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__fil
     failure:
     COMPILER__close__parsling_namespace(file_to_buffer_name);
     COMPILER__close__parsling_namespace(buffer_to_file_name);
+    COMPILER__close__parsling_namespace(delete_file_name);
     COMPILER__close__parsling_namespace(copy_buffer_data_name);
     return ANVIL__bt__false;
 
@@ -2759,6 +2780,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__fil
     match:
     COMPILER__close__parsling_namespace(file_to_buffer_name);
     COMPILER__close__parsling_namespace(buffer_to_file_name);
+    COMPILER__close__parsling_namespace(delete_file_name);
     COMPILER__close__parsling_namespace(copy_buffer_data_name);
     return ANVIL__bt__true;
 }
@@ -3708,7 +3730,7 @@ void COMPILER__print__accountling_variable(COMPILER__accountling_function functi
     printf("', cells: [ %lu->%lu ], member_range: [ %lu->%lu ]]\n", (ANVIL__u64)variable.cells.start, (ANVIL__u64)variable.cells.end, variable.members.start, variable.members.end);
 
     // print all members
-    if (variable.members.start != -1) {
+    if (variable.members.start != (COMPILER__variable_member_index)-1) {
         for (COMPILER__variable_member_index index = variable.members.start; index <= variable.members.end; index++) {
             // get member variable
             COMPILER__accountling_variable member_variable = ((COMPILER__accountling_variable*)function.variables.lists[COMPILER__avat__member].list.buffer.start)[index];

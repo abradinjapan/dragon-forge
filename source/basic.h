@@ -388,6 +388,27 @@ void ANVIL__move__buffer_to_file(ANVIL__bt* error, ANVIL__buffer file_path, ANVI
 	return;
 }
 
+// delete a file
+void ANVIL__delete__file(ANVIL__bt* error, ANVIL__buffer file_path) {
+    ANVIL__buffer null_terminated_file_path = file_path;
+
+    // check for null termination
+    if (*(ANVIL__character*)file_path.end != 0) {
+        // setup null termination
+        null_terminated_file_path = ANVIL__add__null_termination_to_file_path(file_path, error);
+    }
+
+    // free file
+    remove(null_terminated_file_path.start);
+
+    // close null file path if necessary
+    if (*(ANVIL__character*)file_path.end != 0) {
+        ANVIL__close__buffer(null_terminated_file_path);
+    }
+
+    return;
+}
+
 // print buffer
 void ANVIL__print__buffer(ANVIL__buffer buffer) {
     // print character by character

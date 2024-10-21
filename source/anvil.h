@@ -143,6 +143,7 @@ ANVIL__ilt ANVIL__convert__it_to_ilt(ANVIL__it instruction) {
         ANVIL__ilt__cell_to_address,
         ANVIL__ilt__file_to_buffer,
         ANVIL__ilt__buffer_to_file,
+        ANVIL__ilt__delete_file,
         ANVIL__ilt__buffer_to_buffer,
         ANVIL__ilt__compile,
         ANVIL__ilt__run,
@@ -603,6 +604,12 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
     ANVIL__buffer buffer_to_file__file_name;
     ANVIL__bt buffer_to_file__error = ANVIL__bt__false;
 
+    // delete file temps
+    ANVIL__cell_ID delete_file__file_path_start;
+    ANVIL__cell_ID delete_file__file_path_end;
+    ANVIL__buffer delete_file__file_path;
+    ANVIL__bt delete_file__error = ANVIL__bt__false;
+
     // buffer to buffer temps
     ANVIL__cell_ID buffer_to_buffer__source_start;
     ANVIL__cell_ID buffer_to_buffer__source_end;
@@ -902,6 +909,26 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         } else {
             // set error
             ANVIL__set__error_code_cell(context, ANVIL__et__invalid_allocation__allocation_does_not_exist);
+        }
+
+        break;
+    // take a file path and delete it
+    case ANVIL__it__delete_file:
+        // get parameters
+        delete_file__file_path_start = ANVIL__read_next__cell_ID(execution_read_address);
+        delete_file__file_path_end = ANVIL__read_next__cell_ID(execution_read_address);
+
+        // setup temps
+        delete_file__file_path.start = (*context).cells[delete_file__file_path_start];
+        delete_file__file_path.end = (*context).cells[delete_file__file_path_end];
+
+        // remove file
+        ANVIL__delete__file(&delete_file__error, delete_file__file_path);
+
+        // check for error
+        if (delete_file__error == ANVIL__bt__true) {
+            // set error
+            ANVIL__set__error_code_cell(context, ANVIL__et__file_not_found);
         }
 
         break;

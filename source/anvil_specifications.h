@@ -87,6 +87,7 @@ typedef enum ANVIL__it {
     ANVIL__it__cell_to_address, // write cell to memory
     ANVIL__it__file_to_buffer, // get file into buffer
     ANVIL__it__buffer_to_file, // write buffer to disk
+    ANVIL__it__delete_file, // deletes a file
     ANVIL__it__buffer_to_buffer, // copy data from one buffer to another of the same size
     ANVIL__it__compile, // compile one or more source files to an anvil program
     ANVIL__it__run, // run context (both until finished and run one instruction)
@@ -97,7 +98,7 @@ typedef enum ANVIL__it {
     ANVIL__it__debug__fgets, // read one line from stdin
     ANVIL__it__debug__mark_data_section, // mark a section of data (NOP)
     ANVIL__it__debug__mark_code_section, // mark a section of code (NOP)
-    ANVIL__it__debug__get_current_context, // gets the current context as a buffer,
+    ANVIL__it__debug__get_current_context, // gets the current context as a buffer
 
     // end of defined instruction types
     ANVIL__it__END,
@@ -117,6 +118,7 @@ typedef enum ANVIL__ilt {
     ANVIL__ilt__cell_to_address = sizeof(ANVIL__instruction_ID) + sizeof(ANVIL__flag_ID) + (sizeof(ANVIL__cell_ID) * 3),
     ANVIL__ilt__file_to_buffer = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 4),
     ANVIL__ilt__buffer_to_file = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 4),
+    ANVIL__ilt__delete_file = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 2),
     ANVIL__ilt__buffer_to_buffer = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 4),
     ANVIL__ilt__compile = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 11),
     ANVIL__ilt__run = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 3),

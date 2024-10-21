@@ -160,7 +160,7 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             break;
         case COMPILER__ast__predefined__copy__anything:
             // setup copies
-            for (ANVIL__cell_index cell_index = 0; cell_index <= (COMPILER__generate__use_variable(copy__input).cells.end - COMPILER__generate__use_variable(copy__input).cells.start) + 1; cell_index++) {
+            for (ANVIL__cell_index cell_index = 0; cell_index <= (ANVIL__cell_index)(COMPILER__generate__use_variable(copy__input).cells.end - COMPILER__generate__use_variable(copy__input).cells.start) + 1; cell_index++) {
                 // setup cell copy
                 ANVIL__code__cell_to_cell(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(copy__input).cells.start + cell_index, COMPILER__generate__use_variable(copy__output).cells.start + cell_index);
             }
@@ -270,6 +270,10 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
         case COMPILER__ast__predefined__mover__buffer_to_file:
             ANVIL__code__buffer_to_file(anvil, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.end, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.end);
             
+            break;
+        case COMPILER__ast__predefined__delete_file:
+            ANVIL__code__delete_file(anvil, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start + 1);
+
             break;
         case COMPILER__ast__predefined__mover__copy_buffer_data:
             ANVIL__code__buffer_to_buffer(anvil, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.end, COMPILER__generate__use_variable(file_buffer_mover__buffer_1).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_1).cells.end);
