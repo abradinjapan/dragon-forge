@@ -147,6 +147,7 @@ ANVIL__ilt ANVIL__convert__it_to_ilt(ANVIL__it instruction) {
         ANVIL__ilt__buffer_to_buffer,
         ANVIL__ilt__compile,
         ANVIL__ilt__run,
+        ANVIL__ilt__get_time,
         ANVIL__ilt__debug__putchar,
         ANVIL__ilt__debug__print_cell_as_decimal,
         ANVIL__ilt__debug__fgets,
@@ -641,6 +642,11 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
     ANVIL__cell_ID run__context_buffer_end;
     ANVIL__cell_ID run__instruction_count;
 
+    // get time temps
+    ANVIL__cell_ID get_time__seconds;
+    ANVIL__cell_ID get_time__nanoseconds;
+    struct timespec get_time__data_destination;
+
     // debug putchar temps
     ANVIL__cell_ID debug__putchar__printing_cell_ID;
 
@@ -1053,6 +1059,20 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
             // set error
             ANVIL__set__error_code_cell(context, ANVIL__et__invalid_address_range);
         }
+
+        break;
+    // get current time
+    case ANVIL__it__get_time:
+        // get parameters
+        get_time__seconds = ANVIL__read_next__cell_ID(execution_read_address);
+        get_time__nanoseconds = ANVIL__read_next__cell_ID(execution_read_address);
+
+        // get time of day
+        clock_gettime(CLOCK_REALTIME, &get_time__data_destination);
+
+        // set variables
+        (*context).cells[get_time__seconds] = (ANVIL__cell)get_time__data_destination.tv_sec;
+        (*context).cells[get_time__nanoseconds] = (ANVIL__cell)get_time__data_destination.tv_nsec;
 
         break;
     // print one char to stdout

@@ -347,6 +347,16 @@ void ANVIL__code__run(ANVIL__workspace* workspace, ANVIL__cell_ID context_buffer
     return;
 }
 
+// get time instruction
+void ANVIL__code__get_time(ANVIL__workspace* workspace, ANVIL__cell_ID time_in_seconds, ANVIL__cell_ID time_in_nanoseconds) {
+    // write instruction
+    ANVIL__write_next__instruction_ID(workspace, ANVIL__it__get_time);
+    ANVIL__write_next__cell_ID(workspace, time_in_seconds);
+    ANVIL__write_next__cell_ID(workspace, time_in_nanoseconds);
+
+    return;
+}
+
 // write debug putchar instruction
 void ANVIL__code__debug__putchar(ANVIL__workspace* workspace, ANVIL__cell_ID printing_cell_ID) {
     // write instruction

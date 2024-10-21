@@ -3,6 +3,7 @@
 
 /* Include */
 #include "basic.h"
+#include <time.h>
 
 /* Specifications */
 // instructions
@@ -91,8 +92,7 @@ typedef enum ANVIL__it {
     ANVIL__it__buffer_to_buffer, // copy data from one buffer to another of the same size
     ANVIL__it__compile, // compile one or more source files to an anvil program
     ANVIL__it__run, // run context (both until finished and run one instruction)
-
-    // extra defined instructions
+    ANVIL__it__get_time, // get time in seconds and nano seconds
     ANVIL__it__debug__putchar, // print one character to stdout
     ANVIL__it__debug__print_cell_as_decimal, // print an entire cell as a decimal number
     ANVIL__it__debug__fgets, // read one line from stdin
@@ -122,6 +122,7 @@ typedef enum ANVIL__ilt {
     ANVIL__ilt__buffer_to_buffer = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 4),
     ANVIL__ilt__compile = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 11),
     ANVIL__ilt__run = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 3),
+    ANVIL__ilt__get_time = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 2),
     ANVIL__ilt__debug__putchar = sizeof(ANVIL__instruction_ID) + sizeof(ANVIL__cell_ID),
     ANVIL__ilt__debug__print_cell_as_decimal = sizeof(ANVIL__instruction_ID) + sizeof(ANVIL__cell_ID),
     ANVIL__ilt__debug__fgets = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 2),

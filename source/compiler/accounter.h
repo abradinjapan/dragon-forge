@@ -359,6 +359,9 @@ typedef struct COMPILER__accountling_statement {
     COMPILER__accountling_variable_argument list__output_list;
     COMPILER__accountling_variable_argument list__append_data;
 
+    // time functions
+    COMPILER__accountling_variable_argument time__get_time_data;
+
     // user defined function call inputs and outputs
     COMPILER__function_header_index function_call__calling_function_header_index;
     ANVIL__counted_list function_call__inputs; // COMPILER__accountling_variable_argument
@@ -3116,6 +3119,46 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__lis
     return ANVIL__bt__true;
 }
 
+// check for time
+ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__time_functions(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
+    // setup valid names
+    COMPILER__namespace get_time_now_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".time.now", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+
+    // if is a print buffer as string
+    if (COMPILER__check__identical_namespaces(parsling_statement.name.name, get_time_now_name) && parsling_statement.inputs.count == 0 && parsling_statement.outputs.count == 1) {
+        // check input variable type
+        // get index
+        ANVIL__bt is_valid_argument;
+        COMPILER__accountling_variable_argument output_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_time, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || output_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__time__get_current_time;
+        (*accountling_statement).time__get_time_data = output_argument;
+
+        // match
+        goto match;
+    // not the right argument type
+    } else {
+        goto failure;
+    }
+
+    // not a match
+    failure:
+    COMPILER__close__parsling_namespace(get_time_now_name);
+    return ANVIL__bt__false;
+
+    // match!
+    match:
+    COMPILER__close__parsling_namespace(get_time_now_name);
+    return ANVIL__bt__true;
+}
+
 // check for user defined function calls
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__user_defined_function_calls(COMPILER__accountling_structures structures, COMPILER__accountling_function_headers function_headers, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     COMPILER__function_header_index match_count = 0;
@@ -3431,6 +3474,19 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
 
             // find cell address movers
             if (COMPILER__account__functions__check_and_get_statement_translation__lists(structures, accountling_function, parsling_statement, &accountling_statement, error)) {
+                // append statement
+                COMPILER__append__accountling_statement(&(*accountling_scope).statements.list, accountling_statement, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return;
+                }
+                goto next_statement;
+            }
+            if (COMPILER__check__error_occured(error)) {
+                return;
+            }
+
+            // find cell address movers
+            if (COMPILER__account__functions__check_and_get_statement_translation__time_functions(structures, accountling_function, parsling_statement, &accountling_statement, error)) {
                 // append statement
                 COMPILER__append__accountling_statement(&(*accountling_scope).statements.list, accountling_statement, error);
                 if (COMPILER__check__error_occured(error)) {

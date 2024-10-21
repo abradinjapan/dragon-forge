@@ -359,6 +359,10 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             );*/
 
             break;
+        case COMPILER__ast__predefined__time__get_current_time:
+            ANVIL__code__get_time(anvil, COMPILER__generate__use_variable(time__get_time_data).cells.start, COMPILER__generate__use_variable(time__get_time_data).cells.start + 1);
+            
+            break;
         case COMPILER__ast__user_defined_function_call:
             // setup counter
             user_defined_function_call__current_function_io_register = ANVIL__srt__start__function_io;

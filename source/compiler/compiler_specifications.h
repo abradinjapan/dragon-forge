@@ -181,6 +181,9 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__list__append_structure,
     COMPILER__ast__predefined__list__append_buffer_data,
 
+    // time
+    COMPILER__ast__predefined__time__get_current_time,
+
     // user defined call
     COMPILER__ast__user_defined_function_call,
 
@@ -228,6 +231,7 @@ char* COMPILER__global__predefined_type_names[] = {
     COMPILER__define__master_namespace ".cell",
     COMPILER__define__master_namespace ".buffer",
     COMPILER__define__master_namespace ".list",
+    COMPILER__define__master_namespace ".time",
 };
 // predefined type's member names
 const char* COMPILER__global__predefined_type_member_names[] = {
@@ -237,6 +241,8 @@ const char* COMPILER__global__predefined_type_member_names[] = {
     "allocation",
     "content",
     "increase",
+    "seconds",
+    "nanoseconds",
     "INTERNAL",
 };
 // predefined type member name type
@@ -247,6 +253,8 @@ typedef enum COMPILER__ptmnt {
     COMPILER__ptmnt__allocation,
     COMPILER__ptmnt__content,
     COMPILER__ptmnt__increase,
+    COMPILER__ptmnt__seconds,
+    COMPILER__ptmnt__nanoseconds,
     COMPILER__ptmnt__COUNT,
 } COMPILER__ptmnt;
 // predefined type type
@@ -258,6 +266,7 @@ typedef enum COMPILER__ptt {
     COMPILER__ptt__dragon_cell = COMPILER__ptt__START,
     COMPILER__ptt__dragon_buffer,
     COMPILER__ptt__dragon_list,
+    COMPILER__ptt__dragon_time,
 
     // user defined start
     COMPILER__ptt__USER_DEFINED_START,
@@ -294,6 +303,14 @@ COMPILER__blueprintling COMPILER__global__predefined_types[] = {
             COMPILER__ptmnt__content,
         COMPILER__ptt__dragon_cell, // increase
             COMPILER__ptmnt__increase,
+    // time
+    COMPILER__abt__define_type,
+        COMPILER__ptt__dragon_time,
+        2,
+        COMPILER__ptt__dragon_cell,
+            COMPILER__ptmnt__seconds, // seconds
+        COMPILER__ptt__dragon_cell,
+            COMPILER__ptmnt__nanoseconds, // nanoseconds
     COMPILER__abt__end_blueprint,
 };
 
