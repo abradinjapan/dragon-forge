@@ -209,6 +209,41 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__operate__jump__static(anvil, ANVIL__sft__always_run, ANVIL__srt__constant__false, COMPILER__generate__use_variable(jump__variable_argument).cells.start, ANVIL__srt__constant__false, ANVIL__sft__always_run, ((ANVIL__offset*)(((COMPILER__generation_function*)(*workspace).user_defined_functions.list.buffer.start)[user_defined_function_index].statement_offsets.list.buffer.start))[statement.offset_index]);
 
             break;
+        case COMPILER__ast__predefined__bits_or:
+            // do calculation
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__bits_or, COMPILER__generate__use_variable(bit_operation__first_argument).cells.start, COMPILER__generate__use_variable(bit_operation__second_argument).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(bit_operation__output_argument).cells.start);
+
+            break;
+        case COMPILER__ast__predefined__bits_invert:
+            // do calculation
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__bits_invert, COMPILER__generate__use_variable(bit_operation__first_argument).cells.start, ANVIL__unused_cell_ID, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(bit_operation__output_argument).cells.start);
+
+            break;
+        case COMPILER__ast__predefined__bits_and:
+            // do calculation
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__bits_and, COMPILER__generate__use_variable(bit_operation__first_argument).cells.start, COMPILER__generate__use_variable(bit_operation__second_argument).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(bit_operation__output_argument).cells.start);
+
+            break;
+        case COMPILER__ast__predefined__bits_xor:
+            // do calculation
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__bits_xor, COMPILER__generate__use_variable(bit_operation__first_argument).cells.start, COMPILER__generate__use_variable(bit_operation__second_argument).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(bit_operation__output_argument).cells.start);
+
+            break;
+        case COMPILER__ast__predefined__bits_shift_higher:
+            // do calculation
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__bits_shift_higher, COMPILER__generate__use_variable(bit_operation__first_argument).cells.start, COMPILER__generate__use_variable(bit_operation__second_argument).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(bit_operation__output_argument).cells.start);
+
+            break;
+        case COMPILER__ast__predefined__bits_shift_lower:
+            // do calculation
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__bits_shift_lower, COMPILER__generate__use_variable(bit_operation__first_argument).cells.start, COMPILER__generate__use_variable(bit_operation__second_argument).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(bit_operation__output_argument).cells.start);
+
+            break;
+        case COMPILER__ast__predefined__bits_overwrite:
+            // do calculation
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__bits_overwrite, COMPILER__generate__use_variable(bit_operation__first_argument).cells.start, COMPILER__generate__use_variable(bit_operation__second_argument).cells.start, COMPILER__generate__use_variable(bit_operation__third_argument).cells.start, COMPILER__generate__use_variable(bit_operation__output_argument).cells.start);
+
+            break;
         case COMPILER__ast__predefined__check__integer_within_range:
             // setup inversion flag
             ANVIL__code__write_cell(anvil, (ANVIL__cell)ANIVL__sft__temp_1, ANVIL__srt__temp__flag_ID_1);
@@ -271,13 +306,13 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__buffer_to_file(anvil, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.end, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.end);
             
             break;
-        case COMPILER__ast__predefined__delete_file:
-            ANVIL__code__delete_file(anvil, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start + 1);
-
-            break;
         case COMPILER__ast__predefined__mover__copy_buffer_data:
             ANVIL__code__buffer_to_buffer(anvil, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.end, COMPILER__generate__use_variable(file_buffer_mover__buffer_1).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_1).cells.end);
             
+            break;
+        case COMPILER__ast__predefined__delete_file:
+            ANVIL__code__delete_file(anvil, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start + 1);
+
             break;
         case COMPILER__ast__predefined__list__open_list:
             STANDARD__code__call__open_list(

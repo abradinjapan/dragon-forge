@@ -332,6 +332,12 @@ typedef struct COMPILER__accountling_statement {
     COMPILER__accountling_variable_argument integer_operation__second_argument;
     COMPILER__accountling_variable_argument integer_operation__output_argument;
 
+    // bit operations
+    COMPILER__accountling_variable_argument bit_operation__first_argument;
+    COMPILER__accountling_variable_argument bit_operation__second_argument;
+    COMPILER__accountling_variable_argument bit_operation__third_argument;
+    COMPILER__accountling_variable_argument bit_operation__output_argument;
+
     // buffer acquisition data
     COMPILER__accountling_variable_argument buffer_acquisition__buffer_size;
     COMPILER__accountling_variable_argument buffer_acquisition__buffer_result;
@@ -1900,7 +1906,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__set
             ANVIL__buffer integer_string = COMPILER__get__lexling_by_index(COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).name.lexlings, 0).value;
 
             // attempt translation
-            if (COMPILER__translate__string_to_boolean(integer_string, &integer_value) || COMPILER__translate__string_to_binary(integer_string, &integer_value) || COMPILER__translate__string_to_integer(integer_string, &integer_value) || COMPILER__translate__string_to_hexedecimal(integer_string, &integer_value)) {
+            if (COMPILER__translate__string_to_boolean(integer_string, &integer_value) || COMPILER__translate__string_to_binary(integer_string, &integer_value) || COMPILER__translate__string_to_integer(integer_string, &integer_value) || COMPILER__translate__string_to_hexadecimal(integer_string, &integer_value)) {
                 // get index
                 ANVIL__bt is_valid_argument;
                 COMPILER__accountling_variable_argument variable_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
@@ -2515,6 +2521,236 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__int
     return ANVIL__bt__true;
 }
 
+// check for bit operations
+ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__bit_operations(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
+    ANVIL__bt is_valid_argument;
+
+    // setup valid names
+    COMPILER__namespace or_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".bits.or", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+    COMPILER__namespace invert_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".bits.invert", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+    COMPILER__namespace and_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".bits.and", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+    COMPILER__namespace xor_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".bits.xor", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+    COMPILER__namespace shift_higher_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".bits.shift_higher", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+    COMPILER__namespace shift_lower_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".bits.shift_lower", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+    COMPILER__namespace overwrite_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".bits.overwrite", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+
+    // if is an or
+    if (COMPILER__check__identical_namespaces(parsling_statement.name.name, or_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 1) {
+        // get variables
+        COMPILER__accountling_variable_argument first_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || first_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument second_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || second_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument output_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || output_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__bits_or;
+        (*accountling_statement).bit_operation__first_argument = first_argument;
+        (*accountling_statement).bit_operation__second_argument = second_argument;
+        (*accountling_statement).bit_operation__output_argument = output_argument;
+
+        // match
+        goto match;
+    // if is an invert
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, invert_name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 1) {
+        // get variables
+        COMPILER__accountling_variable_argument first_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || first_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument output_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || output_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__bits_invert;
+        (*accountling_statement).bit_operation__first_argument = first_argument;
+        (*accountling_statement).bit_operation__output_argument = output_argument;
+
+        // match
+        goto match;
+    // if is an and
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, and_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 1) {
+        // get variables
+        COMPILER__accountling_variable_argument first_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || first_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument second_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || second_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument output_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || output_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__bits_and;
+        (*accountling_statement).bit_operation__first_argument = first_argument;
+        (*accountling_statement).bit_operation__second_argument = second_argument;
+        (*accountling_statement).bit_operation__output_argument = output_argument;
+
+        // match
+        goto match;
+    // if is a xor
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, xor_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 1) {
+        // get variables
+        COMPILER__accountling_variable_argument first_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || first_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument second_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || second_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument output_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || output_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__bits_xor;
+        (*accountling_statement).bit_operation__first_argument = first_argument;
+        (*accountling_statement).bit_operation__second_argument = second_argument;
+        (*accountling_statement).bit_operation__output_argument = output_argument;
+
+        // match
+        goto match;
+    // if is shift higher
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, shift_higher_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 1) {
+        // get variables
+        COMPILER__accountling_variable_argument first_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || first_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument second_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || second_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument output_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || output_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__bits_shift_higher;
+        (*accountling_statement).bit_operation__first_argument = first_argument;
+        (*accountling_statement).bit_operation__second_argument = second_argument;
+        (*accountling_statement).bit_operation__output_argument = output_argument;
+
+        // match
+        goto match;
+    // if is a shift lower
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, shift_lower_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 1) {
+        // get variables
+        COMPILER__accountling_variable_argument first_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || first_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument second_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || second_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument output_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || output_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__bits_shift_lower;
+        (*accountling_statement).bit_operation__first_argument = first_argument;
+        (*accountling_statement).bit_operation__second_argument = second_argument;
+        (*accountling_statement).bit_operation__output_argument = output_argument;
+
+        // match
+        goto match;
+    // if is an overwrite
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, overwrite_name) && parsling_statement.inputs.count == 3 && parsling_statement.outputs.count == 1) {
+        // get variables
+        COMPILER__accountling_variable_argument first_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || first_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument second_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || second_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument third_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 2), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || third_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument output_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || output_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__bits_overwrite;
+        (*accountling_statement).bit_operation__first_argument = first_argument;
+        (*accountling_statement).bit_operation__second_argument = second_argument;
+        (*accountling_statement).bit_operation__third_argument = third_argument;
+        (*accountling_statement).bit_operation__output_argument = output_argument;
+
+        // match
+        goto match;
+    // not the right argument type
+    } else {
+        goto failure;
+    }
+
+    // not a match
+    failure:
+    COMPILER__close__parsling_namespace(or_name);
+    COMPILER__close__parsling_namespace(invert_name);
+    COMPILER__close__parsling_namespace(and_name);
+    COMPILER__close__parsling_namespace(xor_name);
+    COMPILER__close__parsling_namespace(shift_higher_name);
+    COMPILER__close__parsling_namespace(shift_lower_name);
+    COMPILER__close__parsling_namespace(overwrite_name);
+    return ANVIL__bt__false;
+
+    // match!
+    match:
+    COMPILER__close__parsling_namespace(or_name);
+    COMPILER__close__parsling_namespace(invert_name);
+    COMPILER__close__parsling_namespace(and_name);
+    COMPILER__close__parsling_namespace(xor_name);
+    COMPILER__close__parsling_namespace(shift_higher_name);
+    COMPILER__close__parsling_namespace(shift_lower_name);
+    COMPILER__close__parsling_namespace(overwrite_name);
+    return ANVIL__bt__true;
+}
+
 // check for buffer requesting and returning
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__buffer_acquisition(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid names
@@ -3117,6 +3353,19 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
 
             // find checks
             if (COMPILER__account__functions__check_and_get_statement_translation__data_checking(structures, accountling_function, parsling_statement, &accountling_statement, error)) {
+                // append statement
+                COMPILER__append__accountling_statement(&(*accountling_scope).statements.list, accountling_statement, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return;
+                }
+                goto next_statement;
+            }
+            if (COMPILER__check__error_occured(error)) {
+                return;
+            }
+
+            // find bit operations
+            if (COMPILER__account__functions__check_and_get_statement_translation__bit_operations(structures, accountling_function, parsling_statement, &accountling_statement, error)) {
                 // append statement
                 COMPILER__append__accountling_statement(&(*accountling_scope).statements.list, accountling_statement, error);
                 if (COMPILER__check__error_occured(error)) {

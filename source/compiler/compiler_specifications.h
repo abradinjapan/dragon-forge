@@ -144,6 +144,15 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__jump__bottom,
     COMPILER__ast__predefined__jump__offset,
 
+    // bits
+    COMPILER__ast__predefined__bits_or,
+    COMPILER__ast__predefined__bits_invert,
+    COMPILER__ast__predefined__bits_and,
+    COMPILER__ast__predefined__bits_xor,
+    COMPILER__ast__predefined__bits_shift_higher,
+    COMPILER__ast__predefined__bits_shift_lower,
+    COMPILER__ast__predefined__bits_overwrite,
+
     // integers
     COMPILER__ast__predefined__check__integer_within_range,
     COMPILER__ast__predefined__integer__addition,
@@ -753,7 +762,7 @@ ANVIL__cell_integer_value COMPILER__translate__character_to_hexadecimal(ANVIL__c
 }
 
 // translate string to hexedecimal
-ANVIL__bt COMPILER__translate__string_to_hexedecimal(ANVIL__buffer string, ANVIL__cell_integer_value* value) {
+ANVIL__bt COMPILER__translate__string_to_hexadecimal(ANVIL__buffer string, ANVIL__cell_integer_value* value) {
     ANVIL__buffer prefix = ANVIL__open__buffer_from_string((u8*)COMPILER__define__master_namespace ".hexadecimal.", ANVIL__bt__false, ANVIL__bt__false);
     ANVIL__buffer suffix;
     ANVIL__buffer current;
