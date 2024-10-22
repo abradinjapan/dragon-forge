@@ -1962,6 +1962,10 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
+    COMPILER__namespace print_tabs_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".print.tabs", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
 
     // if is a print buffer as string
     if (COMPILER__check__identical_namespaces(parsling_statement.name.name, print_buffer_as_string_name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 0) {
@@ -2029,6 +2033,28 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
         } else {
             goto failure;
         }
+    // if is a tab print
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, print_tabs_name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 0) {
+        // if inputs are correct parsing type
+        if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__name) {
+            // check input variable type
+            // get index
+            ANVIL__bt is_valid_argument;
+            COMPILER__accountling_variable_argument variable_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+            if (COMPILER__check__error_occured(error) || variable_argument.type >= COMPILER__avat__COUNT) {
+                goto failure;
+            }
+
+            // setup output statement
+            (*accountling_statement).statement_type = COMPILER__ast__predefined__print__tabs;
+            (*accountling_statement).print__variable_argument = variable_argument;
+
+            // match
+            goto match;
+        // not the right argument type
+        } else {
+            goto failure;
+        }
     }
 
     // not a match
@@ -2036,6 +2062,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
     COMPILER__close__parsling_namespace(print_buffer_as_string_name);
     COMPILER__close__parsling_namespace(print_debug_cell_name);
     COMPILER__close__parsling_namespace(print_cell_as_binary_name);
+    COMPILER__close__parsling_namespace(print_tabs_name);
     return ANVIL__bt__false;
 
     // match!
@@ -2043,6 +2070,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
     COMPILER__close__parsling_namespace(print_buffer_as_string_name);
     COMPILER__close__parsling_namespace(print_debug_cell_name);
     COMPILER__close__parsling_namespace(print_cell_as_binary_name);
+    COMPILER__close__parsling_namespace(print_tabs_name);
     return ANVIL__bt__true;
 }
 
