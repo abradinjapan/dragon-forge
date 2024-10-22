@@ -133,6 +133,7 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__print__debug_cell,
     COMPILER__ast__predefined__print__buffer_as_string,
     COMPILER__ast__predefined__print__cell_as_binary,
+    COMPILER__ast__predefined__print__new_line,
     COMPILER__ast__predefined__print__tabs,
 
     // filling structures

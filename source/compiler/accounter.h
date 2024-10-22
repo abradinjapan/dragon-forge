@@ -1962,6 +1962,10 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
+    COMPILER__namespace print_new_line_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".print.new_line", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
     COMPILER__namespace print_tabs_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".print.tabs", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
@@ -2033,6 +2037,13 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
         } else {
             goto failure;
         }
+    // if is a new line
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, print_new_line_name) && parsling_statement.inputs.count == 0 && parsling_statement.outputs.count == 0) {
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__print__new_line;
+
+        // match
+        goto match;
     // if is a tab print
     } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, print_tabs_name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 0) {
         // if inputs are correct parsing type
@@ -2062,6 +2073,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
     COMPILER__close__parsling_namespace(print_buffer_as_string_name);
     COMPILER__close__parsling_namespace(print_debug_cell_name);
     COMPILER__close__parsling_namespace(print_cell_as_binary_name);
+    COMPILER__close__parsling_namespace(print_new_line_name);
     COMPILER__close__parsling_namespace(print_tabs_name);
     return ANVIL__bt__false;
 
@@ -2070,6 +2082,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
     COMPILER__close__parsling_namespace(print_buffer_as_string_name);
     COMPILER__close__parsling_namespace(print_debug_cell_name);
     COMPILER__close__parsling_namespace(print_cell_as_binary_name);
+    COMPILER__close__parsling_namespace(print_new_line_name);
     COMPILER__close__parsling_namespace(print_tabs_name);
     return ANVIL__bt__true;
 }
