@@ -1252,6 +1252,7 @@ COMPILER__accountling_function_headers COMPILER__account__functions__generate_pr
 
         // allocate inputs
         header.input_types = ANVIL__create__counted_list(COMPILER__open__list_with_error(sizeof(COMPILER__structure_index) * 8, error), 0);
+        header.input_types.count = input_count;
 
         // get inputs
         for (COMPILER__input_count input_ID = 0; input_ID < input_count; input_ID++) {
@@ -1267,6 +1268,7 @@ COMPILER__accountling_function_headers COMPILER__account__functions__generate_pr
 
         // allocate outputs
         header.output_types = ANVIL__create__counted_list(COMPILER__open__list_with_error(sizeof(COMPILER__structure_index) * 8, error), 0);
+        header.output_types.count = output_count;
 
         // get outputs
         for (COMPILER__output_count output_ID = 0; output_ID < output_count; output_ID++) {
