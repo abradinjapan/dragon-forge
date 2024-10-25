@@ -183,15 +183,15 @@ COMPILER__accountling_function_headers COMPILER__open__accountling_function_head
     COMPILER__accountling_function_headers output;
 
     // null init
+    output.category[COMPILER__afht__predefined] = ANVIL__create_null__counted_list();
     output.category[COMPILER__afht__user_defined] = ANVIL__create_null__counted_list();
-    output.category[COMPILER__afht__sets] = ANVIL__create_null__counted_list();
     
     // open all lists
-    output.category[COMPILER__afht__user_defined] = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_function_header) * 16, error);
+    output.category[COMPILER__afht__predefined] = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_function_header) * 16, error);
     if (COMPILER__check__error_occured(error)) {
         return output;
     }
-    output.category[COMPILER__afht__sets] = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_function_header) * 16, error);
+    output.category[COMPILER__afht__user_defined] = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_function_header) * 16, error);
     if (COMPILER__check__error_occured(error)) {
         return output;
     }
@@ -240,8 +240,8 @@ void COMPILER__close__accountling_function_headers__header_list(ANVIL__counted_l
 // close function headers
 void COMPILER__close__accountling_function_headers(COMPILER__accountling_function_headers headers) {
     // close lists
+    COMPILER__close__accountling_function_headers__header_list(headers.category[COMPILER__afht__predefined], ANVIL__bt__true);
     COMPILER__close__accountling_function_headers__header_list(headers.category[COMPILER__afht__user_defined], ANVIL__bt__false);
-    COMPILER__close__accountling_function_headers__header_list(headers.category[COMPILER__afht__sets], ANVIL__bt__true);
 
     return;
 }
@@ -1203,7 +1203,7 @@ COMPILER__accountling_function_header_location COMPILER__account__search_for_fun
     COMPILER__accountling_function_header_location output;
 
     // init output
-    output = COMPILER__create__accountling_function_header_location(0, 0);
+    output = COMPILER__create__accountling_function_header_location(COMPILER__afht__predefined, 0);
 
     // search each list until found
     for (; output.category_index < COMPILER__afht__COUNT; output.category_index++) {
@@ -1222,17 +1222,15 @@ COMPILER__accountling_function_header_location COMPILER__account__search_for_fun
 }
 
 // generate all predefined function headers
-COMPILER__accountling_function_headers COMPILER__account__functions__generate_predefined_function_headers(COMPILER__accountling_function_headers headers, COMPILER__error* error) {
+COMPILER__accountling_function_headers COMPILER__account__functions__generate_predefined_function_headers(COMPILER__accountling_structures structures, COMPILER__accountling_function_headers headers, COMPILER__error* error) {
+    // generate individual functions
     // setup current blueprintling
-    ANVIL__current current_blueprintling = ANVIL__create__buffer((ANVIL__address)COMPILER__global__predefined_function_calls, (ANVIL__address)COMPILER__global__predefined_function_calls + sizeof(COMPILER__global__predefined_function_calls) - 1);
+    ANVIL__current current_blueprintling = ANVIL__create__buffer((ANVIL__address)COMPILER__global__predefined_one_off_function_calls, (ANVIL__address)COMPILER__global__predefined_one_off_function_calls + sizeof(COMPILER__global__predefined_one_off_function_calls) - 1);
 
     // for each definition
     while (ANVIL__check__current_within_range(current_blueprintling) && COMPILER__read__blueprintling(&current_blueprintling) == COMPILER__abt__define_function_call) {
         // skip past marker
         COMPILER__next__blueprintling(&current_blueprintling);
-
-        // get list it belongs to
-        COMPILER__afht list_index = COMPILER__read_and_next__blueprintling(&current_blueprintling);
 
         // setup variable
         COMPILER__accountling_function_header header;
@@ -1280,11 +1278,143 @@ COMPILER__accountling_function_headers COMPILER__account__functions__generate_pr
         }
 
         // append function header
-        COMPILER__append__accountling_function_header(&headers.category[list_index].list, header, error);
+        COMPILER__append__accountling_function_header(&headers.category[COMPILER__afht__predefined].list, header, error);
         if (COMPILER__check__error_occured(error)) {
             return headers;
         }
-        headers.category[list_index].count++;
+        headers.category[COMPILER__afht__predefined].count++;
+    }
+
+    // generate copy headers
+    for (COMPILER__structure_index index = 0; index < structures.name_table.count; index++) {
+        // setup variable
+        COMPILER__accountling_function_header header;
+
+        // setup name
+        header.name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__copy], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+
+        // allocate io
+        header.input_types = ANVIL__open__counted_list(sizeof(COMPILER__structure_index) * 1, &(*error).memory_error_occured);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        header.output_types = ANVIL__open__counted_list(sizeof(COMPILER__structure_index) * 1, &(*error).memory_error_occured);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+
+        // append io data
+        COMPILER__append__structure_index(&header.input_types.list, COMPILER__aat__COUNT + index, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        header.input_types.count = 1;
+        COMPILER__append__structure_index(&header.output_types.list, COMPILER__aat__COUNT + index, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        header.output_types.count = 1;
+
+        // append header
+        COMPILER__append__accountling_function_header(&headers.category[COMPILER__afht__predefined].list, header, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        headers.category[COMPILER__afht__predefined].count++;
+    }
+
+    // generate packer headers (skip dragon.cell)
+    for (COMPILER__structure_index structure_index = 1; structure_index < structures.data_table.count; structure_index++) {
+        // setup variable
+        COMPILER__accountling_function_header header;
+
+        // setup name
+        header.name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__pack], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+
+        // setup inputs
+        // allocate inputs
+        header.input_types = ANVIL__open__counted_list(sizeof(COMPILER__structure_index) * ((COMPILER__accountling_structure*)structures.data_table.list.buffer.start)[structure_index].members.count, &(*error).memory_error_occured);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+
+        // append each input
+        for (COMPILER__structure_member_index member_index = 0; member_index < ((COMPILER__accountling_structure*)structures.data_table.list.buffer.start)[structure_index].members.count; member_index++) {
+            // append input
+            COMPILER__append__structure_index(&header.input_types.list, COMPILER__aat__COUNT + ((COMPILER__accountling_structure_member*)((COMPILER__accountling_structure*)structures.data_table.list.buffer.start)[structure_index].members.list.buffer.start)[member_index].structure_ID, error);
+            if (COMPILER__check__error_occured(error)) {
+                return headers;
+            }
+            header.input_types.count++;
+        }
+
+        // setup outputs
+        // allocate outputs
+        header.output_types = ANVIL__open__counted_list(sizeof(COMPILER__structure_index) * 1, &(*error).memory_error_occured);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        
+        // append destination
+        COMPILER__append__structure_index(&header.output_types.list, COMPILER__aat__COUNT + structure_index, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        header.output_types.count = 1;
+
+        // append header
+        COMPILER__append__accountling_function_header(&headers.category[COMPILER__afht__predefined].list, header, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        headers.category[COMPILER__afht__predefined].count++;
+    }
+
+    // generate null packer headers
+    for (COMPILER__structure_index structure_index = 0; structure_index < structures.data_table.count; structure_index++) {
+        // setup variable
+        COMPILER__accountling_function_header header;
+
+        // setup name
+        header.name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__pack_null], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+
+        // setup inputs
+        // allocate inputs (no inputs so nothing to append)
+        header.input_types = ANVIL__open__counted_list(sizeof(COMPILER__structure_index) * 1, &(*error).memory_error_occured);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        header.input_types.count = 0;
+
+        // setup outputs
+        // allocate outputs
+        header.output_types = ANVIL__open__counted_list(sizeof(COMPILER__structure_index) * 1, &(*error).memory_error_occured);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        
+        // append destination
+        COMPILER__append__structure_index(&header.output_types.list, COMPILER__aat__COUNT + structure_index, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        header.output_types.count = 1;
+
+        // append header
+        COMPILER__append__accountling_function_header(&headers.category[COMPILER__afht__predefined].list, header, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        headers.category[COMPILER__afht__predefined].count++;
     }
 
     // done
@@ -3849,7 +3979,7 @@ COMPILER__accountling_functions COMPILER__account__functions(ANVIL__list parslin
     }
 
     // generate predefined headers
-    output.headers = COMPILER__account__functions__generate_predefined_function_headers(output.headers, error);
+    output.headers = COMPILER__account__functions__generate_predefined_function_headers(structures, output.headers, error);
     if (COMPILER__check__error_occured(error)) {
         return output;
     }

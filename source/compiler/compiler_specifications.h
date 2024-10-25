@@ -60,8 +60,8 @@ typedef enum COMPILER__abt {
 
 // accountling function header type (a category, NOT the individual built in instructions)
 typedef enum COMPILER__afht {
+    COMPILER__afht__predefined,
     COMPILER__afht__user_defined,
-    COMPILER__afht__sets,
     COMPILER__afht__COUNT,
 } COMPILER__afht;
 
@@ -318,42 +318,399 @@ COMPILER__blueprintling COMPILER__global__predefined_types[] = {
 
 // all predefined function call names
 char* COMPILER__global__predefined_function_call_names[] = {
+    // set
     COMPILER__define__master_namespace ".set",
+
+    // prints
+    COMPILER__define__master_namespace ".print.debug_cell",
     COMPILER__define__master_namespace ".print.buffer_as_string",
+    COMPILER__define__master_namespace ".print.cell_as_binary",
+    COMPILER__define__master_namespace ".print.new_line",
+    COMPILER__define__master_namespace ".print.tabs",
+
+    // moving cells
+    COMPILER__define__master_namespace ".copy",
+    COMPILER__define__master_namespace ".pack",
+    COMPILER__define__master_namespace ".pack.null",
+
+    // jumps
+    COMPILER__define__master_namespace ".jump.top",
+    COMPILER__define__master_namespace ".jump.bottom",
+    COMPILER__define__master_namespace ".jump",
+
+    // bit operations
+    COMPILER__define__master_namespace ".bits.or",
+    COMPILER__define__master_namespace ".bits.invert",
+    COMPILER__define__master_namespace ".bits.and",
+    COMPILER__define__master_namespace ".bits.xor",
+    COMPILER__define__master_namespace ".bits.shift_higher",
+    COMPILER__define__master_namespace ".bits.shift_lower",
+    COMPILER__define__master_namespace ".bits.overwrite",
+
+    // integer operations
+    COMPILER__define__master_namespace ".integer.within_range",
+    COMPILER__define__master_namespace ".integer.add",
+    COMPILER__define__master_namespace ".integer.subtract",
+    COMPILER__define__master_namespace ".integer.multiply",
+    COMPILER__define__master_namespace ".integer.divide",
+    COMPILER__define__master_namespace ".integer.modulous",
+
+    // buffer operations
+    COMPILER__define__master_namespace ".buffer.request",
+    COMPILER__define__master_namespace ".buffer.return",
+    COMPILER__define__master_namespace ".address_to_cell",
+    COMPILER__define__master_namespace ".cell_to_address",
+    COMPILER__define__master_namespace ".file_to_buffer",
+    COMPILER__define__master_namespace ".buffer_to_file",
+    COMPILER__define__master_namespace ".copy_buffer_data",
+    COMPILER__define__master_namespace ".delete_file",
+
+    // list operations
+    COMPILER__define__master_namespace ".list.open",
+    COMPILER__define__master_namespace ".list.close",
+    COMPILER__define__master_namespace ".list.append",
+
+    // time operations
+    COMPILER__define__master_namespace ".time.now",
 };
 // predefined function call name type
 typedef enum COMPILER__pfcnt {
+    // sets
     COMPILER__pfcnt__set,
-    COMPILER__pfcnt__print__buffer_as_string,
-} COMPILER__pfcnt;
-// predefined function call types
-typedef enum COMPILER__pfct {
-    // calls
-    COMPILER__pfct__set__cell_value = 0,
-    COMPILER__pfct__set__string,
-    COMPILER__pfct__print__integer_unsigned,
 
-    // user defined
-    COMPILER__pfct__USER_DEFINED,
-} COMPILER__pfct;
-// blueprint (NOTE: definitions MUST be in order!)
-COMPILER__blueprintling COMPILER__global__predefined_function_calls[] = {
+    // prints
+    COMPILER__pfcnt__print__debug_cell,
+    COMPILER__pfcnt__print__buffer_as_string,
+    COMPILER__pfcnt__print__cell_as_binary,
+    COMPILER__pfcnt__print__new_line,
+    COMPILER__pfcnt__print__tabs,
+
+    // moving cells
+    COMPILER__pfcnt__copy,
+    COMPILER__pfcnt__pack,
+    COMPILER__pfcnt__pack_null,
+
+    // jumps
+    COMPILER__pfcnt__jump__top,
+    COMPILER__pfcnt__jump__bottom,
+    COMPILER__pfcnt__jump,
+
+    // bit operations
+    COMPILER__pfcnt__bits__or,
+    COMPILER__pfcnt__bits__invert,
+    COMPILER__pfcnt__bits__and,
+    COMPILER__pfcnt__bits__xor,
+    COMPILER__pfcnt__bits__shift_higher,
+    COMPILER__pfcnt__bits__shift_lower,
+    COMPILER__pfcnt__bits__overwrite,
+
+    // integer operations
+    COMPILER__pfcnt__integer__within_range,
+    COMPILER__pfcnt__integer__add,
+    COMPILER__pfcnt__integer__subtract,
+    COMPILER__pfcnt__integer__multiply,
+    COMPILER__pfcnt__integer__divide,
+    COMPILER__pfcnt__integer__modulous,
+
+    // buffer operations
+    COMPILER__pfcnt__buffer__request,
+    COMPILER__pfcnt__buffer__return,
+    COMPILER__pfcnt__buffer__address_to_cell,
+    COMPILER__pfcnt__buffer__cell_to_address,
+    COMPILER__pfcnt__buffer__file_to_buffer,
+    COMPILER__pfcnt__buffer__buffer_to_file,
+    COMPILER__pfcnt__buffer__copy_buffer_data,
+    COMPILER__pfcnt__buffer__delete_file,
+
+    // list operations
+    COMPILER__pfcnt__list__open,
+    COMPILER__pfcnt__list__close,
+    COMPILER__pfcnt__list__append,
+
+    // time
+    COMPILER__pfcnt__time__now,
+
+    // COUNT
+    COMPILER__pfcnt__COUNT,
+} COMPILER__pfcnt;
+// header blueprint for one off built in functions
+COMPILER__blueprintling COMPILER__global__predefined_one_off_function_calls[] = {
+    // set cell
     COMPILER__abt__define_function_call,
-        COMPILER__afht__sets,
-        COMPILER__pfct__set__cell_value,
+        COMPILER__ast__predefined__set__cell,
         COMPILER__pfcnt__set,
         1,
         COMPILER__aat__cell_value,
         1,
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        
+    // set string
     COMPILER__abt__define_function_call,
-        COMPILER__afht__sets,
-        COMPILER__pfct__set__string,
+        COMPILER__ast__predefined__set__string,
         COMPILER__pfcnt__set,
         1,
         COMPILER__aat__string_index,
         1,
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+    
+    // print debug cell
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__print__debug_cell,
+        COMPILER__pfcnt__print__debug_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        0,
+    
+    // print buffer as string
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__print__buffer_as_string,
+        COMPILER__pfcnt__print__buffer_as_string,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+        0,
+    
+    // print cell as binary
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__print__cell_as_binary,
+        COMPILER__pfcnt__print__cell_as_binary,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        0,
+    
+    // print new line
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__print__new_line,
+        COMPILER__pfcnt__print__new_line,
+        0,
+        0,
+    
+    // print tabs
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__print__tabs,
+        COMPILER__pfcnt__print__tabs,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        0,
+
+    // jumps
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__jump__top,
+        COMPILER__pfcnt__jump__top,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__offset,
+        0,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__jump__bottom,
+        COMPILER__pfcnt__jump__bottom,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__offset,
+        0,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__jump__offset,
+        COMPILER__pfcnt__jump,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__offset,
+        0,
+    
+    // bits
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__bits_or,
+        COMPILER__pfcnt__bits__or,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__bits_invert,
+        COMPILER__pfcnt__bits__invert,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__bits_and,
+        COMPILER__pfcnt__bits__and,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__bits_xor,
+        COMPILER__pfcnt__bits__xor,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__bits_shift_higher,
+        COMPILER__pfcnt__bits__shift_higher,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__bits_shift_lower,
+        COMPILER__pfcnt__bits__shift_lower,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__bits_overwrite,
+        COMPILER__pfcnt__bits__overwrite,
+        3,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+    
+    // integers
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__check__integer_within_range,
+        COMPILER__pfcnt__integer__within_range,
+        4,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__integer__addition,
+        COMPILER__pfcnt__integer__add,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__integer__subtraction,
+        COMPILER__pfcnt__integer__subtract,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__integer__multiplication,
+        COMPILER__pfcnt__integer__multiply,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__integer__division,
+        COMPILER__pfcnt__integer__divide,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__integer__modulous,
+        COMPILER__pfcnt__integer__modulous,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+    
+    // buffers
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__buffer__request,
+        COMPILER__pfcnt__buffer__request,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__buffer__return,
+        COMPILER__pfcnt__buffer__return,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+        0,
+    
+    // movers
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__mover__address_to_cell,
+        COMPILER__pfcnt__buffer__address_to_cell,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__mover__cell_to_address,
+        COMPILER__pfcnt__buffer__cell_to_address,
+        3,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        0,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__mover__file_to_buffer,
+        COMPILER__pfcnt__buffer__file_to_buffer,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__mover__buffer_to_file,
+        COMPILER__pfcnt__buffer__buffer_to_file,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+        0,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__mover__copy_buffer_data,
+        COMPILER__pfcnt__buffer__copy_buffer_data,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+        0,
+    
+    // file deleters
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__delete_file,
+        COMPILER__pfcnt__buffer__delete_file,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+        0,
+    
+    // list functions that dont require varying types
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__list__open_list,
+        COMPILER__pfcnt__list__open,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_list,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__list__close_list,
+        COMPILER__pfcnt__list__close,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_list,
+        0,
+    
+    // time calls
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__time__get_current_time,
+        COMPILER__pfcnt__time__now,
+        0,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_time,
+    
+    // end of blueprint
     COMPILER__abt__end_blueprint,
 };
 
