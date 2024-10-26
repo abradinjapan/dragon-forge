@@ -169,7 +169,7 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             break;
         case COMPILER__ast__predefined__copy__anything:
             // setup copies
-            for (ANVIL__cell_index cell_index = 0; cell_index <= (ANVIL__cell_index)(COMPILER__generate__use_variable(copy__input).cells.end - COMPILER__generate__use_variable(copy__input).cells.start) + 1; cell_index++) {
+            for (ANVIL__cell_index cell_index = 0; cell_index <= (ANVIL__cell_index)(COMPILER__generate__use_variable(copy__input).cells.end - COMPILER__generate__use_variable(copy__input).cells.start); cell_index++) {
                 // setup cell copy
                 ANVIL__code__cell_to_cell(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(copy__input).cells.start + cell_index, COMPILER__generate__use_variable(copy__output).cells.start + cell_index);
             }
