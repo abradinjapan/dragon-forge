@@ -306,9 +306,21 @@ void ANVIL__code__delete_file(ANVIL__workspace* workspace, ANVIL__cell_ID file_p
 }
 
 // write buffer to buffer instruction
-void ANVIL__code__buffer_to_buffer(ANVIL__workspace* workspace, ANVIL__cell_ID source_start, ANVIL__cell_ID source_end, ANVIL__cell_ID destination_start, ANVIL__cell_ID destination_end) {
+void ANVIL__code__buffer_to_buffer__low_to_high(ANVIL__workspace* workspace, ANVIL__cell_ID source_start, ANVIL__cell_ID source_end, ANVIL__cell_ID destination_start, ANVIL__cell_ID destination_end) {
     // write instruction
-    ANVIL__write_next__instruction_ID(workspace, ANVIL__it__buffer_to_buffer);
+    ANVIL__write_next__instruction_ID(workspace, ANVIL__it__buffer_to_buffer__low_to_high);
+    ANVIL__write_next__cell_ID(workspace, source_start);
+    ANVIL__write_next__cell_ID(workspace, source_end);
+    ANVIL__write_next__cell_ID(workspace, destination_start);
+    ANVIL__write_next__cell_ID(workspace, destination_end);
+
+    return;
+}
+
+// write buffer to buffer instruction
+void ANVIL__code__buffer_to_buffer__high_to_low(ANVIL__workspace* workspace, ANVIL__cell_ID source_start, ANVIL__cell_ID source_end, ANVIL__cell_ID destination_start, ANVIL__cell_ID destination_end) {
+    // write instruction
+    ANVIL__write_next__instruction_ID(workspace, ANVIL__it__buffer_to_buffer__high_to_low);
     ANVIL__write_next__cell_ID(workspace, source_start);
     ANVIL__write_next__cell_ID(workspace, source_end);
     ANVIL__write_next__cell_ID(workspace, destination_start);

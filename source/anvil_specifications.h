@@ -89,7 +89,8 @@ typedef enum ANVIL__it {
     ANVIL__it__file_to_buffer, // get file into buffer
     ANVIL__it__buffer_to_file, // write buffer to disk
     ANVIL__it__delete_file, // deletes a file
-    ANVIL__it__buffer_to_buffer, // copy data from one buffer to another of the same size
+    ANVIL__it__buffer_to_buffer__low_to_high, // copy data from one buffer to another of the same size in the low to high direction
+    ANVIL__it__buffer_to_buffer__high_to_low, // copy data from one buffer to another of the same size in the high to low direction
     ANVIL__it__compile, // compile one or more source files to an anvil program
     ANVIL__it__run, // run context (both until finished and run one instruction)
     ANVIL__it__get_time, // get time in seconds and nano seconds
@@ -119,7 +120,8 @@ typedef enum ANVIL__ilt {
     ANVIL__ilt__file_to_buffer = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 4),
     ANVIL__ilt__buffer_to_file = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 4),
     ANVIL__ilt__delete_file = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 2),
-    ANVIL__ilt__buffer_to_buffer = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 4),
+    ANVIL__ilt__buffer_to_buffer__low_to_high = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 4),
+    ANVIL__ilt__buffer_to_buffer__high_to_low = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 4),
     ANVIL__ilt__compile = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 11),
     ANVIL__ilt__run = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 3),
     ANVIL__ilt__get_time = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 2),

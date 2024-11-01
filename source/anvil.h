@@ -144,7 +144,8 @@ ANVIL__ilt ANVIL__convert__it_to_ilt(ANVIL__it instruction) {
         ANVIL__ilt__file_to_buffer,
         ANVIL__ilt__buffer_to_file,
         ANVIL__ilt__delete_file,
-        ANVIL__ilt__buffer_to_buffer,
+        ANVIL__ilt__buffer_to_buffer__low_to_high,
+        ANVIL__ilt__buffer_to_buffer__high_to_low,
         ANVIL__ilt__compile,
         ANVIL__ilt__run,
         ANVIL__ilt__get_time,
@@ -938,8 +939,8 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         }
 
         break;
-    // copy one buffer of data from one area to another of equal size
-    case ANVIL__it__buffer_to_buffer:
+    // copy one buffer of data from one area to another of equal size copying bytes low to high
+    case ANVIL__it__buffer_to_buffer__low_to_high:
         // get parameters
         buffer_to_buffer__source_start = ANVIL__read_next__cell_ID(execution_read_address);
         buffer_to_buffer__source_end = ANVIL__read_next__cell_ID(execution_read_address);
@@ -956,6 +957,36 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         if (ANVIL__check__valid_address_range_in_allocations(allocations, buffer_to_buffer__source) && ANVIL__check__valid_address_range_in_allocations(allocations, buffer_to_buffer__destination)) {
             // perform copy
             ANVIL__copy__buffer(buffer_to_buffer__source, buffer_to_buffer__destination, &buffer_to_buffer__error);
+
+            // check for error
+            if (buffer_to_buffer__error == ANVIL__bt__true) {
+                ANVIL__set__error_code_cell(context, ANVIL__et__buffer_to_buffer__buffers_are_different_sizes);
+            }
+        // if one allocation does not exist
+        } else {
+            // set error
+            ANVIL__set__error_code_cell(context, ANVIL__et__invalid_allocation__allocation_does_not_exist);
+        }
+
+        break;
+    // copy one buffer of data from one area to another of equal size copying bytes low to high
+    case ANVIL__it__buffer_to_buffer__high_to_low:
+        // get parameters
+        buffer_to_buffer__source_start = ANVIL__read_next__cell_ID(execution_read_address);
+        buffer_to_buffer__source_end = ANVIL__read_next__cell_ID(execution_read_address);
+        buffer_to_buffer__destination_start = ANVIL__read_next__cell_ID(execution_read_address);
+        buffer_to_buffer__destination_end = ANVIL__read_next__cell_ID(execution_read_address);
+
+        // setup temps
+        buffer_to_buffer__source.start = (*context).cells[buffer_to_buffer__source_start];
+        buffer_to_buffer__source.end = (*context).cells[buffer_to_buffer__source_end];
+        buffer_to_buffer__destination.start = (*context).cells[buffer_to_buffer__destination_start];
+        buffer_to_buffer__destination.end = (*context).cells[buffer_to_buffer__destination_end];
+
+        // if both allocations exist
+        if (ANVIL__check__valid_address_range_in_allocations(allocations, buffer_to_buffer__source) && ANVIL__check__valid_address_range_in_allocations(allocations, buffer_to_buffer__destination)) {
+            // perform copy
+            ANVIL__copy__buffer__backwards(buffer_to_buffer__source, buffer_to_buffer__destination, &buffer_to_buffer__error);
 
             // check for error
             if (buffer_to_buffer__error == ANVIL__bt__true) {

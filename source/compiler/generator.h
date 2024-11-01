@@ -316,7 +316,11 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             
             break;
         case COMPILER__ast__predefined__mover__buffer_copy__low_to_high:
-            ANVIL__code__buffer_to_buffer(anvil, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.end, COMPILER__generate__use_variable(file_buffer_mover__buffer_1).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_1).cells.end);
+            ANVIL__code__buffer_to_buffer__low_to_high(anvil, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.end, COMPILER__generate__use_variable(file_buffer_mover__buffer_1).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_1).cells.end);
+            
+            break;
+        case COMPILER__ast__predefined__mover__buffer_copy__high_to_low:
+            ANVIL__code__buffer_to_buffer__high_to_low(anvil, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_0).cells.end, COMPILER__generate__use_variable(file_buffer_mover__buffer_1).cells.start, COMPILER__generate__use_variable(file_buffer_mover__buffer_1).cells.end);
             
             break;
         case COMPILER__ast__predefined__delete_file:
