@@ -680,6 +680,20 @@ ANVIL__counted_list COMPILER__parse__function_call_statement_arguments(ANVIL__cu
 
     // get arguments
     while (ANVIL__check__current_within_range(*current) && COMPILER__read__lexling_from_current(*current).type != COMPILER__lt__right_parenthesis) {
+        // if should check for comma
+        if (output.count > 0) {
+            // if lexling is comma
+            if (COMPILER__read__lexling_from_current(*current).type != COMPILER__lt__comma) {
+                // set error
+                *error = COMPILER__open__error("Parse Error: Arguments is missing comma separator.", COMPILER__read__lexling_from_current(*current).location);
+
+                return output;
+            } else {
+                // skip past comma
+                COMPILER__advance__lexling_current(current, 1);
+            }
+        }
+
         // parse argument
         COMPILER__parsling_argument argument = COMPILER__parse__function_argument(current, is_function_header_argument, error);
         if (COMPILER__check__error_occured(error)) {
