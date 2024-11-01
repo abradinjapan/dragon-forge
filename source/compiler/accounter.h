@@ -3091,7 +3091,11 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__fil
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace copy_buffer_data_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".copy_buffer_data", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace copy_low_to_high_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__buffer__copy__low_to_high], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+    COMPILER__namespace copy_high_to_low_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__buffer__copy__high_to_low], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -3154,8 +3158,8 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__fil
 
         // match
         goto match;
-    // if is buffer to buffer
-    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, copy_buffer_data_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 0) {
+    // if is buffer copy low to high
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, copy_low_to_high_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 0) {
         // get variables
         ANVIL__bt is_valid_argument;
         COMPILER__accountling_variable_argument first_buffer_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_buffer, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
@@ -3169,7 +3173,28 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__fil
 
         // match
         // setup output statement
-        (*accountling_statement).statement_type = COMPILER__ast__predefined__mover__copy_buffer_data;
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__mover__buffer_copy__low_to_high;
+        (*accountling_statement).file_buffer_mover__buffer_0 = first_buffer_argument;
+        (*accountling_statement).file_buffer_mover__buffer_1 = second_buffer_argument;
+
+        // match
+        goto match;
+    // if is buffer copy high to low
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, copy_high_to_low_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 0) {
+        // get variables
+        ANVIL__bt is_valid_argument;
+        COMPILER__accountling_variable_argument first_buffer_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_buffer, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || first_buffer_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument second_buffer_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__ptt__dragon_buffer, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || second_buffer_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // match
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__mover__buffer_copy__high_to_low;
         (*accountling_statement).file_buffer_mover__buffer_0 = first_buffer_argument;
         (*accountling_statement).file_buffer_mover__buffer_1 = second_buffer_argument;
 
@@ -3185,7 +3210,8 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__fil
     COMPILER__close__parsling_namespace(file_to_buffer_name);
     COMPILER__close__parsling_namespace(buffer_to_file_name);
     COMPILER__close__parsling_namespace(delete_file_name);
-    COMPILER__close__parsling_namespace(copy_buffer_data_name);
+    COMPILER__close__parsling_namespace(copy_low_to_high_name);
+    COMPILER__close__parsling_namespace(copy_high_to_low_name);
     return ANVIL__bt__false;
 
     // match!
@@ -3193,7 +3219,8 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__fil
     COMPILER__close__parsling_namespace(file_to_buffer_name);
     COMPILER__close__parsling_namespace(buffer_to_file_name);
     COMPILER__close__parsling_namespace(delete_file_name);
-    COMPILER__close__parsling_namespace(copy_buffer_data_name);
+    COMPILER__close__parsling_namespace(copy_low_to_high_name);
+    COMPILER__close__parsling_namespace(copy_high_to_low_name);
     return ANVIL__bt__true;
 }
 

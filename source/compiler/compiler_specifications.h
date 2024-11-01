@@ -172,7 +172,8 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__mover__cell_to_address,
     COMPILER__ast__predefined__mover__file_to_buffer,
     COMPILER__ast__predefined__mover__buffer_to_file,
-    COMPILER__ast__predefined__mover__copy_buffer_data,
+    COMPILER__ast__predefined__mover__buffer_copy__low_to_high,
+    COMPILER__ast__predefined__mover__buffer_copy__high_to_low,
 
     // file deleters
     COMPILER__ast__predefined__delete_file,
@@ -362,7 +363,8 @@ char* COMPILER__global__predefined_function_call_names[] = {
     COMPILER__define__master_namespace ".cell_to_address",
     COMPILER__define__master_namespace ".file_to_buffer",
     COMPILER__define__master_namespace ".buffer_to_file",
-    COMPILER__define__master_namespace ".copy_buffer_data",
+    COMPILER__define__master_namespace ".buffer.copy.low_to_high",
+    COMPILER__define__master_namespace ".buffer.copy.high_to_low",
     COMPILER__define__master_namespace ".delete_file",
 
     // list operations
@@ -419,7 +421,8 @@ typedef enum COMPILER__pfcnt {
     COMPILER__pfcnt__buffer__cell_to_address,
     COMPILER__pfcnt__buffer__file_to_buffer,
     COMPILER__pfcnt__buffer__buffer_to_file,
-    COMPILER__pfcnt__buffer__copy_buffer_data,
+    COMPILER__pfcnt__buffer__copy__low_to_high,
+    COMPILER__pfcnt__buffer__copy__high_to_low,
     COMPILER__pfcnt__buffer__delete_file,
 
     // list operations
@@ -672,8 +675,15 @@ COMPILER__blueprintling COMPILER__global__predefined_one_off_function_calls[] = 
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
         0,
     COMPILER__abt__define_function_call,
-        COMPILER__ast__predefined__mover__copy_buffer_data,
-        COMPILER__pfcnt__buffer__copy_buffer_data,
+        COMPILER__ast__predefined__mover__buffer_copy__low_to_high,
+        COMPILER__pfcnt__buffer__copy__low_to_high,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+        0,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__mover__buffer_copy__high_to_low,
+        COMPILER__pfcnt__buffer__copy__high_to_low,
         2,
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
