@@ -2002,7 +2002,7 @@ COMPILER__accountling_variable_argument COMPILER__account__functions__mark_varia
 // check for set
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__sets(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid name
-    COMPILER__namespace valid_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".set", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace valid_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__set], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -2082,23 +2082,23 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__set
 // check for printing
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__prints(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid names
-    COMPILER__namespace print_buffer_as_string_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".print.buffer_as_string", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace print_buffer_as_string_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__print__buffer_as_string], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace print_debug_cell_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".print.debug_cell", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace print_debug_cell_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__print__debug_cell], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace print_cell_as_binary_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".print.cell_as_binary", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace print_cell_as_binary_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__print__cell_as_binary], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace print_new_line_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".print.new_line", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace print_new_line_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__print__new_line], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace print_tabs_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".print.tabs", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace print_tabs_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__print__tabs], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -2222,7 +2222,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
 // check for packers
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__copy(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid name
-    COMPILER__namespace valid_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".copy", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace valid_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__copy], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -2278,7 +2278,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__cop
 // check for packers
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__packers(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid name
-    COMPILER__namespace valid_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".pack", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace valid_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__pack], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -2368,7 +2368,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pac
 // check for null packers
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__null_packers(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid name
-    COMPILER__namespace valid_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".pack.null", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace valid_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__pack_null], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -2413,15 +2413,15 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__nul
 // check for scope jumping
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__jumping(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid names
-    COMPILER__namespace jump_top_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".jump.top", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace jump_top_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__jump__top], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace jump_bottom_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".jump.bottom", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace jump_bottom_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__jump__bottom], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace jump_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".jump", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace jump_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__jump], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -2521,7 +2521,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__jum
 // check for checking
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__data_checking(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid names
-    COMPILER__namespace integer_range_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".integer.within_range", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace integer_range_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__integer__within_range], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -2584,23 +2584,23 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__dat
 // check for integer operations
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__integer_operations(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid names
-    COMPILER__namespace addition_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".integer.add", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace addition_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__integer__add], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace subtraction_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".integer.subtract", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace subtraction_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__integer__subtract], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace multiplication_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".integer.multiply", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace multiplication_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__integer__multiply], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace division_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".integer.divide", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace division_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__integer__divide], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace modulous_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".integer.modulous", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace modulous_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__integer__modulous], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -2702,31 +2702,31 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__bit
     ANVIL__bt is_valid_argument;
 
     // setup valid names
-    COMPILER__namespace or_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".bits.or", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace or_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__bits__or], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace invert_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".bits.invert", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace invert_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__bits__invert], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace and_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".bits.and", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace and_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__bits__and], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace xor_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".bits.xor", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace xor_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__bits__xor], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace shift_higher_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".bits.shift_higher", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace shift_higher_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__bits__shift_higher], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace shift_lower_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".bits.shift_lower", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace shift_lower_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__bits__shift_lower], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace overwrite_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".bits.overwrite", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace overwrite_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__bits__overwrite], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -2930,11 +2930,11 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__bit
 // check for buffer requesting and returning
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__buffer_acquisition(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid names
-    COMPILER__namespace buffer_request_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".buffer.request", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace buffer_request_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__buffer__request], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace buffer_return_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".buffer.return", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace buffer_return_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__buffer__return], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -2997,11 +2997,11 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__buf
 // check for cell address movers
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__cell_address_movers(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid names
-    COMPILER__namespace address_to_cell_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".address_to_cell", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace address_to_cell_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__buffer__address_to_cell], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace cell_to_address_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".cell_to_address", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace cell_to_address_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__buffer__cell_to_address], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -3079,15 +3079,15 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__cel
 // check for file buffer movers
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__file_buffer_movers(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid names
-    COMPILER__namespace file_to_buffer_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".file_to_buffer", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace file_to_buffer_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__buffer__file_to_buffer], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace buffer_to_file_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".buffer_to_file", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace buffer_to_file_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__buffer__buffer_to_file], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace delete_file_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".delete_file", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace delete_file_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__buffer__delete_file], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -3227,15 +3227,15 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__fil
 // check for list functions
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__lists(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid names
-    COMPILER__namespace list_open_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".list.open", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace list_open_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__list__open], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace list_close_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".list.close", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace list_close_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__list__close], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace list_append_data_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".list.append.data", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace list_append_data_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__list__append], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -3322,7 +3322,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__lis
 // check for time
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__time_functions(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid names
-    COMPILER__namespace get_time_now_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".time.now", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace get_time_now_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__time__now], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
