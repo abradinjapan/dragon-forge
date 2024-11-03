@@ -192,7 +192,7 @@ ANVIL__bt ANVIL__calculate__are_buffers_same_size(ANVIL__buffer a, ANVIL__buffer
 // copy buffer
 void ANVIL__copy__buffer(ANVIL__buffer source, ANVIL__buffer destination, ANVIL__bt* error) {
     // check for invalid buffer
-    if (ANVIL__calculate__are_buffers_same_size(source, destination) == ANVIL__bt__true) {
+    if (ANVIL__calculate__are_buffers_same_size(source, destination) == ANVIL__bt__true && destination.start <= destination.end) {
         // copy buffer
         for (ANVIL__length byte_index = 0; byte_index < (ANVIL__length)(destination.end - destination.start) + 1; byte_index++) {
             // copy byte
@@ -209,7 +209,7 @@ void ANVIL__copy__buffer(ANVIL__buffer source, ANVIL__buffer destination, ANVIL_
 // copy buffer backwards
 void ANVIL__copy__buffer__backwards(ANVIL__buffer source, ANVIL__buffer destination, ANVIL__bt* error) {
     // check for invalid buffer
-    if (ANVIL__calculate__are_buffers_same_size(source, destination) == ANVIL__bt__true) {
+    if (ANVIL__calculate__are_buffers_same_size(source, destination) == ANVIL__bt__true && destination.start <= destination.end) {
         // copy buffer
         for (ANVIL__length byte_index = (ANVIL__length)(destination.end - destination.start) + 1; byte_index > 0; byte_index--) {
             // copy byte
