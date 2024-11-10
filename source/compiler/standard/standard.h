@@ -27,6 +27,7 @@ void STANDARD__code__package(ANVIL__workspace* workspace, STANDARD__offsets* sta
     // list functions
     STANDARD__code__open_list(workspace, standard_offsets);
     STANDARD__code__close_list(workspace, standard_offsets);
+    STANDARD__code__append_buffer(workspace, standard_offsets);
 
     return;
 }

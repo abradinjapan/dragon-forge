@@ -34,6 +34,8 @@ typedef enum STANDARD__sot {
     // list functions
     STANDARD__ot__open_list__start,
     STANDARD__ot__close_list__start,
+    STANDARD__ot__append_buffer__start,
+    STANDARD__sot__append_buffer__skip_reallocation,
 
     // count
     STANDARD__sot__COUNT,

@@ -478,6 +478,9 @@ typedef enum ANVIL__srt {
     ANVIL__srt__temp__flag_ID_2,
     ANVIL__srt__temp__bit_count,
     ANVIL__srt__temp__length,
+    ANVIL__srt__temp__buffer__start,
+    ANVIL__srt__temp__buffer__end,
+    ANVIL__srt__temp__cell_ID,
 
     // end of cells
     ANVIL__srt__END,

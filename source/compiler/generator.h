@@ -368,8 +368,57 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
 
             break;
         case COMPILER__ast__predefined__list__append__structure:
-            // TODO
+            // get cell address range from context
+            ANVIL__code__debug__get_current_context(anvil, ANVIL__srt__temp__buffer__start, ANVIL__srt__temp__buffer__end);
+
+            // narrow cell range
+            // setup starting address
+            ANVIL__code__write_cell(anvil, (ANVIL__cell)(ANVIL__u64)COMPILER__generate__use_variable(list__append_data).cells.start, ANVIL__srt__temp__cell_ID);
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_multiply, ANVIL__srt__constant__cell_byte_size, ANVIL__srt__temp__cell_ID, ANVIL__unused_cell_ID, ANVIL__srt__temp__length);
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, ANVIL__srt__temp__buffer__start, ANVIL__srt__temp__length, ANVIL__unused_cell_ID, ANVIL__srt__temp__buffer__start);
+
+            // setup end address
+            ANVIL__code__write_cell(anvil, (ANVIL__cell)(ANVIL__u64)(COMPILER__generate__use_variable(list__append_data).cells.end + 1), ANVIL__srt__temp__cell_ID);
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_multiply, ANVIL__srt__constant__cell_byte_size, ANVIL__srt__temp__cell_ID, ANVIL__unused_cell_ID, ANVIL__srt__temp__length);
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_subtract, ANVIL__srt__temp__length, ANVIL__srt__constant__1, ANVIL__unused_cell_ID, ANVIL__srt__temp__length);
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, ANVIL__srt__temp__buffer__start, ANVIL__srt__temp__length, ANVIL__unused_cell_ID, ANVIL__srt__temp__buffer__end);
+
+            // append data
+            STANDARD__code__call__append_buffer(
+                anvil,
+                &(*workspace).standard_offsets,
+                ANVIL__sft__always_run,
+                COMPILER__generate__use_variable(list__input_list).cells.start,
+                COMPILER__generate__use_variable(list__input_list).cells.start + 1,
+                COMPILER__generate__use_variable(list__input_list).cells.start + 2,
+                COMPILER__generate__use_variable(list__input_list).cells.start + 3,
+                ANVIL__srt__temp__buffer__start,
+                ANVIL__srt__temp__buffer__end,
+                COMPILER__generate__use_variable(list__output_list).cells.start,
+                COMPILER__generate__use_variable(list__output_list).cells.start + 1,
+                COMPILER__generate__use_variable(list__output_list).cells.start + 2,
+                COMPILER__generate__use_variable(list__output_list).cells.start + 3
+            );
         
+            break;
+        case COMPILER__ast__predefined__list__append__buffer_data:
+            // append data
+            STANDARD__code__call__append_buffer(
+                anvil,
+                &(*workspace).standard_offsets,
+                ANVIL__sft__always_run,
+                COMPILER__generate__use_variable(list__input_list).cells.start,
+                COMPILER__generate__use_variable(list__input_list).cells.start + 1,
+                COMPILER__generate__use_variable(list__input_list).cells.start + 2,
+                COMPILER__generate__use_variable(list__input_list).cells.start + 3,
+                COMPILER__generate__use_variable(list__append_data).cells.start,
+                COMPILER__generate__use_variable(list__append_data).cells.start + 1,
+                COMPILER__generate__use_variable(list__output_list).cells.start,
+                COMPILER__generate__use_variable(list__output_list).cells.start + 1,
+                COMPILER__generate__use_variable(list__output_list).cells.start + 2,
+                COMPILER__generate__use_variable(list__output_list).cells.start + 3
+            );
+
             break;
         case COMPILER__ast__predefined__time__get_current_time:
             ANVIL__code__get_time(anvil, COMPILER__generate__use_variable(time__get_time_data).cells.start, COMPILER__generate__use_variable(time__get_time_data).cells.start + 1);

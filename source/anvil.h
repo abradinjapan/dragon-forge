@@ -154,6 +154,7 @@ ANVIL__ilt ANVIL__convert__it_to_ilt(ANVIL__it instruction) {
         ANVIL__ilt__debug__fgets,
         ANVIL__ilt__debug__mark_data_section,
         ANVIL__ilt__debug__mark_code_section,
+        ANVIL__ilt__debug__get_current_context,
     };
 
     return lengths[instruction];

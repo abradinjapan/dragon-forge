@@ -376,7 +376,8 @@ char* COMPILER__global__predefined_function_call_names[] = {
     // list operations
     COMPILER__define__master_namespace ".list.open",
     COMPILER__define__master_namespace ".list.close",
-    COMPILER__define__master_namespace ".list.append",
+    COMPILER__define__master_namespace ".list.append.structure",
+    COMPILER__define__master_namespace ".list.append.buffer",
 
     // time operations
     COMPILER__define__master_namespace ".time.now",
@@ -438,6 +439,7 @@ typedef enum COMPILER__pfcnt {
     COMPILER__pfcnt__list__open,
     COMPILER__pfcnt__list__close,
     COMPILER__pfcnt__list__append__structure,
+    COMPILER__pfcnt__list__append__buffer_data,
 
     // time
     COMPILER__pfcnt__time__now,
@@ -742,6 +744,13 @@ COMPILER__blueprintling COMPILER__global__predefined_one_off_function_calls[] = 
         COMPILER__pfcnt__list__close,
         1,
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_list,
+        0,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__list__append__buffer_data,
+        COMPILER__pfcnt__list__append__buffer_data,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_list,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
         0,
     
     // time calls

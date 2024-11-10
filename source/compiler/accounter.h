@@ -3395,7 +3395,11 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__lis
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
-    COMPILER__namespace list_append_data_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__list__append__structure], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    COMPILER__namespace list_append_structure_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__list__append__structure], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+    COMPILER__namespace list_append_buffer_data_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__list__append__buffer_data], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
@@ -3438,7 +3442,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__lis
         // match
         goto match;
     // if is a list append
-    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, list_append_data_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 0) {
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, list_append_structure_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 0) {
         // get argument for structure type
         COMPILER__accountling_variable_argument structure_argument_type = COMPILER__account__functions__get_variable_argument_by_name((*accountling_function).variables, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1).name);
         if (structure_argument_type.type >= COMPILER__avat__COUNT) {
@@ -3465,6 +3469,28 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__lis
 
         // match
         goto match;
+    // if is a list append buffer
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, list_append_buffer_data_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 0) {
+        // get variable arguments
+        ANVIL__bt is_valid_argument;
+        COMPILER__accountling_variable_argument list_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_list, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || list_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument buffer_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__ptt__dragon_buffer, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || buffer_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // match
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__list__append__buffer_data;
+        (*accountling_statement).list__input_list = list_argument;
+        (*accountling_statement).list__append_data = buffer_argument;
+        (*accountling_statement).list__output_list = list_argument;
+
+        // match
+        goto match;
     // if is not a match
     } else {
         goto failure;
@@ -3474,14 +3500,16 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__lis
     failure:
     COMPILER__close__parsling_namespace(list_open_name);
     COMPILER__close__parsling_namespace(list_close_name);
-    COMPILER__close__parsling_namespace(list_append_data_name);
+    COMPILER__close__parsling_namespace(list_append_structure_name);
+    COMPILER__close__parsling_namespace(list_append_buffer_data_name);
     return ANVIL__bt__false;
 
     // match!
     match:
     COMPILER__close__parsling_namespace(list_open_name);
     COMPILER__close__parsling_namespace(list_close_name);
-    COMPILER__close__parsling_namespace(list_append_data_name);
+    COMPILER__close__parsling_namespace(list_append_structure_name);
+    COMPILER__close__parsling_namespace(list_append_buffer_data_name);
     return ANVIL__bt__true;
 }
 
