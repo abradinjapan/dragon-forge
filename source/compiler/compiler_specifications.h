@@ -184,8 +184,8 @@ typedef enum COMPILER__ast {
     // list calls
     COMPILER__ast__predefined__list__open_list,
     COMPILER__ast__predefined__list__close_list,
-    COMPILER__ast__predefined__list__append_structure,
-    COMPILER__ast__predefined__list__append_buffer_data,
+    COMPILER__ast__predefined__list__append__structure,
+    COMPILER__ast__predefined__list__append__buffer_data,
 
     // time
     COMPILER__ast__predefined__time__get_current_time,
@@ -437,7 +437,7 @@ typedef enum COMPILER__pfcnt {
     // list operations
     COMPILER__pfcnt__list__open,
     COMPILER__pfcnt__list__close,
-    COMPILER__pfcnt__list__append,
+    COMPILER__pfcnt__list__append__structure,
 
     // time
     COMPILER__pfcnt__time__now,

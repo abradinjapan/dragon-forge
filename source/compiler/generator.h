@@ -369,23 +369,9 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             );
 
             break;
-        case COMPILER__ast__predefined__list__append_buffer_data:
-            /*STANDARD__code__call__append_buffer_data(
-                anvil,
-                &(*workspace).standard_offsets,
-                ANVIL__sft__always_run,
-                COMPILER__generate__use_variable(list__input_list).cells.start,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 1,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 2,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 3,
-                COMPILER__generate__use_variable(list__append_data).cells.start,
-                COMPILER__generate__use_variable(list__append_data).cells.start + 1,
-                COMPILER__generate__use_variable(list__output_list).cells.start,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 1,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 2,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 3
-            );*/
-
+        case COMPILER__ast__predefined__list__append__structure:
+            // TODO
+        
             break;
         case COMPILER__ast__predefined__time__get_current_time:
             ANVIL__code__get_time(anvil, COMPILER__generate__use_variable(time__get_time_data).cells.start, COMPILER__generate__use_variable(time__get_time_data).cells.start + 1);
