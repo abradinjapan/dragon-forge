@@ -172,10 +172,10 @@ typedef enum COMPILER__ast {
 
     // structures
     COMPILER__ast__predefined__structure__size,
-    COMPILER__ast__predefined__mover__structure_to_buffer__no_advance,
-    COMPILER__ast__predefined__mover__buffer_to_structure__no_advance,
-    COMPILER__ast__predefined__mover__structure_to_buffer__advance,
-    COMPILER__ast__predefined__mover__buffer_to_structure__advance,
+    COMPILER__ast__predefined__structure__structure_to_buffer__no_advance,
+    COMPILER__ast__predefined__structure__buffer_to_structure__no_advance,
+    COMPILER__ast__predefined__structure__structure_to_buffer__advance,
+    COMPILER__ast__predefined__structure__buffer_to_structure__advance,
 
     // movers
     COMPILER__ast__predefined__mover__address_to_cell,
