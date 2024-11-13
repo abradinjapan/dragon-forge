@@ -1430,6 +1430,51 @@ COMPILER__accountling_function_headers COMPILER__account__functions__generate_pr
         headers.category[COMPILER__afht__predefined].count++;
     }
 
+    // generate structure sizes
+    for (COMPILER__structure_index structure_index = 0; structure_index < structures.data_table.count; structure_index++) {
+        // setup variable
+        COMPILER__accountling_function_header header;
+
+        // setup name
+        header.name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__structure__structure_byte_size], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+
+        // setup inputs
+        // allocate inputs
+        header.input_types = COMPILER__open__counted_list_with_error(sizeof(COMPILER__structure_index) * 1, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        // append structure
+        COMPILER__append__structure_index(&header.input_types.list, COMPILER__aat__COUNT + structure_index, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        header.input_types.count = 1;
+
+        // setup outputs
+        // allocate outputs
+        header.output_types = ANVIL__open__counted_list(sizeof(COMPILER__structure_index) * 1, &(*error).memory_error_occured);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        // append structure
+        COMPILER__append__structure_index(&header.output_types.list, COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        header.output_types.count = 1;
+
+        // append header
+        COMPILER__append__accountling_function_header(&headers.category[COMPILER__afht__predefined].list, header, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        headers.category[COMPILER__afht__predefined].count++;
+    }
+
     // generate structure appenders
     for (COMPILER__structure_index structure_index = 0; structure_index < structures.data_table.count; structure_index++) {
         // setup variable
