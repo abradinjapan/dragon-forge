@@ -243,6 +243,7 @@ typedef enum COMPILER__aat {
 char* COMPILER__global__predefined_type_names[] = {
     COMPILER__define__master_namespace ".cell",
     COMPILER__define__master_namespace ".buffer",
+    COMPILER__define__master_namespace ".current",
     COMPILER__define__master_namespace ".list",
     COMPILER__define__master_namespace ".time",
 };
@@ -252,6 +253,8 @@ const char* COMPILER__global__predefined_type_member_names[] = {
     "start",
     "end",
     "allocation",
+    "buffer",
+    "progress",
     "length",
     "increase",
     "seconds",
@@ -264,6 +267,8 @@ typedef enum COMPILER__ptmnt {
     COMPILER__ptmnt__start,
     COMPILER__ptmnt__end,
     COMPILER__ptmnt__allocation,
+    COMPILER__ptmnt__buffer,
+    COMPILER__ptmnt__progress,
     COMPILER__ptmnt__content_length,
     COMPILER__ptmnt__increase,
     COMPILER__ptmnt__seconds,
@@ -278,6 +283,7 @@ typedef enum COMPILER__ptt {
     // type definitions
     COMPILER__ptt__dragon_cell = COMPILER__ptt__START,
     COMPILER__ptt__dragon_buffer,
+    COMPILER__ptt__dragon_current,
     COMPILER__ptt__dragon_list,
     COMPILER__ptt__dragon_time,
 
@@ -306,6 +312,14 @@ COMPILER__blueprintling COMPILER__global__predefined_types[] = {
             COMPILER__ptmnt__start,
         COMPILER__ptt__dragon_cell, // end
             COMPILER__ptmnt__end,
+    // current
+    COMPILER__abt__define_type,
+        COMPILER__ptt__dragon_current,
+        2,
+        COMPILER__ptt__dragon_buffer, // buffer
+            COMPILER__ptmnt__buffer,
+        COMPILER__ptt__dragon_cell, // progress
+            COMPILER__ptmnt__progress,
     // list
     COMPILER__abt__define_type,
         COMPILER__ptt__dragon_list,
