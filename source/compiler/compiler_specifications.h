@@ -170,6 +170,9 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__buffer__calculate__end_address,
     COMPILER__ast__predefined__buffer__calculate__start_address,
 
+    // structures
+    COMPILER__ast__predefined__structure__size,
+
     // movers
     COMPILER__ast__predefined__mover__address_to_cell,
     COMPILER__ast__predefined__mover__cell_to_address,
@@ -177,6 +180,10 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__mover__buffer_to_file,
     COMPILER__ast__predefined__mover__buffer_copy__low_to_high,
     COMPILER__ast__predefined__mover__buffer_copy__high_to_low,
+    COMPILER__ast__predefined__mover__structure_to_buffer__no_advance,
+    COMPILER__ast__predefined__mover__buffer_to_structure__no_advance,
+    COMPILER__ast__predefined__mover__structure_to_buffer__advance,
+    COMPILER__ast__predefined__mover__buffer_to_structure__advance,
 
     // file deleters
     COMPILER__ast__predefined__delete_file,
@@ -373,6 +380,11 @@ char* COMPILER__global__predefined_function_call_names[] = {
     COMPILER__define__master_namespace ".buffer.copy.high_to_low",
     COMPILER__define__master_namespace ".delete_file",
 
+    // structure operations
+    COMPILER__define__master_namespace ".structure_to_buffer",
+    COMPILER__define__master_namespace ".buffer_to_structure",
+    COMPILER__define__master_namespace ".structure.byte_size",
+
     // list operations
     COMPILER__define__master_namespace ".list.open",
     COMPILER__define__master_namespace ".list.close",
@@ -434,6 +446,11 @@ typedef enum COMPILER__pfcnt {
     COMPILER__pfcnt__buffer__copy__low_to_high,
     COMPILER__pfcnt__buffer__copy__high_to_low,
     COMPILER__pfcnt__buffer__delete_file,
+
+    // structure operations
+    COMPILER__pfcnt__structure__structure_to_buffer,
+    COMPILER__pfcnt__structure__buffer_to_structure,
+    COMPILER__pfcnt__structure__structure_byte_size,
 
     // list operations
     COMPILER__pfcnt__list__open,

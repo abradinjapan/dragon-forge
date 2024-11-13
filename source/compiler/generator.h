@@ -314,6 +314,10 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, COMPILER__generate__use_variable(buffer_calculations__start_address).cells.start, ANVIL__srt__constant__1, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(buffer_calculations__start_address).cells.start);
 
             break;
+        case COMPILER__ast__predefined__structure__size:
+            ANVIL__code__write_cell(anvil, (ANVIL__cell)(ANVIL__u64)((COMPILER__generate__use_variable(structure_buffer_mover__structure).cells.end - COMPILER__generate__use_variable(structure_buffer_mover__structure).cells.start + 1) * sizeof(ANVIL__cell)), COMPILER__generate__use_variable(structure_buffer_mover__size).cells.start);
+
+            break;
         case COMPILER__ast__predefined__mover__address_to_cell:
             ANVIL__code__address_to_cell(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(cell_address_mover__address).cells.start, COMPILER__generate__use_variable(cell_address_mover__byte_count).cells.start, COMPILER__generate__use_variable(cell_address_mover__cell).cells.start);
 
