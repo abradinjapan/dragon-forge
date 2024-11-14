@@ -899,4 +899,23 @@ void ANVIL__code__setup__context(ANVIL__workspace* workspace, ANVIL__cell_ID pro
     return;
 }
 
+// calculate buffer for cell range
+void ANVIL__code__calculate__addresses_for_cell_range_from_context(ANVIL__workspace* workspace, ANVIL__flag_ID flag, ANVIL__cell_ID range_start, ANVIL__cell_ID range_end, ANVIL__cell_ID buffer_start, ANVIL__cell_ID buffer_end) {
+    // get cell address range from context
+    ANVIL__code__debug__get_current_context(workspace, ANVIL__srt__temp__buffer__start, ANVIL__srt__temp__buffer__end);
+    
+    // setup starting address
+    ANVIL__code__write_cell(workspace, (ANVIL__cell)(ANVIL__u64)range_start, ANVIL__srt__temp__cell_ID);
+    ANVIL__code__operate(workspace, flag, ANVIL__ot__integer_multiply, ANVIL__srt__constant__cell_byte_size, ANVIL__srt__temp__cell_ID, ANVIL__unused_cell_ID, ANVIL__srt__temp__length);
+    ANVIL__code__operate(workspace, flag, ANVIL__ot__integer_add, ANVIL__srt__temp__buffer__start, ANVIL__srt__temp__length, ANVIL__unused_cell_ID, buffer_start);
+
+    // setup end address
+    ANVIL__code__write_cell(workspace, (ANVIL__cell)(ANVIL__u64)(range_end + 1), ANVIL__srt__temp__cell_ID);
+    ANVIL__code__operate(workspace, flag, ANVIL__ot__integer_multiply, ANVIL__srt__constant__cell_byte_size, ANVIL__srt__temp__cell_ID, ANVIL__unused_cell_ID, ANVIL__srt__temp__length);
+    ANVIL__code__operate(workspace, flag, ANVIL__ot__integer_subtract, ANVIL__srt__temp__length, ANVIL__srt__constant__1, ANVIL__unused_cell_ID, ANVIL__srt__temp__length);
+    ANVIL__code__operate(workspace, flag, ANVIL__ot__integer_add, ANVIL__srt__temp__buffer__start, ANVIL__srt__temp__length, ANVIL__unused_cell_ID, buffer_end);
+
+    return;
+}
+
 #endif

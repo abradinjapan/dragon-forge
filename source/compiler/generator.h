@@ -5,9 +5,6 @@
 #include "accounter.h"
 #include "standard/standard.h"
 
-/* Define */
-// blank
-
 /* Generation */
 // one function
 typedef struct COMPILER__generation_function {
@@ -144,6 +141,10 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
         case COMPILER__ast__predefined__set__string:
             ANVIL__code__write_cell(anvil, (ANVIL__cell)((ANVIL__offset*)(*function).data_offsets.list.buffer.start)[statement.set_string__string_value_index], ANVIL__srt__temp__offset);
             ANVIL__code__retrieve_embedded_buffer(anvil, ANVIL__sft__always_run, ANVIL__srt__temp__offset, COMPILER__generate__use_variable(set_string__variable_argument).cells.start, COMPILER__generate__use_variable(set_string__variable_argument).cells.end);
+
+            break;
+        case COMPILER__ast__predefined__print__character:
+            ANVIL__code__debug__putchar(anvil, COMPILER__generate__use_variable(print__variable_argument).cells.start);
 
             break;
         case COMPILER__ast__predefined__print__debug_cell:
@@ -318,6 +319,26 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__write_cell(anvil, (ANVIL__cell)(ANVIL__u64)((COMPILER__generate__use_variable(structure_buffer_mover__structure).cells.end - COMPILER__generate__use_variable(structure_buffer_mover__structure).cells.start + 1) * sizeof(ANVIL__cell)), COMPILER__generate__use_variable(structure_buffer_mover__size).cells.start);
 
             break;
+        case COMPILER__ast__predefined__structure__structure_to_buffer:
+            // calculate addresses
+            ANVIL__code__calculate__addresses_for_cell_range_from_context(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(structure_to_buffer__structure).cells.start, COMPILER__generate__use_variable(structure_to_buffer__structure).cells.start + 1, ANVIL__srt__temp__buffer__start, ANVIL__srt__temp__buffer__end);
+
+            // perform write
+            ANVIL__code__buffer_to_buffer__low_to_high(anvil, ANVIL__srt__temp__buffer__start, ANVIL__srt__temp__buffer__end, COMPILER__generate__use_variable(structure_to_buffer__buffer).cells.start, COMPILER__generate__use_variable(structure_to_buffer__buffer).cells.start + 1);
+
+            // calculate advancement
+            ANVIL__code__write_cell(anvil, (ANVIL__cell)(ANVIL__u64)((COMPILER__generate__use_variable(structure_to_buffer__structure).cells.end - COMPILER__generate__use_variable(structure_to_buffer__structure).cells.start + 1) * sizeof(ANVIL__cell)), ANVIL__srt__temp__length);
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, COMPILER__generate__use_variable(structure_to_buffer__buffer).cells.start, ANVIL__srt__temp__length, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(structure_to_buffer__advancement).cells.start);
+
+            break;
+        case COMPILER__ast__predefined__structure__buffer_to_structure:
+            // calculate addresses
+            ANVIL__code__calculate__addresses_for_cell_range_from_context(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(structure_to_buffer__structure).cells.start, COMPILER__generate__use_variable(structure_to_buffer__structure).cells.start + 1, ANVIL__srt__temp__buffer__start, ANVIL__srt__temp__buffer__end);
+
+            // perform write
+            ANVIL__code__buffer_to_buffer__low_to_high(anvil, COMPILER__generate__use_variable(structure_to_buffer__buffer).cells.start, COMPILER__generate__use_variable(structure_to_buffer__buffer).cells.start + 1, ANVIL__srt__temp__buffer__start, ANVIL__srt__temp__buffer__end);
+
+            break;
         case COMPILER__ast__predefined__current__within_range:
             // setup inversion flag
             ANVIL__code__write_cell(anvil, (ANVIL__cell)ANIVL__sft__temp_1, ANVIL__srt__temp__flag_ID_1);
@@ -333,10 +354,12 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             break;
         case COMPILER__ast__predefined__mover__address_to_cell:
             ANVIL__code__address_to_cell(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(cell_address_mover__address).cells.start, COMPILER__generate__use_variable(cell_address_mover__byte_count).cells.start, COMPILER__generate__use_variable(cell_address_mover__cell).cells.start);
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, COMPILER__generate__use_variable(cell_address_mover__address).cells.start, ANVIL__srt__constant__ascii_character_byte_size, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(cell_address_mover__advancement).cells.start);
 
             break;
         case COMPILER__ast__predefined__mover__cell_to_address:
             ANVIL__code__cell_to_address(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(cell_address_mover__cell).cells.start, COMPILER__generate__use_variable(cell_address_mover__byte_count).cells.start, COMPILER__generate__use_variable(cell_address_mover__address).cells.start);
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, COMPILER__generate__use_variable(cell_address_mover__address).cells.start, ANVIL__srt__constant__ascii_character_byte_size, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(cell_address_mover__advancement).cells.start);
 
             break;
         case COMPILER__ast__predefined__mover__file_to_buffer:
@@ -385,20 +408,8 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
 
             break;
         case COMPILER__ast__predefined__list__append__structure:
-            // get cell address range from context
-            ANVIL__code__debug__get_current_context(anvil, ANVIL__srt__temp__buffer__start, ANVIL__srt__temp__buffer__end);
-
-            // narrow cell range
-            // setup starting address
-            ANVIL__code__write_cell(anvil, (ANVIL__cell)(ANVIL__u64)COMPILER__generate__use_variable(list__append_data).cells.start, ANVIL__srt__temp__cell_ID);
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_multiply, ANVIL__srt__constant__cell_byte_size, ANVIL__srt__temp__cell_ID, ANVIL__unused_cell_ID, ANVIL__srt__temp__length);
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, ANVIL__srt__temp__buffer__start, ANVIL__srt__temp__length, ANVIL__unused_cell_ID, ANVIL__srt__temp__buffer__start);
-
-            // setup end address
-            ANVIL__code__write_cell(anvil, (ANVIL__cell)(ANVIL__u64)(COMPILER__generate__use_variable(list__append_data).cells.end + 1), ANVIL__srt__temp__cell_ID);
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_multiply, ANVIL__srt__constant__cell_byte_size, ANVIL__srt__temp__cell_ID, ANVIL__unused_cell_ID, ANVIL__srt__temp__length);
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_subtract, ANVIL__srt__temp__length, ANVIL__srt__constant__1, ANVIL__unused_cell_ID, ANVIL__srt__temp__length);
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, ANVIL__srt__temp__buffer__start, ANVIL__srt__temp__length, ANVIL__unused_cell_ID, ANVIL__srt__temp__buffer__end);
+            // calculate addresses
+            ANVIL__code__calculate__addresses_for_cell_range_from_context(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(list__append_data).cells.start, COMPILER__generate__use_variable(list__append_data).cells.end, ANVIL__srt__temp__buffer__start, ANVIL__srt__temp__buffer__end);
 
             // append data
             STANDARD__code__call__append_buffer(

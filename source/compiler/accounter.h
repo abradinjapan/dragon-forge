@@ -353,6 +353,7 @@ typedef struct COMPILER__accountling_statement {
     COMPILER__accountling_variable_argument cell_address_mover__cell;
     COMPILER__accountling_variable_argument cell_address_mover__byte_count;
     COMPILER__accountling_variable_argument cell_address_mover__address;
+    COMPILER__accountling_variable_argument cell_address_mover__advancement;
 
     // file buffer movers (variables for file->buffer, buffer->file & buffer->buffer)
     COMPILER__accountling_variable_argument file_buffer_mover__file_path;
@@ -368,6 +369,11 @@ typedef struct COMPILER__accountling_statement {
     COMPILER__accountling_variable_argument current__current;
     COMPILER__accountling_variable_argument current__invert;
     COMPILER__accountling_variable_argument current__result;
+
+    // structure buffer functions
+    COMPILER__accountling_variable_argument structure_to_buffer__structure;
+    COMPILER__accountling_variable_argument structure_to_buffer__buffer;
+    COMPILER__accountling_variable_argument structure_to_buffer__advancement;
 
     // list functions
     COMPILER__accountling_variable_argument list__increase;
@@ -1525,6 +1531,101 @@ COMPILER__accountling_function_headers COMPILER__account__functions__generate_pr
         headers.category[COMPILER__afht__predefined].count++;
     }
 
+    // generate structure to buffer
+    for (COMPILER__structure_index structure_index = 0; structure_index < structures.data_table.count; structure_index++) {
+        // setup variable
+        COMPILER__accountling_function_header header;
+
+        // setup name
+        header.name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__structure__structure_to_buffer], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+
+        // setup inputs
+        // allocate inputs
+        header.input_types = COMPILER__open__counted_list_with_error(sizeof(COMPILER__structure_index) * 2, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        // append structure
+        COMPILER__append__structure_index(&header.input_types.list, COMPILER__aat__COUNT + structure_index, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        // append structure
+        COMPILER__append__structure_index(&header.input_types.list, COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        header.input_types.count = 2;
+
+        // setup outputs
+        // allocate outputs
+        header.output_types = ANVIL__open__counted_list(sizeof(COMPILER__structure_index) * 1, &(*error).memory_error_occured);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        // append structure
+        COMPILER__append__structure_index(&header.input_types.list, COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        header.output_types.count = 1;
+
+        // append header
+        COMPILER__append__accountling_function_header(&headers.category[COMPILER__afht__predefined].list, header, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        headers.category[COMPILER__afht__predefined].count++;
+    }
+
+    // generate buffer to structure
+    for (COMPILER__structure_index structure_index = 0; structure_index < structures.data_table.count; structure_index++) {
+        // setup variable
+        COMPILER__accountling_function_header header;
+
+        // setup name
+        header.name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__structure__buffer_to_structure], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+
+        // setup inputs
+        // allocate inputs
+        header.input_types = COMPILER__open__counted_list_with_error(sizeof(COMPILER__structure_index) * 2, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        // append structure
+        COMPILER__append__structure_index(&header.input_types.list, COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        // append structure
+        COMPILER__append__structure_index(&header.input_types.list, COMPILER__aat__COUNT + structure_index, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        header.input_types.count = 2;
+
+        // setup outputs
+        // allocate outputs
+        header.output_types = ANVIL__open__counted_list(sizeof(COMPILER__structure_index) * 1, &(*error).memory_error_occured);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        header.output_types.count = 0;
+
+        // append header
+        COMPILER__append__accountling_function_header(&headers.category[COMPILER__afht__predefined].list, header, error);
+        if (COMPILER__check__error_occured(error)) {
+            return headers;
+        }
+        headers.category[COMPILER__afht__predefined].count++;
+    }
+
     // done
     return headers;
 }
@@ -2192,6 +2293,10 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
+    COMPILER__namespace print_character_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__print__character], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
     COMPILER__namespace print_debug_cell_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__print__debug_cell], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
@@ -2245,6 +2350,28 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
 
             // setup output statement
             (*accountling_statement).statement_type = COMPILER__ast__predefined__print__debug_cell;
+            (*accountling_statement).print__variable_argument = variable_argument;
+
+            // match
+            goto match;
+        // not the right argument type
+        } else {
+            goto failure;
+        }
+    // if is a character print
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, print_character_name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 0) {
+        // if inputs are correct parsing type
+        if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__name) {
+            // check input variable type
+            // get index
+            ANVIL__bt is_valid_argument;
+            COMPILER__accountling_variable_argument variable_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+            if (COMPILER__check__error_occured(error) || variable_argument.type >= COMPILER__avat__COUNT) {
+                goto failure;
+            }
+
+            // setup output statement
+            (*accountling_statement).statement_type = COMPILER__ast__predefined__print__character;
             (*accountling_statement).print__variable_argument = variable_argument;
 
             // match
@@ -2309,6 +2436,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
     // not a match
     failure:
     COMPILER__close__parsling_namespace(print_buffer_as_string_name);
+    COMPILER__close__parsling_namespace(print_character_name);
     COMPILER__close__parsling_namespace(print_debug_cell_name);
     COMPILER__close__parsling_namespace(print_cell_as_binary_name);
     COMPILER__close__parsling_namespace(print_new_line_name);
@@ -2318,6 +2446,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
     // match!
     match:
     COMPILER__close__parsling_namespace(print_buffer_as_string_name);
+    COMPILER__close__parsling_namespace(print_character_name);
     COMPILER__close__parsling_namespace(print_debug_cell_name);
     COMPILER__close__parsling_namespace(print_cell_as_binary_name);
     COMPILER__close__parsling_namespace(print_new_line_name);
@@ -3272,7 +3401,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__cel
     }
 
     // if is address to cell
-    if (COMPILER__check__identical_namespaces(parsling_statement.name.name, address_to_cell_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 1) {
+    if (COMPILER__check__identical_namespaces(parsling_statement.name.name, address_to_cell_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 2) {
         // get variables
         ANVIL__bt is_valid_argument;
         COMPILER__accountling_variable_argument address_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
@@ -3287,6 +3416,10 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__cel
         if (COMPILER__check__error_occured(error) || cell_argument.type >= COMPILER__avat__COUNT) {
             goto failure;
         }
+        COMPILER__accountling_variable_argument advancement_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 1), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || advancement_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
 
         // match
         // setup output statement
@@ -3294,11 +3427,12 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__cel
         (*accountling_statement).cell_address_mover__address = address_argument;
         (*accountling_statement).cell_address_mover__byte_count = byte_count_argument;
         (*accountling_statement).cell_address_mover__cell = cell_argument;
+        (*accountling_statement).cell_address_mover__advancement = advancement_argument;
 
         // match
         goto match;
     // if is cell to address
-    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, cell_to_address_name) && parsling_statement.inputs.count == 3) {
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, cell_to_address_name) && parsling_statement.inputs.count == 3 && parsling_statement.outputs.count == 1) {
         // get variables
         ANVIL__bt is_valid_argument;
         COMPILER__accountling_variable_argument cell_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
@@ -3313,6 +3447,10 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__cel
         if (COMPILER__check__error_occured(error) || address_argument.type >= COMPILER__avat__COUNT) {
             goto failure;
         }
+        COMPILER__accountling_variable_argument advancement_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || advancement_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
 
         // match
         // setup output statement
@@ -3320,6 +3458,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__cel
         (*accountling_statement).cell_address_mover__cell = cell_argument;
         (*accountling_statement).cell_address_mover__byte_count = byte_count_argument;
         (*accountling_statement).cell_address_mover__address = address_argument;
+        (*accountling_statement).cell_address_mover__advancement = advancement_argument;
 
         // match
         goto match;
@@ -3496,6 +3635,14 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__str
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
+    COMPILER__namespace structure_to_buffer_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__structure__structure_to_buffer], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+    COMPILER__namespace buffer_to_structure_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__structure__buffer_to_structure], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
 
     // if is structure size
     if (COMPILER__check__identical_namespaces(parsling_statement.name.name, structure_byte_size_name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 1) {
@@ -3524,6 +3671,65 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__str
 
         // match
         goto match;
+    // if is structure to buffer
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, structure_to_buffer_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 1) {
+        // get argument for structure type
+        COMPILER__accountling_variable_argument structure_type = COMPILER__account__functions__get_variable_argument_by_name((*accountling_function).variables, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).name);
+        if (structure_type.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // get variables
+        ANVIL__bt is_valid_argument;
+        COMPILER__accountling_variable_argument structure_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__account__functions__get_variable_by_variable_argument((*accountling_function).variables, structure_type).type, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || structure_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument buffer_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__ptt__dragon_buffer, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || buffer_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument advancement_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || advancement_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // match
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__structure__structure_to_buffer;
+        (*accountling_statement).structure_to_buffer__structure = structure_argument;
+        (*accountling_statement).structure_to_buffer__buffer = buffer_argument;
+        (*accountling_statement).structure_to_buffer__advancement = advancement_argument;
+        
+        // match
+        goto match;
+    // if is buffer to structure
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, buffer_to_structure_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 0) {
+        // get argument for structure type
+        COMPILER__accountling_variable_argument structure_type = COMPILER__account__functions__get_variable_argument_by_name((*accountling_function).variables, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1).name);
+        if (structure_type.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // get variables
+        ANVIL__bt is_valid_argument;
+        COMPILER__accountling_variable_argument buffer_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_buffer, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || buffer_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument structure_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__account__functions__get_variable_by_variable_argument((*accountling_function).variables, structure_type).type, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || structure_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // match
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__structure__buffer_to_structure;
+        (*accountling_statement).structure_to_buffer__structure = structure_argument;
+        (*accountling_statement).structure_to_buffer__buffer = buffer_argument;
+        
+        // match
+        goto match;
     // if is not a match
     } else {
         goto failure;
@@ -3532,11 +3738,15 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__str
     // not a match
     failure:
     COMPILER__close__parsling_namespace(structure_byte_size_name);
+    COMPILER__close__parsling_namespace(structure_to_buffer_name);
+    COMPILER__close__parsling_namespace(buffer_to_structure_name);
     return ANVIL__bt__false;
 
     // match!
     match:
     COMPILER__close__parsling_namespace(structure_byte_size_name);
+    COMPILER__close__parsling_namespace(structure_to_buffer_name);
+    COMPILER__close__parsling_namespace(buffer_to_structure_name);
     return ANVIL__bt__true;
 }
 

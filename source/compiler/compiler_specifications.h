@@ -131,6 +131,7 @@ typedef enum COMPILER__ast {
 
     // print
     COMPILER__ast__predefined__print__debug_cell,
+    COMPILER__ast__predefined__print__character,
     COMPILER__ast__predefined__print__buffer_as_string,
     COMPILER__ast__predefined__print__cell_as_binary,
     COMPILER__ast__predefined__print__new_line,
@@ -175,10 +176,8 @@ typedef enum COMPILER__ast {
 
     // structures
     COMPILER__ast__predefined__structure__size,
-    COMPILER__ast__predefined__structure__structure_to_buffer__no_advance,
-    COMPILER__ast__predefined__structure__buffer_to_structure__no_advance,
-    COMPILER__ast__predefined__structure__structure_to_buffer__advance,
-    COMPILER__ast__predefined__structure__buffer_to_structure__advance,
+    COMPILER__ast__predefined__structure__structure_to_buffer,
+    COMPILER__ast__predefined__structure__buffer_to_structure,
 
     // movers
     COMPILER__ast__predefined__mover__address_to_cell,
@@ -351,6 +350,7 @@ char* COMPILER__global__predefined_function_call_names[] = {
 
     // prints
     COMPILER__define__master_namespace ".print.debug_cell",
+    COMPILER__define__master_namespace ".print.character",
     COMPILER__define__master_namespace ".print.buffer_as_string",
     COMPILER__define__master_namespace ".print.cell_as_binary",
     COMPILER__define__master_namespace ".print.new_line",
@@ -421,6 +421,7 @@ typedef enum COMPILER__pfcnt {
 
     // prints
     COMPILER__pfcnt__print__debug_cell,
+    COMPILER__pfcnt__print__character,
     COMPILER__pfcnt__print__buffer_as_string,
     COMPILER__pfcnt__print__cell_as_binary,
     COMPILER__pfcnt__print__new_line,
