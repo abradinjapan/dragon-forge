@@ -364,6 +364,11 @@ typedef struct COMPILER__accountling_statement {
     COMPILER__accountling_variable_argument structure_buffer_mover__buffer;
     COMPILER__accountling_variable_argument structure_buffer_mover__size;
 
+    // current functions
+    COMPILER__accountling_variable_argument current__current;
+    COMPILER__accountling_variable_argument current__invert;
+    COMPILER__accountling_variable_argument current__result;
+
     // list functions
     COMPILER__accountling_variable_argument list__increase;
     COMPILER__accountling_variable_argument list__input_list;
@@ -3204,6 +3209,56 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__buf
     return ANVIL__bt__true;
 }
 
+// check for current functions
+ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__current_assorted(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
+    // setup valid names
+    COMPILER__namespace current_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__current__within_range], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
+
+    // if is structure size
+    if (COMPILER__check__identical_namespaces(parsling_statement.name.name, current_name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 1) {
+        // get variables
+        ANVIL__bt is_valid_argument;
+        COMPILER__accountling_variable_argument current_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_current, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || current_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument invert_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || invert_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument result_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || result_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // match
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__current__within_range;
+        (*accountling_statement).current__current = current_argument;
+        (*accountling_statement).current__invert = invert_argument;
+        (*accountling_statement).current__result = result_argument;
+
+        // match
+        goto match;
+    // if is not a match
+    } else {
+        goto failure;
+    }
+
+    // not a match
+    failure:
+    COMPILER__close__parsling_namespace(current_name);
+    return ANVIL__bt__false;
+
+    // match!
+    match:
+    COMPILER__close__parsling_namespace(current_name);
+    return ANVIL__bt__true;
+}
+
 // check for cell address movers
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__cell_address_movers(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // setup valid names
@@ -3943,6 +3998,19 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
 
             // find buffer calculations
             if (COMPILER__account__functions__check_and_get_statement_translation__buffer_calculations(structures, accountling_function, parsling_statement, &accountling_statement, error)) {
+                // append statement
+                COMPILER__append__accountling_statement(&(*accountling_scope).statements.list, accountling_statement, error);
+                if (COMPILER__check__error_occured(error)) {
+                    return;
+                }
+                goto next_statement;
+            }
+            if (COMPILER__check__error_occured(error)) {
+                return;
+            }
+
+            // find cell address movers
+            if (COMPILER__account__functions__check_and_get_statement_translation__current_assorted(structures, accountling_function, parsling_statement, &accountling_statement, error)) {
                 // append statement
                 COMPILER__append__accountling_statement(&(*accountling_scope).statements.list, accountling_statement, error);
                 if (COMPILER__check__error_occured(error)) {
