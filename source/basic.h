@@ -330,7 +330,9 @@ ANVIL__buffer ANVIL__move__file_to_buffer(ANVIL__buffer file_path) {
 	// check if the file opened
 	if (file_handle == 0) {
 		// if not, return empty buffer
-		return ANVIL__create_null__buffer();
+		output = ANVIL__create_null__buffer();
+
+        goto quit_no_file_handle;
 	}
 
 	// get file size
@@ -343,18 +345,21 @@ ANVIL__buffer ANVIL__move__file_to_buffer(ANVIL__buffer file_path) {
 
 	// check if buffer allocated
 	if (output.start == ANVIL__define__null_address) {
-		// close file handle
-		fclose(file_handle);
-
-		// return empty buffer
-		return output;
+		// exit
+        goto quit;
 	}
 
 	// read file into buffer
 	fread(output.start, file_size, 1, file_handle);
 
+    // return offset
+    quit:
+
 	// close file handle
 	fclose(file_handle);
+
+    // quit no file handle
+    quit_no_file_handle:
 
     // close null file path if necessary
     if (*(ANVIL__character*)file_path.end != 0) {
@@ -387,7 +392,7 @@ void ANVIL__move__buffer_to_file(ANVIL__bt* error, ANVIL__buffer file_path, ANVI
 		// if not, return error
         *error = ANVIL__bt__true;
 
-		return;
+		goto quit;
 	}
 
 	// write buffer to file
@@ -395,6 +400,9 @@ void ANVIL__move__buffer_to_file(ANVIL__bt* error, ANVIL__buffer file_path, ANVI
 
 	// close file handle
 	fclose(file_handle);
+
+    // exit offset
+    quit:
 
     // close null file path if necessary
     if (*(ANVIL__character*)file_path.end != 0) {
