@@ -2675,6 +2675,12 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__jum
             
             // get offset ID by name
             (*accountling_statement).scope_index = COMPILER__account__functions__get_scope_index(accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1).name);
+            if ((*accountling_statement).scope_index >= (*accountling_function).scope_headers.count) {
+                *error = COMPILER__open__error("Accounting Error: A scope offset is used but never declared.", COMPILER__get__namespace_lexling_location(parsling_statement.name.name));
+
+                goto failure;
+            }
+
 
             // setup output statement
             (*accountling_statement).statement_type = COMPILER__ast__predefined__jump__top;
@@ -2700,6 +2706,11 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__jum
             
             // get offset ID by name
             (*accountling_statement).scope_index = COMPILER__account__functions__get_scope_index(accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1).name);
+            if ((*accountling_statement).scope_index >= (*accountling_function).scope_headers.count) {
+                *error = COMPILER__open__error("Accounting Error: A scope offset is used but never declared.", COMPILER__get__namespace_lexling_location(parsling_statement.name.name));
+
+                goto failure;
+            }
 
             // setup output statement
             (*accountling_statement).statement_type = COMPILER__ast__predefined__jump__bottom;
@@ -2725,6 +2736,11 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__jum
             
             // get offset ID by name
             (*accountling_statement).offset_index = COMPILER__account__functions__get_offset_index(accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1).name);
+            if ((*accountling_statement).offset_index >= (*accountling_function).offsets.count) {
+                *error = COMPILER__open__error("Accounting Error: An offset is used but never declared.", COMPILER__get__namespace_lexling_location(parsling_statement.name.name));
+
+                goto failure;
+            }
 
             // setup output statement
             (*accountling_statement).statement_type = COMPILER__ast__predefined__jump__offset;
@@ -4315,8 +4331,11 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
 
             return;
         } else if (parsling_statement.type == COMPILER__stt__offset) {
+            // search for offset
+            COMPILER__offset_index offset_index = COMPILER__account__functions__get_offset_index(accountling_function, parsling_statement.name.name);
+
             // setup offset data
-            accountling_statement.offset_index = COMPILER__account__functions__get_offset_index(accountling_function, parsling_statement.name.name);
+            accountling_statement.offset_index = offset_index;
             accountling_statement.statement_type = COMPILER__ast__offset;
             
             // append statement
