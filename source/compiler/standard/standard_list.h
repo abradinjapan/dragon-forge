@@ -15,6 +15,7 @@ typedef enum STANDARD__open_list {
 	STANDARD__open_list__list_allocation_end,
 	STANDARD__open_list__list_content_length,
 	STANDARD__open_list__list_increase,
+	STANDARD__open_list__list_append_count,
 
 	// preserve end
 	STANDARD__open_list__preserve__END,
@@ -27,10 +28,11 @@ typedef enum STANDARD__open_list {
 	STANDARD__open_list__output__list_allocation_end,
 	STANDARD__open_list__output__list_content_length,
 	STANDARD__open_list__output__list_increase,
+	STANDARD__open_list__output__list_append_count,
 } STANDARD__open_list;
 
 // call function
-void STANDARD__code__call__open_list(ANVIL__workspace* workspace, STANDARD__offsets* standard_offsets, ANVIL__flag_ID flag, ANVIL__cell_ID input__increase, ANVIL__cell_ID output__list_allocation_start, ANVIL__cell_ID output__list_allocation_end, ANVIL__cell_ID output__list_content_length, ANVIL__cell_ID output__list_increase) {
+void STANDARD__code__call__open_list(ANVIL__workspace* workspace, STANDARD__offsets* standard_offsets, ANVIL__flag_ID flag, ANVIL__cell_ID input__increase, ANVIL__cell_ID output__list_allocation_start, ANVIL__cell_ID output__list_allocation_end, ANVIL__cell_ID output__list_content_length, ANVIL__cell_ID output__list_increase, ANVIL__cell_ID output__list_append_count) {
 	// pass inputs
 	ANVIL__code__cell_to_cell(workspace, flag, input__increase, STANDARD__open_list__input__increase);
 
@@ -42,6 +44,7 @@ void STANDARD__code__call__open_list(ANVIL__workspace* workspace, STANDARD__offs
 	ANVIL__code__cell_to_cell(workspace, flag, STANDARD__open_list__output__list_allocation_end, output__list_allocation_end);
 	ANVIL__code__cell_to_cell(workspace, flag, STANDARD__open_list__output__list_content_length, output__list_content_length);
 	ANVIL__code__cell_to_cell(workspace, flag, STANDARD__open_list__output__list_increase, output__list_increase);
+	ANVIL__code__cell_to_cell(workspace, flag, STANDARD__open_list__output__list_append_count, output__list_append_count);
 
 	return;
 }
@@ -60,12 +63,14 @@ void STANDARD__code__open_list(ANVIL__workspace* workspace, STANDARD__offsets* s
 	// open list
     ANVIL__code__request_memory(workspace, STANDARD__open_list__list_increase, STANDARD__open_list__list_allocation_start, STANDARD__open_list__list_allocation_end);
 	ANVIL__code__write_cell(workspace, ANVIL__define__zero_length, STANDARD__open_list__list_content_length);
+	ANVIL__code__write_cell(workspace, ANVIL__define__zero_length, STANDARD__open_list__list_append_count);
 
 	// setup outputs
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__open_list__list_allocation_start, STANDARD__open_list__output__list_allocation_start);
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__open_list__list_allocation_end, STANDARD__open_list__output__list_allocation_end);
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__open_list__list_content_length, STANDARD__open_list__output__list_content_length);
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__open_list__list_increase, STANDARD__open_list__output__list_increase);
+	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__open_list__list_append_count, STANDARD__open_list__output__list_append_count);
 
 	// setup function epilogue
 	ANVIL__code__restore_workspace(workspace, ANVIL__sft__always_run, STANDARD__open_list__preserve__START, STANDARD__open_list__preserve__END);
@@ -86,6 +91,7 @@ typedef enum STANDARD__close_list {
 	STANDARD__close_list__list_allocation_end,
 	STANDARD__close_list__list_content_length,
 	STANDARD__close_list__list_increase,
+	STANDARD__close_list__list_append_count,
 
 	// preserve end
 	STANDARD__close_list__preserve__END,
@@ -95,17 +101,17 @@ typedef enum STANDARD__close_list {
 	STANDARD__close_list__input__list_allocation_end,
 	STANDARD__close_list__input__list_content_length,
 	STANDARD__close_list__input__list_increase,
-
-	// outputs
+	STANDARD__close_list__input__list_append_count,
 } STANDARD__close_list;
 
 // call function
-void STANDARD__code__call__close_list(ANVIL__workspace* workspace, STANDARD__offsets* standard_offsets, ANVIL__flag_ID flag, ANVIL__cell_ID input__list_allocation_start, ANVIL__cell_ID input__list_allocation_end, ANVIL__cell_ID input__list_content_length, ANVIL__cell_ID input__list_increase) {
+void STANDARD__code__call__close_list(ANVIL__workspace* workspace, STANDARD__offsets* standard_offsets, ANVIL__flag_ID flag, ANVIL__cell_ID input__list_allocation_start, ANVIL__cell_ID input__list_allocation_end, ANVIL__cell_ID input__list_content_length, ANVIL__cell_ID input__list_increase, ANVIL__cell_ID input__list_append_count) {
 	// pass inputs
 	ANVIL__code__cell_to_cell(workspace, flag, input__list_allocation_start, STANDARD__close_list__input__list_allocation_start);
 	ANVIL__code__cell_to_cell(workspace, flag, input__list_allocation_end, STANDARD__close_list__input__list_allocation_end);
 	ANVIL__code__cell_to_cell(workspace, flag, input__list_content_length, STANDARD__close_list__input__list_content_length);
 	ANVIL__code__cell_to_cell(workspace, flag, input__list_increase, STANDARD__close_list__input__list_increase);
+	ANVIL__code__cell_to_cell(workspace, flag, input__list_append_count, STANDARD__close_list__input__list_append_count);
 
 	// call function
 	ANVIL__code__call__static(workspace, flag, (*standard_offsets).offsets[STANDARD__ot__close_list__start]);
@@ -126,6 +132,7 @@ void STANDARD__code__close_list(ANVIL__workspace* workspace, STANDARD__offsets* 
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__close_list__input__list_allocation_end, STANDARD__close_list__list_allocation_end);
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__close_list__input__list_content_length, STANDARD__close_list__list_content_length);
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__close_list__input__list_increase, STANDARD__close_list__list_increase);
+	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__close_list__input__list_append_count, STANDARD__close_list__list_append_count);
 
 	// close buffer
 	ANVIL__code__return_memory(workspace, STANDARD__close_list__list_allocation_start, STANDARD__close_list__list_allocation_end);
@@ -149,6 +156,7 @@ typedef enum STANDARD__append_buffer {
 	STANDARD__append_buffer__list_allocation_end,
 	STANDARD__append_buffer__list_length,
 	STANDARD__append_buffer__list_increase,
+	STANDARD__append_buffer__list_append_count,
 	STANDARD__append_buffer__data_start,
 	STANDARD__append_buffer__data_end,
 	STANDARD__append_buffer__data_length,
@@ -171,6 +179,7 @@ typedef enum STANDARD__append_buffer {
 	STANDARD__append_buffer__input__list_allocation_end,
 	STANDARD__append_buffer__input__list_length,
 	STANDARD__append_buffer__input__list_increase,
+	STANDARD__append_buffer__input__list_append_count,
 	STANDARD__append_buffer__input__data_start,
 	STANDARD__append_buffer__input__data_end,
 
@@ -179,15 +188,17 @@ typedef enum STANDARD__append_buffer {
 	STANDARD__append_buffer__output__list_allocation_end,
 	STANDARD__append_buffer__output__list_length,
 	STANDARD__append_buffer__output__list_increase,
+	STANDARD__append_buffer__output__list_append_count,
 } STANDARD__append_buffer;
 
 // call function
-void STANDARD__code__call__append_buffer(ANVIL__workspace* workspace, STANDARD__offsets* standard_offsets, ANVIL__flag_ID flag, ANVIL__cell_ID input__list_allocation_start, ANVIL__cell_ID input__list_allocation_end, ANVIL__cell_ID input__list_length, ANVIL__cell_ID input__list_increase, ANVIL__cell_ID input__data_start, ANVIL__cell_ID input__data_end, ANVIL__cell_ID output__list_allocation_start, ANVIL__cell_ID output__list_allocation_end, ANVIL__cell_ID output__list_length, ANVIL__cell_ID output__list_increase) {
+void STANDARD__code__call__append_buffer(ANVIL__workspace* workspace, STANDARD__offsets* standard_offsets, ANVIL__flag_ID flag, ANVIL__cell_ID input__list_allocation_start, ANVIL__cell_ID input__list_allocation_end, ANVIL__cell_ID input__list_length, ANVIL__cell_ID input__list_increase, ANVIL__cell_ID input__list_append_count, ANVIL__cell_ID input__data_start, ANVIL__cell_ID input__data_end, ANVIL__cell_ID output__list_allocation_start, ANVIL__cell_ID output__list_allocation_end, ANVIL__cell_ID output__list_length, ANVIL__cell_ID output__list_increase, ANVIL__cell_ID output__list_append_count) {
 	// pass inputs
 	ANVIL__code__cell_to_cell(workspace, flag, input__list_allocation_start, STANDARD__append_buffer__input__list_allocation_start);
 	ANVIL__code__cell_to_cell(workspace, flag, input__list_allocation_end, STANDARD__append_buffer__input__list_allocation_end);
 	ANVIL__code__cell_to_cell(workspace, flag, input__list_length, STANDARD__append_buffer__input__list_length);
 	ANVIL__code__cell_to_cell(workspace, flag, input__list_increase, STANDARD__append_buffer__input__list_increase);
+	ANVIL__code__cell_to_cell(workspace, flag, input__list_append_count, STANDARD__append_buffer__input__list_append_count);
 	ANVIL__code__cell_to_cell(workspace, flag, input__data_start, STANDARD__append_buffer__input__data_start);
 	ANVIL__code__cell_to_cell(workspace, flag, input__data_end, STANDARD__append_buffer__input__data_end);
 
@@ -199,6 +210,7 @@ void STANDARD__code__call__append_buffer(ANVIL__workspace* workspace, STANDARD__
 	ANVIL__code__cell_to_cell(workspace, flag, STANDARD__append_buffer__output__list_allocation_end, output__list_allocation_end);
 	ANVIL__code__cell_to_cell(workspace, flag, STANDARD__append_buffer__output__list_length, output__list_length);
 	ANVIL__code__cell_to_cell(workspace, flag, STANDARD__append_buffer__output__list_increase, output__list_increase);
+	ANVIL__code__cell_to_cell(workspace, flag, STANDARD__append_buffer__output__list_append_count, output__list_append_count);
 
 	return;
 }
@@ -216,6 +228,7 @@ void STANDARD__code__append_buffer(ANVIL__workspace* workspace, STANDARD__offset
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__append_buffer__input__list_allocation_end, STANDARD__append_buffer__list_allocation_end);
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__append_buffer__input__list_length, STANDARD__append_buffer__list_length);
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__append_buffer__input__list_increase, STANDARD__append_buffer__list_increase);
+	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__append_buffer__input__list_append_count, STANDARD__append_buffer__list_append_count);
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__append_buffer__input__data_start, STANDARD__append_buffer__data_start);
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__append_buffer__input__data_end, STANDARD__append_buffer__data_end);
 
@@ -262,11 +275,15 @@ void STANDARD__code__append_buffer(ANVIL__workspace* workspace, STANDARD__offset
 	// update length
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__append_buffer__required_length, STANDARD__append_buffer__list_length);
 
+	// update append count
+	ANVIL__code__operate(workspace, ANVIL__sft__always_run, ANVIL__ot__integer_add, STANDARD__append_buffer__list_append_count, ANVIL__srt__constant__1, ANVIL__unused_cell_ID, STANDARD__append_buffer__list_append_count);
+
 	// setup outputs
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__append_buffer__list_allocation_start, STANDARD__append_buffer__output__list_allocation_start);
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__append_buffer__list_allocation_end, STANDARD__append_buffer__output__list_allocation_end);
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__append_buffer__list_length, STANDARD__append_buffer__output__list_length);
 	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__append_buffer__list_increase, STANDARD__append_buffer__output__list_increase);
+	ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, STANDARD__append_buffer__list_append_count, STANDARD__append_buffer__output__list_append_count);
 
 	// setup function epilogue
 	ANVIL__code__restore_workspace(workspace, ANVIL__sft__always_run, STANDARD__append_buffer__preserve__START, STANDARD__append_buffer__preserve__END);

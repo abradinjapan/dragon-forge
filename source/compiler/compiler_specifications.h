@@ -259,6 +259,7 @@ const char* COMPILER__global__predefined_type_member_names[] = {
     "progress",
     "length",
     "increase",
+    "append_count",
     "seconds",
     "nanoseconds",
     "INTERNAL",
@@ -273,6 +274,7 @@ typedef enum COMPILER__ptmnt {
     COMPILER__ptmnt__progress,
     COMPILER__ptmnt__content_length,
     COMPILER__ptmnt__increase,
+    COMPILER__ptmnt__append_count,
     COMPILER__ptmnt__seconds,
     COMPILER__ptmnt__nanoseconds,
     COMPILER__ptmnt__COUNT,
@@ -325,13 +327,15 @@ COMPILER__blueprintling COMPILER__global__predefined_types[] = {
     // list
     COMPILER__abt__define_type,
         COMPILER__ptt__dragon_list,
-        3,
+        4,
         COMPILER__ptt__dragon_buffer, // allocated memory
             COMPILER__ptmnt__allocation,
         COMPILER__ptt__dragon_cell, // filled memory
             COMPILER__ptmnt__content_length,
         COMPILER__ptt__dragon_cell, // increase
             COMPILER__ptmnt__increase,
+        COMPILER__ptt__dragon_cell, // append counter
+            COMPILER__ptmnt__append_count,
     // time
     COMPILER__abt__define_type,
         COMPILER__ptt__dragon_time,
