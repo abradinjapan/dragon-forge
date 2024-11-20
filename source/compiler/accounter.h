@@ -379,6 +379,7 @@ typedef struct COMPILER__accountling_statement {
     COMPILER__accountling_variable_argument list__increase;
     COMPILER__accountling_variable_argument list__input_list;
     COMPILER__accountling_variable_argument list__output_list;
+    COMPILER__accountling_variable_argument list__output_buffer;
     COMPILER__accountling_variable_argument list__append_data;
 
     // time functions
@@ -3777,6 +3778,10 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__lis
     if (COMPILER__check__error_occured(error)) {
         goto failure;
     }
+    COMPILER__namespace list_calculate_content_buffer_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__list__calculate__content_buffer], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    if (COMPILER__check__error_occured(error)) {
+        goto failure;
+    }
     COMPILER__namespace list_append_structure_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__list__append__structure], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
     if (COMPILER__check__error_occured(error)) {
         goto failure;
@@ -3820,6 +3825,27 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__lis
         // setup output statement
         (*accountling_statement).statement_type = COMPILER__ast__predefined__list__close_list;
         (*accountling_statement).list__input_list = list_argument;
+
+        // match
+        goto match;
+    // if is calculate content buffer
+    } else if (COMPILER__check__identical_namespaces(parsling_statement.name.name, list_calculate_content_buffer_name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 1) {
+        // get variables
+        ANVIL__bt is_valid_argument;
+        COMPILER__accountling_variable_argument list_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_list, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || list_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+        COMPILER__accountling_variable_argument buffer_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_buffer, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || buffer_argument.type >= COMPILER__avat__COUNT) {
+            goto failure;
+        }
+
+        // match
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__list__calculate__content_buffer;
+        (*accountling_statement).list__input_list = list_argument;
+        (*accountling_statement).list__output_buffer = buffer_argument;
 
         // match
         goto match;
@@ -3882,6 +3908,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__lis
     failure:
     COMPILER__close__parsling_namespace(list_open_name);
     COMPILER__close__parsling_namespace(list_close_name);
+    COMPILER__close__parsling_namespace(list_calculate_content_buffer_name);
     COMPILER__close__parsling_namespace(list_append_structure_name);
     COMPILER__close__parsling_namespace(list_append_buffer_data_name);
     return ANVIL__bt__false;
@@ -3890,6 +3917,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__lis
     match:
     COMPILER__close__parsling_namespace(list_open_name);
     COMPILER__close__parsling_namespace(list_close_name);
+    COMPILER__close__parsling_namespace(list_calculate_content_buffer_name);
     COMPILER__close__parsling_namespace(list_append_structure_name);
     COMPILER__close__parsling_namespace(list_append_buffer_data_name);
     return ANVIL__bt__true;
