@@ -4489,60 +4489,35 @@ void COMPILER__account__functions__function_io_variables(COMPILER__accountling_s
 void COMPILER__account__functions__predefined_variables(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__error* error) {
     COMPILER__accountling_variable variable;
 
-    // create dragon.always_run
-    variable.cells = COMPILER__create__cell_range(ANVIL__srt__constant__always_run__value, ANVIL__srt__constant__always_run__value);
-    variable.members = COMPILER__create__accountling_variable_range(-1, -1);
-    variable.name = COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)(COMPILER__define__master_namespace ".always"), ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location());
-    variable.type = COMPILER__ptt__dragon_cell;
-    COMPILER__append__accountling_variable(&(*accountling_function).variables.lists[COMPILER__avat__master].list, variable, error);
-    if (COMPILER__check__error_occured(error)) {
-        return;
-    }
-    (*accountling_function).variables.lists[COMPILER__avat__master].count++;
+    // setup current
+    ANVIL__current current_blueprintling = ANVIL__create__buffer((ANVIL__address)COMPILER__global__predefined_variables, (ANVIL__address)(COMPILER__global__predefined_variables + sizeof(COMPILER__global__predefined_variables) - 1));
 
-    // create dragon.never_run
-    variable.cells = COMPILER__create__cell_range(ANVIL__srt__constant__never_run__value, ANVIL__srt__constant__never_run__value);
-    variable.members = COMPILER__create__accountling_variable_range(-1, -1);
-    variable.name = COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)(COMPILER__define__master_namespace ".never"), ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location());
-    variable.type = COMPILER__ptt__dragon_cell;
-    COMPILER__append__accountling_variable(&(*accountling_function).variables.lists[COMPILER__avat__master].list, variable, error);
-    if (COMPILER__check__error_occured(error)) {
-        return;
-    }
-    (*accountling_function).variables.lists[COMPILER__avat__master].count++;
+    // loop until end of blueprint
+    while (ANVIL__check__current_within_range(current_blueprintling) && COMPILER__read__blueprintling(&current_blueprintling) == COMPILER__abt__define_type) {
+        // skip past define type marker
+        COMPILER__next__blueprintling(&current_blueprintling);
 
-    // create dragon.constant.0
-    variable.cells = COMPILER__create__cell_range(ANVIL__srt__constant__0, ANVIL__srt__constant__0);
-    variable.members = COMPILER__create__accountling_variable_range(-1, -1);
-    variable.name = COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)(COMPILER__define__master_namespace ".constant.0"), ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location());
-    variable.type = COMPILER__ptt__dragon_cell;
-    COMPILER__append__accountling_variable(&(*accountling_function).variables.lists[COMPILER__avat__master].list, variable, error);
-    if (COMPILER__check__error_occured(error)) {
-        return;
-    }
-    (*accountling_function).variables.lists[COMPILER__avat__master].count++;
+        // read predefined variable name
+        variable.name = COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)COMPILER__global__predefined_variable_names[(COMPILER__index)COMPILER__read_and_next__blueprintling(&current_blueprintling)], ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location());
 
-    // create dragon.constant.1
-    variable.cells = COMPILER__create__cell_range(ANVIL__srt__constant__1, ANVIL__srt__constant__1);
-    variable.members = COMPILER__create__accountling_variable_range(-1, -1);
-    variable.name = COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)(COMPILER__define__master_namespace ".constant.1"), ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location());
-    variable.type = COMPILER__ptt__dragon_cell;
-    COMPILER__append__accountling_variable(&(*accountling_function).variables.lists[COMPILER__avat__master].list, variable, error);
-    if (COMPILER__check__error_occured(error)) {
-        return;
-    }
-    (*accountling_function).variables.lists[COMPILER__avat__master].count++;
+        // read type
+        variable.type = (COMPILER__variable_type_index)COMPILER__read_and_next__blueprintling(&current_blueprintling);
 
-    // create dragon.constant.cell.byte_size
-    variable.cells = COMPILER__create__cell_range(ANVIL__srt__constant__cell_byte_size, ANVIL__srt__constant__cell_byte_size);
-    variable.members = COMPILER__create__accountling_variable_range(-1, -1);
-    variable.name = COMPILER__create__lexling(COMPILER__lt__name, ANVIL__open__buffer_from_string((u8*)(COMPILER__define__master_namespace ".constant.cell.byte_size"), ANVIL__bt__false, ANVIL__bt__false), COMPILER__create_null__character_location());
-    variable.type = COMPILER__ptt__dragon_cell;
-    COMPILER__append__accountling_variable(&(*accountling_function).variables.lists[COMPILER__avat__master].list, variable, error);
-    if (COMPILER__check__error_occured(error)) {
-        return;
+        // get cell range
+        variable.cells = COMPILER__create__cell_range((ANVIL__cell_ID)COMPILER__read_and_next__blueprintling(&current_blueprintling), (ANVIL__cell_ID)COMPILER__read_and_next__blueprintling(&current_blueprintling));
+
+        // setup variable range (since predefined there is no variable range, make invalid)
+        variable.members = COMPILER__create__accountling_variable_range(-1, -1);
+
+        // append variable
+        COMPILER__append__accountling_variable(&(*accountling_function).variables.lists[COMPILER__avat__master].list, variable, error);
+        if (COMPILER__check__error_occured(error)) {
+            return;
+        }
+
+        // increment count
+        (*accountling_function).variables.lists[COMPILER__avat__master].count++;
     }
-    (*accountling_function).variables.lists[COMPILER__avat__master].count++;
 
     return;
 }

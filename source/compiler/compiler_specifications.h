@@ -99,9 +99,25 @@ char* COMPILER__global__general_argument_type_names[] = {
     "type",
 };
 
-// all predefined cell names
-char* COMPILER__global__predefined_cell_names[] = {
-    COMPILER__define__master_namespace ".error",
+// predefined variable names
+typedef enum COMPILER__pvn {
+    COMPILER__pvn__always,
+    COMPILER__pvn__never,
+    COMPILER__pvn__true,
+    COMPILER__pvn__false,
+    COMPILER__pvn__constant_0,
+    COMPILER__pvn__constant_1,
+    COMPILER__pvn__cell_byte_size,
+};
+// all predefined variable names
+char* COMPILER__global__predefined_variable_names[] = {
+    COMPILER__define__master_namespace ".always",
+    COMPILER__define__master_namespace ".never",
+    COMPILER__define__master_namespace ".true",
+    COMPILER__define__master_namespace ".false",
+    COMPILER__define__master_namespace ".constant.0",
+    COMPILER__define__master_namespace ".constant.1",
+    COMPILER__define__master_namespace ".cell.byte_size"
 };
 
 // statement type type
@@ -345,6 +361,47 @@ COMPILER__blueprintling COMPILER__global__predefined_types[] = {
             COMPILER__ptmnt__seconds, // seconds
         COMPILER__ptt__dragon_cell,
             COMPILER__ptmnt__nanoseconds, // nanoseconds
+    COMPILER__abt__end_blueprint,
+};
+
+// blueprint
+COMPILER__blueprintling COMPILER__global__predefined_variables[] = {
+    // booleans
+    COMPILER__abt__define_type,
+        COMPILER__pvn__true,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__constant__true,
+        ANVIL__srt__constant__true,
+    COMPILER__abt__define_type,
+        COMPILER__pvn__false,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__constant__false,
+        ANVIL__srt__constant__false,
+    COMPILER__abt__define_type,
+        COMPILER__pvn__always,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__constant__always_run__value,
+        ANVIL__srt__constant__always_run__value,
+    COMPILER__abt__define_type,
+        COMPILER__pvn__never,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__constant__never_run__value,
+        ANVIL__srt__constant__never_run__value,
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant_0,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__constant__0,
+        ANVIL__srt__constant__0,
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant_1,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__constant__1,
+        ANVIL__srt__constant__1,
+    COMPILER__abt__define_type,
+        COMPILER__pvn__cell_byte_size,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__constant__cell_byte_size,
+        ANVIL__srt__constant__cell_byte_size,
     COMPILER__abt__end_blueprint,
 };
 
