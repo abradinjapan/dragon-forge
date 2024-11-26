@@ -47,8 +47,8 @@ typedef enum ANVIL__rt {
     ANVIL__rt__START = 0,
 
     // basic cells
-    ANVIL__rt__program_start_address = ANVIL__rt__START,
-    ANVIL__rt__program_current_address,
+    ANVIL__rt__program_current_address = ANVIL__rt__START,
+    ANVIL__rt__program_start_address,
     ANVIL__rt__program_end_address,
     ANVIL__rt__error_code,
     ANVIL__rt__flags_0,
