@@ -708,7 +708,10 @@ void ANVIL__code__start(ANVIL__workspace* workspace, ANVIL__stack_size stack_siz
     ANVIL__code__debug__mark_code_section(workspace, 0);
 
     // setup error cell
-    ANVIL__code__write_cell(workspace, (ANVIL__cell)0, ANVIL__rt__error_code);
+    ANVIL__code__write_cell(workspace, (ANVIL__cell)ANVIL__et__no_error, ANVIL__rt__error_code);
+
+    // setup address catcher (default is enabled)
+    ANVIL__code__write_cell(workspace, (ANVIL__cell)ANVIL__bt__true, ANVIL__rt__address_catch_toggle);
 
     // setup flag cells
     ANVIL__code__write_cell(workspace, (ANVIL__cell)1, ANVIL__rt__flags_0);

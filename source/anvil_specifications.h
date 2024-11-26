@@ -55,6 +55,7 @@ typedef enum ANVIL__rt {
     ANVIL__rt__flags_1,
     ANVIL__rt__flags_2,
     ANVIL__rt__flags_3,
+    ANVIL__rt__address_catch_toggle,
 
     // end of defined cells
     ANVIL__rt__END,

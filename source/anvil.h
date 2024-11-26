@@ -68,8 +68,13 @@ void ANVIL__forget__allocation(ANVIL__allocations* allocations, ANVIL__buffer al
 }
 
 // check to see if an address is valid
-ANVIL__bt ANVIL__check__valid_address_range_in_allocations(ANVIL__allocations* allocations, ANVIL__buffer range) {
+ANVIL__bt ANVIL__check__valid_address_range_in_allocations(ANVIL__bt catch_addresses, ANVIL__allocations* allocations, ANVIL__buffer range) {
     ANVIL__buffer current;
+
+    // check if not catching addresses
+    if (catch_addresses == ANVIL__bt__false) {
+        return ANVIL__bt__true;
+    }
     
     // setup current
     current = ANVIL__calculate__list_current_buffer(&allocations->buffers); //ANVIL__create__buffer((*allocations).buffers.buffer.start, ANVIL__calculate__list_current_address(&((*allocations).buffers)) - 1);
@@ -549,6 +554,9 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
     // execution current read address
     ANVIL__cell* execution_read_address;
 
+    // address catching toggle
+    ANVIL__bt catch_addresses;
+
     // instruction ID
     ANVIL__it instruction_ID;
 
@@ -673,6 +681,9 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
     ANVIL__cell_ID get_current_context__buffer_start;
     ANVIL__cell_ID get_current_context__buffer_end;
 
+    // setup address catcher toggle
+    catch_addresses = (ANVIL__bt)(ANVIL__u64)ANVIL__get__cell_from_context(context, ANVIL__rt__address_catch_toggle);
+
     // setup execution read address
     execution_read_address = ANVIL__get__cell_address_from_context(context, ANVIL__rt__program_current_address);
 
@@ -684,8 +695,8 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
 
     // check for valid instruction ID
     if (instruction_ID < ANVIL__it__COUNT) {
-        // check for valid allocation
-        if (ANVIL__check__valid_address_range_in_allocations(allocations, ANVIL__create__buffer((*context).cells[ANVIL__rt__program_current_address], (*context).cells[ANVIL__rt__program_current_address] + ANVIL__convert__it_to_ilt(instruction_ID) - 2)) == ANVIL__bt__false) {
+        // check for invalid allocation
+        if (ANVIL__check__valid_address_range_in_allocations(catch_addresses, allocations, ANVIL__create__buffer((*context).cells[ANVIL__rt__program_current_address], (*context).cells[ANVIL__rt__program_current_address] + ANVIL__convert__it_to_ilt(instruction_ID) - 2)) == ANVIL__bt__false) {
             // set error code
             ANVIL__set__error_code_cell(context, ANVIL__et__program_ran_out_of_instructions);
 
@@ -809,7 +820,7 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         address_to_cell__destination_cell_ID = ANVIL__read_next__cell_ID(execution_read_address);
 
         // if valid address range
-        if (ANVIL__check__valid_address_range_in_allocations(allocations, ANVIL__create__buffer((ANVIL__address)(*context).cells[address_to_cell__source_cell_ID], (ANVIL__address)(*context).cells[address_to_cell__source_cell_ID] + (((ANVIL__length)(*context).cells[address_to_cell__byte_count_cell_ID])) - 1))) {
+        if (ANVIL__check__valid_address_range_in_allocations(catch_addresses, allocations, ANVIL__create__buffer((ANVIL__address)(*context).cells[address_to_cell__source_cell_ID], (ANVIL__address)(*context).cells[address_to_cell__source_cell_ID] + (((ANVIL__length)(*context).cells[address_to_cell__byte_count_cell_ID])) - 1))) {
             // if flag enabled
             if (ANVIL__get__flag_from_context(context, address_to_cell__flag_ID) == ANVIL__bt__true) {
                 // read data into cell
@@ -834,7 +845,7 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         cell_to_address__destination_cell_ID = ANVIL__read_next__cell_ID(execution_read_address);
 
         // if valid address range
-        if (ANVIL__check__valid_address_range_in_allocations(allocations, ANVIL__create__buffer((*context).cells[cell_to_address__destination_cell_ID], (*context).cells[cell_to_address__destination_cell_ID] + (((ANVIL__length)(*context).cells[cell_to_address__byte_count_cell_ID])) - 1))) {
+        if (ANVIL__check__valid_address_range_in_allocations(catch_addresses, allocations, ANVIL__create__buffer((*context).cells[cell_to_address__destination_cell_ID], (*context).cells[cell_to_address__destination_cell_ID] + (((ANVIL__length)(*context).cells[cell_to_address__byte_count_cell_ID])) - 1))) {
             // if flag enabled
             if (ANVIL__get__flag_from_context(context, cell_to_address__flag_ID) == ANVIL__bt__true) {
                 // write data to an address
@@ -904,7 +915,7 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         buffer_to_file__file_name.end = (*context).cells[buffer_to_file__file_name_end];
 
         // if source allocations exists
-        if (ANVIL__check__valid_address_range_in_allocations(allocations, buffer_to_file__file_data) && ANVIL__check__valid_address_range_in_allocations(allocations, buffer_to_file__file_name)) {
+        if (ANVIL__check__valid_address_range_in_allocations(catch_addresses, allocations, buffer_to_file__file_data) && ANVIL__check__valid_address_range_in_allocations(catch_addresses, allocations, buffer_to_file__file_name)) {
             // create file
             ANVIL__move__buffer_to_file(&buffer_to_file__error, buffer_to_file__file_name, buffer_to_file__file_data);
 
@@ -955,7 +966,7 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         buffer_to_buffer__destination.end = (*context).cells[buffer_to_buffer__destination_end];
 
         // if both allocations exist
-        if (ANVIL__check__valid_address_range_in_allocations(allocations, buffer_to_buffer__source) && ANVIL__check__valid_address_range_in_allocations(allocations, buffer_to_buffer__destination)) {
+        if (ANVIL__check__valid_address_range_in_allocations(catch_addresses, allocations, buffer_to_buffer__source) && ANVIL__check__valid_address_range_in_allocations(catch_addresses, allocations, buffer_to_buffer__destination)) {
             // perform copy
             ANVIL__copy__buffer(buffer_to_buffer__source, buffer_to_buffer__destination, &buffer_to_buffer__error);
 
@@ -985,7 +996,7 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         buffer_to_buffer__destination.end = (*context).cells[buffer_to_buffer__destination_end];
 
         // if both allocations exist
-        if (ANVIL__check__valid_address_range_in_allocations(allocations, buffer_to_buffer__source) && ANVIL__check__valid_address_range_in_allocations(allocations, buffer_to_buffer__destination)) {
+        if (ANVIL__check__valid_address_range_in_allocations(catch_addresses, allocations, buffer_to_buffer__source) && ANVIL__check__valid_address_range_in_allocations(catch_addresses, allocations, buffer_to_buffer__destination)) {
             // perform copy
             ANVIL__copy__buffer__backwards(buffer_to_buffer__source, buffer_to_buffer__destination, &buffer_to_buffer__error);
 
@@ -1083,7 +1094,7 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         run__context_buffer_end = run__context_buffer_end;
 
         // if context buffer is valid
-        if (ANVIL__check__valid_address_range_in_allocations(allocations, ANVIL__create__buffer((ANVIL__context*)(*context).cells[run__context_buffer_start], (ANVIL__context*)(*context).cells[run__context_buffer_end]))) {
+        if (ANVIL__check__valid_address_range_in_allocations(catch_addresses, allocations, ANVIL__create__buffer((ANVIL__context*)(*context).cells[run__context_buffer_start], (ANVIL__context*)(*context).cells[run__context_buffer_end]))) {
             // run context
             ANVIL__run__context(allocations, (ANVIL__context*)(*context).cells[run__context_buffer_start], (u64)(*context).cells[run__instruction_count]);
         // error
