@@ -118,6 +118,7 @@ typedef enum COMPILER__pvn {
     COMPILER__pvn__constant_32,
     COMPILER__pvn__constant_64,
     COMPILER__pvn__error,
+    COMPILER__pvn__catch_addresses,
     COMPILER__pvn__cell_byte_size,
     COMPILER__pvn__ascii_character_byte_size,
 } COMPILER__pvn;
@@ -140,6 +141,7 @@ char* COMPILER__global__predefined_variable_names[] = {
     COMPILER__define__master_namespace ".constant.32",
     COMPILER__define__master_namespace ".constant.64",
     COMPILER__define__master_namespace ".error",
+    COMPILER__define__master_namespace ".catch_addresses",
     COMPILER__define__master_namespace ".cell.byte_size",
     COMPILER__define__master_namespace ".ascii_character.byte_size",
 };
@@ -390,7 +392,6 @@ COMPILER__blueprintling COMPILER__global__predefined_types[] = {
 
 // blueprint
 COMPILER__blueprintling COMPILER__global__predefined_variables[] = {
-    // booleans
     COMPILER__abt__define_type,
         COMPILER__pvn__true,
         COMPILER__ptt__dragon_cell,
@@ -476,6 +477,11 @@ COMPILER__blueprintling COMPILER__global__predefined_variables[] = {
         COMPILER__ptt__dragon_cell,
         ANVIL__rt__error_code,
         ANVIL__rt__error_code,
+    COMPILER__abt__define_type,
+        COMPILER__pvn__catch_addresses,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__rt__address_catch_toggle,
+        ANVIL__rt__address_catch_toggle,
     COMPILER__abt__define_type,
         COMPILER__pvn__cell_byte_size,
         COMPILER__ptt__dragon_cell,
