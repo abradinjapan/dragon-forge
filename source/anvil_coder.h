@@ -440,14 +440,14 @@ typedef enum ANVIL__srt {
     ANVIL__srt__constant__0 = ANVIL__srt__START,
     ANVIL__srt__constant__1,
     ANVIL__srt__constant__2,
+    ANVIL__srt__constant__3,
     ANVIL__srt__constant__4,
+    ANVIL__srt__constant__5,
+    ANVIL__srt__constant__6,
+    ANVIL__srt__constant__7,
     ANVIL__srt__constant__8,
     ANVIL__srt__constant__16,
-    ANVIL__srt__constant__24,
     ANVIL__srt__constant__32,
-    ANVIL__srt__constant__40,
-    ANVIL__srt__constant__48,
-    ANVIL__srt__constant__56,
     ANVIL__srt__constant__64,
     ANVIL__srt__constant__cell_byte_size,
     ANVIL__srt__constant__return_address_offset_creation_size,
@@ -720,14 +720,14 @@ void ANVIL__code__start(ANVIL__workspace* workspace, ANVIL__stack_size stack_siz
     ANVIL__code__write_cell(workspace, (ANVIL__cell)0, ANVIL__srt__constant__0);
     ANVIL__code__write_cell(workspace, (ANVIL__cell)1, ANVIL__srt__constant__1);
     ANVIL__code__write_cell(workspace, (ANVIL__cell)2, ANVIL__srt__constant__2);
+    ANVIL__code__write_cell(workspace, (ANVIL__cell)3, ANVIL__srt__constant__3);
     ANVIL__code__write_cell(workspace, (ANVIL__cell)4, ANVIL__srt__constant__4);
+    ANVIL__code__write_cell(workspace, (ANVIL__cell)5, ANVIL__srt__constant__5);
+    ANVIL__code__write_cell(workspace, (ANVIL__cell)6, ANVIL__srt__constant__6);
+    ANVIL__code__write_cell(workspace, (ANVIL__cell)7, ANVIL__srt__constant__7);
     ANVIL__code__write_cell(workspace, (ANVIL__cell)8, ANVIL__srt__constant__8);
     ANVIL__code__write_cell(workspace, (ANVIL__cell)16, ANVIL__srt__constant__16);
-    ANVIL__code__write_cell(workspace, (ANVIL__cell)24, ANVIL__srt__constant__24);
     ANVIL__code__write_cell(workspace, (ANVIL__cell)32, ANVIL__srt__constant__32);
-    ANVIL__code__write_cell(workspace, (ANVIL__cell)40, ANVIL__srt__constant__40);
-    ANVIL__code__write_cell(workspace, (ANVIL__cell)48, ANVIL__srt__constant__48);
-    ANVIL__code__write_cell(workspace, (ANVIL__cell)56, ANVIL__srt__constant__56);
     ANVIL__code__write_cell(workspace, (ANVIL__cell)64, ANVIL__srt__constant__64);
     ANVIL__code__write_cell(workspace, (ANVIL__cell)sizeof(ANVIL__cell), ANVIL__srt__constant__cell_byte_size);
     ANVIL__code__write_cell(workspace, (ANVIL__cell)ANVIL__silt__jump__explicit, ANVIL__srt__constant__return_address_offset_creation_size);
