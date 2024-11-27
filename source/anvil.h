@@ -634,6 +634,7 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
     ANVIL__cell_ID compile__user_code_buffers_buffer_start;
     ANVIL__cell_ID compile__user_code_buffers_buffer_end;
     ANVIL__cell_ID compile__debug_enabled;
+    ANVIL__cell_ID compile__generate_kickstarter;
     ANVIL__cell_ID compile__output_start;
     ANVIL__cell_ID compile__output_end;
     ANVIL__cell_ID compile__error__occured;
@@ -1017,6 +1018,7 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         compile__user_code_buffers_buffer_start = ANVIL__read_next__cell_ID(execution_read_address);
         compile__user_code_buffers_buffer_end = ANVIL__read_next__cell_ID(execution_read_address);
         compile__debug_enabled = ANVIL__read_next__cell_ID(execution_read_address);
+        compile__generate_kickstarter = ANVIL__read_next__cell_ID(execution_read_address);
         compile__output_start = ANVIL__read_next__cell_ID(execution_read_address);
         compile__output_end = ANVIL__read_next__cell_ID(execution_read_address);
         compile__error__occured = ANVIL__read_next__cell_ID(execution_read_address);
@@ -1027,7 +1029,7 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         compile__error__character_location__character_index = ANVIL__read_next__cell_ID(execution_read_address);
 
         // run compiler (WARNING, buffers are NOT checked for vality!)
-        COMPILER__compile__files(ANVIL__create__buffer((*context).cells[compile__user_code_buffers_buffer_start], (*context).cells[compile__user_code_buffers_buffer_end]), (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__debug_enabled], &compile__output_program, &compile__error);
+        COMPILER__compile__files(ANVIL__create__buffer((*context).cells[compile__user_code_buffers_buffer_start], (*context).cells[compile__user_code_buffers_buffer_end]), (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__generate_kickstarter], (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__debug_enabled], &compile__output_program, &compile__error);
 
         // get temps
         compile__output_error_message = compile__error.message;

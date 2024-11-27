@@ -617,7 +617,7 @@ void COMPILER__generate__user_defined_function(COMPILER__generation_workspace* w
 }
 
 // generate program
-void COMPILER__generate__program(ANVIL__buffer* final_program, COMPILER__accountling_program program, ANVIL__stack_size stack_size, COMPILER__error* error) {
+void COMPILER__generate__program(ANVIL__buffer* final_program, COMPILER__accountling_program program, ANVIL__bt generate_kickstarter, ANVIL__stack_size stack_size, COMPILER__error* error) {
     COMPILER__generation_workspace workspace;
 
     // open generation workspace
@@ -632,8 +632,11 @@ void COMPILER__generate__program(ANVIL__buffer* final_program, COMPILER__account
         ANVIL__setup__pass(&workspace.workspace, pass);
 
         // build program
-        // setup kickstarter
-        ANVIL__code__start(&workspace.workspace, stack_size, ((COMPILER__generation_function*)workspace.user_defined_functions.list.buffer.start)[program.entry_point].offset__function_start);
+        // if kickstarter enabled
+        if (generate_kickstarter == ANVIL__bt__true) {
+            // setup kickstarter
+            ANVIL__code__start(&workspace.workspace, stack_size, ((COMPILER__generation_function*)workspace.user_defined_functions.list.buffer.start)[program.entry_point].offset__function_start);
+        }
 
         // build each user defined abstraction
         for (COMPILER__function_index index = 0; index < program.functions.headers.category[COMPILER__afht__user_defined].count; index++) {

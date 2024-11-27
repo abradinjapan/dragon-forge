@@ -65,7 +65,7 @@ void COMPILER__close__compilation_unit(COMPILER__compilation_unit unit) {
 }
 
 // compile a program
-void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt print_debug, ANVIL__buffer* final_program, COMPILER__error* error) {
+void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt generate_kickstarter, ANVIL__bt print_debug, ANVIL__buffer* final_program, COMPILER__error* error) {
     COMPILER__compilation_unit compilation_unit;
     ANVIL__current current;
     ANVIL__file_index current_file_index = 0;
@@ -183,7 +183,7 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt print_debug, A
     }
 
     // generate program
-    COMPILER__generate__program(final_program, compilation_unit.accountlings, 65536, error);
+    COMPILER__generate__program(final_program, compilation_unit.accountlings, generate_kickstarter, 65536, error);
 
     // quit label
     quit:
