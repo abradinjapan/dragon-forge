@@ -27,6 +27,7 @@ typedef enum COMPILER__lt {
     COMPILER__lt__at,
     COMPILER__lt__equals,
     COMPILER__lt__exclamation_point,
+    COMPILER__lt__hashtag,
     COMPILER__lt__string_literal,
     COMPILER__lt__end_of_file,
     COMPILER__lt__COUNT,
@@ -313,6 +314,13 @@ COMPILER__lexlings COMPILER__compile__lex(ANVIL__buffer user_code, ANVIL__file_i
         } else if (COMPILER__calculate__valid_character_range(current, '!', '!')) {
             // add lexling
             COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__exclamation_point, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
+            output.data.count++;
+
+            // next character
+            current.start += sizeof(ANVIL__character);
+        } else if (COMPILER__calculate__valid_character_range(current, '#', '#')) {
+            // add lexling
+            COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__hashtag, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
             output.data.count++;
 
             // next character

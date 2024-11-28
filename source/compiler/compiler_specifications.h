@@ -51,6 +51,20 @@ typedef enum COMPILER__avat {
     COMPILER__avat__COUNT,
 } COMPILER__avat;
 
+// accountling member json format
+typedef enum COMPILER__amjf {
+    COMPILER__amjf__default,
+    COMPILER__amjf__buffer__addresses,
+    COMPILER__amjf__buffer__byte_array,
+    COMPILER__amjf__buffer__string,
+    COMPILER__amjf__integer__decimal,
+    COMPILER__amjf__integer__hexadecimal,
+    COMPILER__amjf__integer__binary,
+    COMPILER__amjt__boolean,
+    COMPILER__amjf__null,
+    COMPILER__amjf__COUNT,
+} COMPILER__amjf;
+
 // accounting blueprintling types
 typedef enum COMPILER__abt {
     COMPILER__abt__end_blueprint,
@@ -98,6 +112,17 @@ char* COMPILER__global__general_argument_type_names[] = {
     "string",
     "type",
 };
+
+// parsling argument location type
+typedef enum COMPILER__palt {
+    // locations
+    COMPILER__palt__structure_declaration,
+    COMPILER__palt__function_declaration,
+    COMPILER__palt__function_call,
+
+    // count
+    COMPILER__palt__COUNT,
+} COMPILER__palt;
 
 // predefined variable names
 typedef enum COMPILER__pvn {
