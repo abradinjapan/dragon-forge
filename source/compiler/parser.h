@@ -82,6 +82,21 @@ COMPILER__character_location COMPILER__get__namespace_lexling_location(COMPILER_
     return ((COMPILER__lexling*)name.lexlings.list.buffer.start)[0].location;
 }
 
+// check single lexling name for equivalence
+ANVIL__bt COMPILER__check__namespace_against_c_string(const char* string, COMPILER__namespace checking) {
+    COMPILER__namespace temp_name;
+    COMPILER__lexling temp_lexling;
+
+    // setup temps
+    temp_lexling = COMPILER__open__lexling_from_string(string, COMPILER__lt__name, COMPILER__create_null__character_location());
+    temp_name.lexlings.count = 1;
+    temp_name.lexlings.list = ANVIL__create__list(ANVIL__create__buffer((ANVIL__address)&temp_lexling, (ANVIL__address)(&temp_lexling) + sizeof(temp_lexling) - 1), sizeof(temp_lexling) - 1, sizeof(temp_lexling));
+
+    // return comparison
+    return COMPILER__check__identical_namespaces(temp_name, checking);
+}
+
+
 // parsling argument
 typedef struct COMPILER__parsling_argument {
     // definition

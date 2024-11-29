@@ -10,6 +10,7 @@
 typedef struct COMPILER__accountling_structure_member {
     COMPILER__structure_index structure_ID; // the ID of the member's type
     COMPILER__namespace name; // the namespace of the member
+    COMPILER__amjf tag_ID; // the optional tag of the member
     ANVIL__bt predefined; // if the member is built in statically
 } COMPILER__accountling_structure_member;
 
@@ -801,6 +802,7 @@ ANVIL__counted_list COMPILER__account__structures__generate_predefined_type_data
             member_temp.structure_ID = member_type;
             member_temp.name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__global__predefined_type_member_names[member_name_ID], COMPILER__lt__name, COMPILER__create_null__character_location()), error);
             member_temp.predefined = ANVIL__bt__true;
+            member_temp.tag_ID = COMPILER__amjf__default;
             if (COMPILER__check__error_occured(error)) {
                 return structure_data;
             }
@@ -1098,6 +1100,77 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
                     accountling_member.structure_ID = COMPILER__find__accountling_structure_name_index(output.name_table, parsling_member.type);
                     accountling_member.name = parsling_member.name;
                     accountling_member.predefined = ANVIL__bt__false;
+                    accountling_member.tag_ID = COMPILER__amjf__default;
+
+                    // check for tag
+                    if (COMPILER__check__empty_namespace(parsling_member.tag) == ANVIL__bt__false) {
+                        // setup loop start
+                        COMPILER__amjf index = 0;
+
+                        // get tag based on type
+                        while (index < COMPILER__amjf__COUNT) {
+                            // check name
+                            if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_tag_names[index], parsling_member.tag) == ANVIL__bt__true) {
+                                // if tag is default
+                                if (index == COMPILER__amjf__default) {
+                                    // setup type
+                                    if (accountling_member.structure_ID == COMPILER__ptt__dragon_cell) {
+                                        accountling_member.tag_ID = COMPILER__amjf__integer__decimal;
+                                    } else if (accountling_member.structure_ID == COMPILER__ptt__dragon_buffer) {
+                                        accountling_member.tag_ID = COMPILER__amjf__buffer__addresses;
+                                    } else {
+                                        // error
+                                        *error = COMPILER__open__error("Accounting Error: The 'default' keyword was used on a tag that does not associate with a type.", COMPILER__get__namespace_lexling_location(parsling_member.tag));
+
+                                        // close members
+                                        ANVIL__close__counted_list(accountling_structure.members);
+
+                                        return output;
+                                    }
+                                } else {
+                                    // set name
+                                    accountling_member.tag_ID = index;
+                                }
+
+                                // exit loop
+                                break;
+                            }
+
+                            // next item
+                            index++;
+                        }
+
+                        // if no matching tag
+                        if (index >= COMPILER__amjf__COUNT) {
+                            // error
+                            *error = COMPILER__open__error("Accounting Error: A tag name was not a valid option.", COMPILER__get__namespace_lexling_location(parsling_member.tag));
+
+                            // close members
+                            ANVIL__close__counted_list(accountling_structure.members);
+
+                            return output;
+                        }
+
+                        // check that the tag is a valid option for the variable
+                        if (accountling_member.structure_ID == COMPILER__ptt__dragon_cell && (accountling_member.tag_ID == COMPILER__amjf__integer__binary && accountling_member.tag_ID == COMPILER__amjf__integer__decimal && accountling_member.tag_ID == COMPILER__amjf__integer__hexadecimal && accountling_member.tag_ID == COMPILER__amjf__boolean)) {
+                            // error
+                            *error = COMPILER__open__error("Accounting Error: A tag name was not a valid option.", COMPILER__get__namespace_lexling_location(parsling_member.tag));
+
+                            // close members
+                            ANVIL__close__counted_list(accountling_structure.members);
+
+                            return output;
+                        }
+                        if (accountling_member.structure_ID == COMPILER__ptt__dragon_buffer && (accountling_member.tag_ID == COMPILER__amjf__buffer__addresses && accountling_member.tag_ID == COMPILER__amjf__buffer__byte_array && accountling_member.tag_ID == COMPILER__amjf__buffer__string)) {
+                            // error
+                            *error = COMPILER__open__error("Accounting Error: A tag name was not a valid option.", COMPILER__get__namespace_lexling_location(parsling_member.tag));
+
+                            // close members
+                            ANVIL__close__counted_list(accountling_structure.members);
+
+                            return output;
+                        }
+                    }
 
                     // check for duplicate member
                     if (COMPILER__find__accountling_structure_member_name_index(accountling_structure, accountling_member.name) < accountling_structure.members.count) {
@@ -2205,20 +2278,6 @@ COMPILER__accountling_variable_argument COMPILER__account__functions__mark_varia
     failure:
     *is_valid_argument = ANVIL__bt__false;
     return COMPILER__create_null__accountling_variable_argument();
-}
-
-// check single lexling name for equivalence
-ANVIL__bt COMPILER__check__namespace_against_c_string(const char* string, COMPILER__namespace checking) {
-    COMPILER__namespace temp_name;
-    COMPILER__lexling temp_lexling;
-
-    // setup temps
-    temp_lexling = COMPILER__open__lexling_from_string(string, COMPILER__lt__name, COMPILER__create_null__character_location());
-    temp_name.lexlings.count = 1;
-    temp_name.lexlings.list = ANVIL__create__list(ANVIL__create__buffer((ANVIL__address)&temp_lexling, (ANVIL__address)(&temp_lexling) + sizeof(temp_lexling) - 1), sizeof(temp_lexling) - 1, sizeof(temp_lexling));
-
-    // return comparison
-    return COMPILER__check__identical_namespaces(temp_name, checking);
 }
 
 // check for set
