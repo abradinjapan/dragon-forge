@@ -373,7 +373,7 @@ void STANDARD__code__call__print_tabs(ANVIL__workspace* workspace, STANDARD__off
 	ANVIL__code__cell_to_cell(workspace, flag, input__tab_count, STANDARD__print_tabs__input__tab_count);
 
 	// call function
-	ANVIL__code__call__static(workspace, flag, (*standard_offsets).offsets[STANDARD__ot__print_tabs__start]);
+	ANVIL__code__call__static(workspace, flag, (*standard_offsets).offsets[STANDARD__sot__print_tabs__start]);
 
 	return;
 }
@@ -381,7 +381,7 @@ void STANDARD__code__call__print_tabs(ANVIL__workspace* workspace, STANDARD__off
 // build function
 void STANDARD__code__print_tabs(ANVIL__workspace* workspace, STANDARD__offsets* standard_offsets) {
 	// setup function offset
-	(*standard_offsets).offsets[STANDARD__ot__print_tabs__start] = ANVIL__get__offset(workspace);
+	(*standard_offsets).offsets[STANDARD__sot__print_tabs__start] = ANVIL__get__offset(workspace);
 
 	// setup function prologue
 	ANVIL__code__preserve_workspace(workspace, ANVIL__sft__always_run, STANDARD__print_tabs__preserve__START, STANDARD__print_tabs__preserve__END);
@@ -393,11 +393,11 @@ void STANDARD__code__print_tabs(ANVIL__workspace* workspace, STANDARD__offsets* 
 	ANVIL__code__write_cell(workspace, (ANVIL__cell)(ANVIL__u64)'\t', STANDARD__print_tabs__tab_character);
 
     // setup loop start offset
-	(*standard_offsets).offsets[STANDARD__ot__print_tabs__loop__start] = ANVIL__get__offset(workspace);
+	(*standard_offsets).offsets[STANDARD__sot__print_tabs__loop__start] = ANVIL__get__offset(workspace);
 
     // check if loop range is still valid and exit if necessary
     ANVIL__code__write_cell(workspace, (ANVIL__cell)(ANVIL__cell_integer_value)ANVIL__sft__temp_0, ANVIL__srt__temp__flag_ID_0);
-    ANVIL__code__operate__jump__static(workspace, ANVIL__sft__always_run, ANVIL__srt__constant__0, STANDARD__print_tabs__tab_count, ANVIL__srt__constant__0, ANVIL__sft__never_run, (*standard_offsets).offsets[STANDARD__ot__print_tabs__loop__end]);
+    ANVIL__code__operate__jump__static(workspace, ANVIL__sft__always_run, ANVIL__srt__constant__0, STANDARD__print_tabs__tab_count, ANVIL__srt__constant__0, ANVIL__sft__never_run, (*standard_offsets).offsets[STANDARD__sot__print_tabs__loop__end]);
 
     // print character
     ANVIL__code__debug__putchar(workspace, STANDARD__print_tabs__tab_character);
@@ -406,10 +406,10 @@ void STANDARD__code__print_tabs(ANVIL__workspace* workspace, STANDARD__offsets* 
 	ANVIL__code__operate(workspace, ANVIL__sft__always_run, ANVIL__ot__integer_subtract, STANDARD__print_tabs__tab_count, ANVIL__srt__constant__1, ANVIL__unused_cell_ID, STANDARD__print_tabs__tab_count);
 
     // jump to beginning of loop
-    ANVIL__code__jump__static(workspace, ANVIL__sft__always_run, (*standard_offsets).offsets[STANDARD__ot__print_tabs__loop__start]);
+    ANVIL__code__jump__static(workspace, ANVIL__sft__always_run, (*standard_offsets).offsets[STANDARD__sot__print_tabs__loop__start]);
 
     // setup loop end offset
-	(*standard_offsets).offsets[STANDARD__ot__print_tabs__loop__end] = ANVIL__get__offset(workspace);
+	(*standard_offsets).offsets[STANDARD__sot__print_tabs__loop__end] = ANVIL__get__offset(workspace);
 
 	// setup function epilogue
 	ANVIL__code__restore_workspace(workspace, ANVIL__sft__always_run, STANDARD__print_tabs__preserve__START, STANDARD__print_tabs__preserve__END);

@@ -37,7 +37,7 @@ void STANDARD__code__call__open_list(ANVIL__workspace* workspace, STANDARD__offs
 	ANVIL__code__cell_to_cell(workspace, flag, input__increase, STANDARD__open_list__input__increase);
 
 	// call function
-	ANVIL__code__call__static(workspace, flag, (*standard_offsets).offsets[STANDARD__ot__open_list__start]);
+	ANVIL__code__call__static(workspace, flag, (*standard_offsets).offsets[STANDARD__sot__open_list__start]);
 
 	// pass outputs
 	ANVIL__code__cell_to_cell(workspace, flag, STANDARD__open_list__output__list_allocation_start, output__list_allocation_start);
@@ -52,7 +52,7 @@ void STANDARD__code__call__open_list(ANVIL__workspace* workspace, STANDARD__offs
 // build function
 void STANDARD__code__open_list(ANVIL__workspace* workspace, STANDARD__offsets* standard_offsets) {
 	// setup function offset
-	(*standard_offsets).offsets[STANDARD__ot__open_list__start] = ANVIL__get__offset(workspace);
+	(*standard_offsets).offsets[STANDARD__sot__open_list__start] = ANVIL__get__offset(workspace);
 
 	// setup function prologue
 	ANVIL__code__preserve_workspace(workspace, ANVIL__sft__always_run, STANDARD__open_list__preserve__START, STANDARD__open_list__preserve__END);
@@ -114,7 +114,7 @@ void STANDARD__code__call__close_list(ANVIL__workspace* workspace, STANDARD__off
 	ANVIL__code__cell_to_cell(workspace, flag, input__list_append_count, STANDARD__close_list__input__list_append_count);
 
 	// call function
-	ANVIL__code__call__static(workspace, flag, (*standard_offsets).offsets[STANDARD__ot__close_list__start]);
+	ANVIL__code__call__static(workspace, flag, (*standard_offsets).offsets[STANDARD__sot__close_list__start]);
 
 	return;
 }
@@ -122,7 +122,7 @@ void STANDARD__code__call__close_list(ANVIL__workspace* workspace, STANDARD__off
 // build function
 void STANDARD__code__close_list(ANVIL__workspace* workspace, STANDARD__offsets* standard_offsets) {
 	// setup function offset
-	(*standard_offsets).offsets[STANDARD__ot__close_list__start] = ANVIL__get__offset(workspace);
+	(*standard_offsets).offsets[STANDARD__sot__close_list__start] = ANVIL__get__offset(workspace);
 
 	// setup function prologue
 	ANVIL__code__preserve_workspace(workspace, ANVIL__sft__always_run, STANDARD__close_list__preserve__START, STANDARD__close_list__preserve__END);
@@ -203,7 +203,7 @@ void STANDARD__code__call__append_buffer(ANVIL__workspace* workspace, STANDARD__
 	ANVIL__code__cell_to_cell(workspace, flag, input__data_end, STANDARD__append_buffer__input__data_end);
 
 	// call function
-	ANVIL__code__call__static(workspace, flag, (*standard_offsets).offsets[STANDARD__ot__append_buffer__start]);
+	ANVIL__code__call__static(workspace, flag, (*standard_offsets).offsets[STANDARD__sot__append_buffer__start]);
 
 	// pass outputs
 	ANVIL__code__cell_to_cell(workspace, flag, STANDARD__append_buffer__output__list_allocation_start, output__list_allocation_start);
@@ -218,7 +218,7 @@ void STANDARD__code__call__append_buffer(ANVIL__workspace* workspace, STANDARD__
 // build function
 void STANDARD__code__append_buffer(ANVIL__workspace* workspace, STANDARD__offsets* standard_offsets) {
 	// setup function offset
-	(*standard_offsets).offsets[STANDARD__ot__append_buffer__start] = ANVIL__get__offset(workspace);
+	(*standard_offsets).offsets[STANDARD__sot__append_buffer__start] = ANVIL__get__offset(workspace);
 
 	// setup function prologue
 	ANVIL__code__preserve_workspace(workspace, ANVIL__sft__always_run, STANDARD__append_buffer__preserve__START, STANDARD__append_buffer__preserve__END);

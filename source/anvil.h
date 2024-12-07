@@ -1027,7 +1027,7 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         compile__error__character_location__file_index = ANVIL__read_next__cell_ID(execution_read_address);
         compile__error__character_location__line_number = ANVIL__read_next__cell_ID(execution_read_address);
         compile__error__character_location__character_index = ANVIL__read_next__cell_ID(execution_read_address);
-
+        
         // run compiler (WARNING, buffers are NOT checked for vality!)
         COMPILER__compile__files(ANVIL__create__buffer((*context).cells[compile__user_code_buffers_buffer_start], (*context).cells[compile__user_code_buffers_buffer_end]), (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__generate_kickstarter], (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__debug_enabled], &compile__output_program, &compile__error);
 
@@ -1220,8 +1220,8 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         get_current_context__buffer_end = ANVIL__read_next__cell_ID(execution_read_address);
         
         // setup output
-        (*context).cells[get_current_context__buffer_start] = context;
-        (*context).cells[get_current_context__buffer_end] = context + sizeof(ANVIL__context) - 1;
+        (*context).cells[get_current_context__buffer_start] = (void*)ANVIL__get__cell_address_from_context(context, 0);
+        (*context).cells[get_current_context__buffer_end] = ((void*)ANVIL__get__cell_address_from_context(context, 0)) + sizeof(ANVIL__context) - 1;
 
         break;
     // in case instruction ID was invalid

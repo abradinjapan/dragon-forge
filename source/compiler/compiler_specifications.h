@@ -274,6 +274,9 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__list__append__structure,
     COMPILER__ast__predefined__list__append__buffer_data,
 
+    // compilation
+    COMPILER__ast__predefined__compilation__compile,
+
     // time
     COMPILER__ast__predefined__time__get_current_time,
 
@@ -599,6 +602,9 @@ char* COMPILER__global__predefined_function_call_names[] = {
     COMPILER__define__master_namespace ".list.append.structure",
     COMPILER__define__master_namespace ".list.append.buffer",
 
+    // compilation operations
+    COMPILER__define__master_namespace ".compiler.compile",
+
     // time operations
     COMPILER__define__master_namespace ".time.now",
 };
@@ -670,6 +676,9 @@ typedef enum COMPILER__pfcnt {
     COMPILER__pfcnt__list__calculate__content_buffer,
     COMPILER__pfcnt__list__append__structure,
     COMPILER__pfcnt__list__append__buffer_data,
+
+    // compiler operations
+    COMPILER__pfcnt__compiler__compile,
 
     // time
     COMPILER__pfcnt__time__now,
@@ -989,6 +998,22 @@ COMPILER__blueprintling COMPILER__global__predefined_one_off_function_calls[] = 
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_list,
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
         0,
+    
+    // compiler assorted calls
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__compilation__compile,
+        COMPILER__pfcnt__compiler__compile,
+        3,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        6,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
     
     // time calls
     COMPILER__abt__define_function_call,

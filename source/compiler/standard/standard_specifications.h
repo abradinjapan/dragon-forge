@@ -23,18 +23,18 @@ typedef enum STANDARD__sot {
     STANDARD__sot__print_buffer_as_string__start,
     STANDARD__sot__print_buffer_as_string__loop__start,
     STANDARD__sot__print_buffer_as_string__loop__end,
-    STANDARD__ot__print_tabs__start,
-    STANDARD__ot__print_tabs__loop__start,
-    STANDARD__ot__print_tabs__loop__end,
+    STANDARD__sot__print_tabs__start,
+    STANDARD__sot__print_tabs__loop__start,
+    STANDARD__sot__print_tabs__loop__end,
 
     // context functions
     STANDARD__sot__set_inputs_in_context_buffer__start,
     STANDARD__sot__get_outputs_from_context_buffer__start,
 
     // list functions
-    STANDARD__ot__open_list__start,
-    STANDARD__ot__close_list__start,
-    STANDARD__ot__append_buffer__start,
+    STANDARD__sot__open_list__start,
+    STANDARD__sot__close_list__start,
+    STANDARD__sot__append_buffer__start,
     STANDARD__sot__append_buffer__skip_reallocation,
 
     // count
