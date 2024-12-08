@@ -173,6 +173,9 @@ int main(int argc, char** argv) {
                 // close allocations
                 ANVIL__close__allocations(&allocations);
 
+                // close context
+                ANVIL__close__buffer(context_buffer);
+
                 // close program
                 ANVIL__close__buffer(program);
             }

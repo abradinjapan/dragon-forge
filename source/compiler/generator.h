@@ -486,6 +486,32 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             );
 
             break;
+        case COMPILER__ast__predefined__context__open:
+            ANVIL__code__write_cell(anvil, (ANVIL__cell)(ANVIL__u64)sizeof(ANVIL__context), ANVIL__srt__temp__length);
+            ANVIL__code__request_memory(anvil, ANVIL__srt__temp__length, COMPILER__generate__use_variable(context__context_buffer).cells.start, COMPILER__generate__use_variable(context__context_buffer).cells.start + 1);
+
+            break;
+        case COMPILER__ast__predefined__context__install_program:
+            // write buffer start
+            ANVIL__code__cell_to_address(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(context__program_buffer).cells.start, ANVIL__srt__constant__cell_byte_size, COMPILER__generate__use_variable(context__context_buffer).cells.start);
+
+            // advance
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, COMPILER__generate__use_variable(context__context_buffer).cells.start, ANVIL__srt__constant__cell_byte_size, ANVIL__unused_cell_ID, ANVIL__srt__temp__address);
+
+            // write buffer end
+            ANVIL__code__cell_to_address(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(context__program_buffer).cells.start, ANVIL__srt__constant__cell_byte_size, ANVIL__srt__temp__address);
+
+            // advance
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, ANVIL__srt__temp__address, ANVIL__srt__constant__cell_byte_size, ANVIL__unused_cell_ID, ANVIL__srt__temp__address);
+
+            // write execution current
+            ANVIL__code__cell_to_address(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(context__program_buffer).cells.start + 1, ANVIL__srt__constant__cell_byte_size, ANVIL__srt__temp__address);
+
+            break;
+        case COMPILER__ast__predefined__context__run:
+            ANVIL__code__run(anvil, COMPILER__generate__use_variable(context__context_buffer).cells.start, COMPILER__generate__use_variable(context__context_buffer).cells.start + 1, COMPILER__generate__use_variable(context__instruction_count).cells.start);
+
+            break;
         case COMPILER__ast__predefined__time__get_current_time:
             ANVIL__code__get_time(anvil, COMPILER__generate__use_variable(time__get_time_data).cells.start, COMPILER__generate__use_variable(time__get_time_data).cells.start + 1);
             
