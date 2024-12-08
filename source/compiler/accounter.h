@@ -3535,7 +3535,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__str
         goto match;
     // if is buffer to structure
     } else if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__structure__buffer_to_structure], parsling_statement.name.name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 1) {
-        // get type
+        // get argument for structure type
         COMPILER__structure_index structure_type = COMPILER__find__accountling_structure_name_index(structures.name_table, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0).type);
 
         // validate type
