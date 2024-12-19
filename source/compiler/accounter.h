@@ -959,7 +959,7 @@ void COMPILER__account__structures__calculate_structure_cell_counts(COMPILER__ac
 }
 
 // generate and get all types
-COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsling_programs, COMPILER__error* error) {
+COMPILER__accountling_structures COMPILER__account__structures(COMPILER__parsling_program parsling_program, COMPILER__error* error) {
     COMPILER__accountling_structures output;
 
     // open tables
@@ -979,55 +979,43 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
     }
 
     // get all names
-    // for each program
-    ANVIL__current current_program = ANVIL__calculate__current_from_list_filled_index(&parsling_programs);
+    // for each structure
+    ANVIL__current current_structure = ANVIL__calculate__current_from_list_filled_index(&parsling_program.structures.list);
 
-    // for each program
-    while (ANVIL__check__current_within_range(current_program)) {
-        // get program
-        COMPILER__parsling_program program = *(COMPILER__parsling_program*)current_program.start;
+    // for each structure
+    while (ANVIL__check__current_within_range(current_structure)) {
+        // get structure
+        COMPILER__parsling_structure structure = *(COMPILER__parsling_structure*)current_structure.start;
 
-        // for each structure
-        ANVIL__current current_structure = ANVIL__calculate__current_from_list_filled_index(&program.structures.list);
+        // for each structure name
+        ANVIL__current current_structure_name = ANVIL__calculate__current_from_list_filled_index(&structure.type_names.list);
 
-        // for each structure
-        while (ANVIL__check__current_within_range(current_structure)) {
-            // get structure
-            COMPILER__parsling_structure structure = *(COMPILER__parsling_structure*)current_structure.start;
+        // for each structure name
+        while (ANVIL__check__current_within_range(current_structure_name)) {
+            // get name
+            COMPILER__parsling_argument name = *(COMPILER__parsling_argument*)current_structure_name.start;
 
-            // for each structure name
-            ANVIL__current current_structure_name = ANVIL__calculate__current_from_list_filled_index(&structure.type_names.list);
+            // check if structure name is taken
+            if (COMPILER__find__accountling_structure_name_index(output.name_table, name.name) < output.name_table.count) {
+                // setup error
+                *error = COMPILER__open__error("Accounting Error: Structure name is defined more than once.", COMPILER__get__namespace_lexling_location(name.name));
 
-            // for each structure name
-            while (ANVIL__check__current_within_range(current_structure_name)) {
-                // get name
-                COMPILER__parsling_argument name = *(COMPILER__parsling_argument*)current_structure_name.start;
-
-                // check if structure name is taken
-                if (COMPILER__find__accountling_structure_name_index(output.name_table, name.name) < output.name_table.count) {
-                    // setup error
-                    *error = COMPILER__open__error("Accounting Error: Structure name is defined more than once.", COMPILER__get__namespace_lexling_location(name.name));
-
-                    return output;
-                }
-
-                // append name
-                COMPILER__append__namespace(&output.name_table.list, name.name, error);
-                output.name_table.count++;
-                if (COMPILER__check__error_occured(error)) {
-                    return output;
-                }
-
-                // next structure name
-                current_structure_name.start += sizeof(COMPILER__parsling_argument);
+                return output;
             }
 
-            // next structure
-            current_structure.start += sizeof(COMPILER__parsling_structure);
+            // append name
+            COMPILER__append__namespace(&output.name_table.list, name.name, error);
+            output.name_table.count++;
+            if (COMPILER__check__error_occured(error)) {
+                return output;
+            }
+
+            // next structure name
+            current_structure_name.start += sizeof(COMPILER__parsling_argument);
         }
 
-        // next program
-        current_program.start += sizeof(COMPILER__parsling_program);
+        // next structure
+        current_structure.start += sizeof(COMPILER__parsling_structure);
     }
 
     // setup predefined structures
@@ -1037,46 +1025,54 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
     }
 
     // get all structure data
-    // for each program
-    current_program = ANVIL__calculate__current_from_list_filled_index(&parsling_programs);
+    // for each structure
+    current_structure = ANVIL__calculate__current_from_list_filled_index(&parsling_program.structures.list);
 
-    // for each program
-    while (ANVIL__check__current_within_range(current_program)) {
-        // get program
-        COMPILER__parsling_program program = *(COMPILER__parsling_program*)current_program.start;
+    // for each structure
+    while (ANVIL__check__current_within_range(current_structure)) {
+        // get structure
+        COMPILER__parsling_structure parsling_structure = *(COMPILER__parsling_structure*)current_structure.start;
 
-        // for each structure
-        ANVIL__current current_structure = ANVIL__calculate__current_from_list_filled_index(&program.structures.list);
+        // for each structure name
+        ANVIL__current current_structure_name = ANVIL__calculate__current_from_list_filled_index(&parsling_structure.type_names.list);
 
-        // for each structure
-        while (ANVIL__check__current_within_range(current_structure)) {
-            // get structure
-            COMPILER__parsling_structure parsling_structure = *(COMPILER__parsling_structure*)current_structure.start;
+        // for each structure name
+        while (ANVIL__check__current_within_range(current_structure_name)) {
+            // get name
+            COMPILER__parsling_argument structure_name = *(COMPILER__parsling_argument*)current_structure_name.start;
 
-            // for each structure name
-            ANVIL__current current_structure_name = ANVIL__calculate__current_from_list_filled_index(&parsling_structure.type_names.list);
+            // setup accountling structure structure
+            COMPILER__accountling_structure accountling_structure;
+            accountling_structure.predefined = ANVIL__bt__false;
+            accountling_structure.name = structure_name.name;
+            accountling_structure.members = ANVIL__create__counted_list(COMPILER__open__list_with_error(sizeof(COMPILER__accountling_structure_member) * 16, error), 0);
+            if (COMPILER__check__error_occured(error)) {
+                return output;
+            }
 
-            // for each structure name
-            while (ANVIL__check__current_within_range(current_structure_name)) {
-                // get name
-                COMPILER__parsling_argument structure_name = *(COMPILER__parsling_argument*)current_structure_name.start;
+            // for each structure member
+            ANVIL__current current_structure_member = ANVIL__calculate__current_from_list_filled_index(&parsling_structure.arguments.list);
 
-                // setup accountling structure structure
-                COMPILER__accountling_structure accountling_structure;
-                accountling_structure.predefined = ANVIL__bt__false;
-                accountling_structure.name = structure_name.name;
-                accountling_structure.members = ANVIL__create__counted_list(COMPILER__open__list_with_error(sizeof(COMPILER__accountling_structure_member) * 16, error), 0);
-                if (COMPILER__check__error_occured(error)) {
-                    return output;
-                }
+            // check for no arguments, this is an error
+            if (parsling_structure.arguments.count < 1) {
+                // set error
+                *error = COMPILER__open__error("Accounting Error: A structure cannot have zero members.", COMPILER__get__namespace_lexling_location(structure_name.name));
 
-                // for each structure member
-                ANVIL__current current_structure_member = ANVIL__calculate__current_from_list_filled_index(&parsling_structure.arguments.list);
+                // close members
+                ANVIL__close__counted_list(accountling_structure.members);
 
-                // check for no arguments, this is an error
-                if (parsling_structure.arguments.count < 1) {
+                return output;
+            }
+
+            // for each structure member
+            while (ANVIL__check__current_within_range(current_structure_member)) {
+                // get member
+                COMPILER__parsling_argument parsling_member = *(COMPILER__parsling_argument*)current_structure_member.start;
+
+                // if unknown type
+                if (COMPILER__find__accountling_structure_name_index(output.name_table, parsling_member.type) >= output.name_table.count) {
                     // set error
-                    *error = COMPILER__open__error("Accounting Error: A structure cannot have zero members.", COMPILER__get__namespace_lexling_location(structure_name.name));
+                    *error = COMPILER__open__error("Accounting Error: A structure member is of unknown type.", COMPILER__get__namespace_lexling_location(parsling_member.type));
 
                     // close members
                     ANVIL__close__counted_list(accountling_structure.members);
@@ -1084,149 +1080,129 @@ COMPILER__accountling_structures COMPILER__account__structures(ANVIL__list parsl
                     return output;
                 }
 
-                // for each structure member
-                while (ANVIL__check__current_within_range(current_structure_member)) {
-                    // get member
-                    COMPILER__parsling_argument parsling_member = *(COMPILER__parsling_argument*)current_structure_member.start;
+                // if type is defined in itself (not including longer recursions, just first level ones)
+                if (COMPILER__check__identical_namespaces(accountling_structure.name, parsling_member.type)) {
+                    // set error
+                    *error = COMPILER__open__error("Accounting Error: A structure has itself as a member.", COMPILER__get__namespace_lexling_location(parsling_member.type));
 
-                    // if unknown type
-                    if (COMPILER__find__accountling_structure_name_index(output.name_table, parsling_member.type) >= output.name_table.count) {
-                        // set error
-                        *error = COMPILER__open__error("Accounting Error: A structure member is of unknown type.", COMPILER__get__namespace_lexling_location(parsling_member.type));
+                    // close members
+                    ANVIL__close__counted_list(accountling_structure.members);
 
-                        // close members
-                        ANVIL__close__counted_list(accountling_structure.members);
-
-                        return output;
-                    }
-
-                    // if type is defined in itself (not including longer recursions, just first level ones)
-                    if (COMPILER__check__identical_namespaces(accountling_structure.name, parsling_member.type)) {
-                        // set error
-                        *error = COMPILER__open__error("Accounting Error: A structure has itself as a member.", COMPILER__get__namespace_lexling_location(parsling_member.type));
-
-                        // close members
-                        ANVIL__close__counted_list(accountling_structure.members);
-
-                        return output;
-                    }
-
-                    // create member
-                    COMPILER__accountling_structure_member accountling_member;
-                    accountling_member.structure_ID = COMPILER__find__accountling_structure_name_index(output.name_table, parsling_member.type);
-                    accountling_member.name = parsling_member.name;
-                    accountling_member.predefined = ANVIL__bt__false;
-                    accountling_member.tag_ID = COMPILER__amjf__default;
-
-                    // check for tag
-                    if (COMPILER__check__empty_namespace(parsling_member.tag) == ANVIL__bt__false) {
-                        // setup loop start
-                        COMPILER__amjf index = 0;
-
-                        // get tag based on type
-                        while (index < COMPILER__amjf__COUNT) {
-                            // check name
-                            if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_tag_names[index], parsling_member.tag) == ANVIL__bt__true) {
-                                // if tag is default
-                                if (index == COMPILER__amjf__default) {
-                                    // setup type
-                                    if (accountling_member.structure_ID == COMPILER__ptt__dragon_cell) {
-                                        accountling_member.tag_ID = COMPILER__amjf__integer__decimal;
-                                    } else if (accountling_member.structure_ID == COMPILER__ptt__dragon_buffer) {
-                                        accountling_member.tag_ID = COMPILER__amjf__buffer__addresses;
-                                    } else {
-                                        // error
-                                        *error = COMPILER__open__error("Accounting Error: The 'default' keyword was used on a tag that does not associate with a type.", COMPILER__get__namespace_lexling_location(parsling_member.tag));
-
-                                        // close members
-                                        ANVIL__close__counted_list(accountling_structure.members);
-
-                                        return output;
-                                    }
-                                } else {
-                                    // set name
-                                    accountling_member.tag_ID = index;
-                                }
-
-                                // exit loop
-                                break;
-                            }
-
-                            // next item
-                            index++;
-                        }
-
-                        // if no matching tag
-                        if (index >= COMPILER__amjf__COUNT) {
-                            // error
-                            *error = COMPILER__open__error("Accounting Error: A tag name was not a valid option.", COMPILER__get__namespace_lexling_location(parsling_member.tag));
-
-                            // close members
-                            ANVIL__close__counted_list(accountling_structure.members);
-
-                            return output;
-                        }
-
-                        // check that the tag is a valid option for the variable
-                        if (accountling_member.structure_ID == COMPILER__ptt__dragon_cell && (accountling_member.tag_ID == COMPILER__amjf__integer__binary && accountling_member.tag_ID == COMPILER__amjf__integer__decimal && accountling_member.tag_ID == COMPILER__amjf__integer__hexadecimal && accountling_member.tag_ID == COMPILER__amjf__boolean)) {
-                            // error
-                            *error = COMPILER__open__error("Accounting Error: A tag name was not a valid option.", COMPILER__get__namespace_lexling_location(parsling_member.tag));
-
-                            // close members
-                            ANVIL__close__counted_list(accountling_structure.members);
-
-                            return output;
-                        }
-                        if (accountling_member.structure_ID == COMPILER__ptt__dragon_buffer && (accountling_member.tag_ID == COMPILER__amjf__buffer__addresses && accountling_member.tag_ID == COMPILER__amjf__buffer__byte_array && accountling_member.tag_ID == COMPILER__amjf__buffer__string)) {
-                            // error
-                            *error = COMPILER__open__error("Accounting Error: A tag name was not a valid option.", COMPILER__get__namespace_lexling_location(parsling_member.tag));
-
-                            // close members
-                            ANVIL__close__counted_list(accountling_structure.members);
-
-                            return output;
-                        }
-                    }
-
-                    // check for duplicate member
-                    if (COMPILER__find__accountling_structure_member_name_index(accountling_structure, accountling_member.name) < accountling_structure.members.count) {
-                        // set error
-                        *error = COMPILER__open__error("Accounting Error: A structure has two or more arguments with the same name.", COMPILER__get__namespace_lexling_location(parsling_member.name));
-
-                        // free unused member
-                        ANVIL__close__counted_list(accountling_structure.members);
-
-                        return output;
-                    }
-
-                    // append member
-                    COMPILER__append__accountling_structure_member(&accountling_structure.members.list, accountling_member, error);
-                    if (COMPILER__check__error_occured(error)) {
-                        return output;
-                    }
-                    accountling_structure.members.count++;
-
-                    // next member
-                    current_structure_member.start += sizeof(COMPILER__parsling_argument);
+                    return output;
                 }
 
-                // append structure to list
-                COMPILER__append__accountling_structure(&output.data_table.list, accountling_structure, error);
+                // create member
+                COMPILER__accountling_structure_member accountling_member;
+                accountling_member.structure_ID = COMPILER__find__accountling_structure_name_index(output.name_table, parsling_member.type);
+                accountling_member.name = parsling_member.name;
+                accountling_member.predefined = ANVIL__bt__false;
+                accountling_member.tag_ID = COMPILER__amjf__default;
+
+                // check for tag
+                if (COMPILER__check__empty_namespace(parsling_member.tag) == ANVIL__bt__false) {
+                    // setup loop start
+                    COMPILER__amjf index = 0;
+
+                    // get tag based on type
+                    while (index < COMPILER__amjf__COUNT) {
+                        // check name
+                        if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_tag_names[index], parsling_member.tag) == ANVIL__bt__true) {
+                            // if tag is default
+                            if (index == COMPILER__amjf__default) {
+                                // setup type
+                                if (accountling_member.structure_ID == COMPILER__ptt__dragon_cell) {
+                                    accountling_member.tag_ID = COMPILER__amjf__integer__decimal;
+                                } else if (accountling_member.structure_ID == COMPILER__ptt__dragon_buffer) {
+                                    accountling_member.tag_ID = COMPILER__amjf__buffer__addresses;
+                                } else {
+                                    // error
+                                    *error = COMPILER__open__error("Accounting Error: The 'default' keyword was used on a tag that does not associate with a type.", COMPILER__get__namespace_lexling_location(parsling_member.tag));
+
+                                    // close members
+                                    ANVIL__close__counted_list(accountling_structure.members);
+
+                                    return output;
+                                }
+                            } else {
+                                // set name
+                                accountling_member.tag_ID = index;
+                            }
+
+                            // exit loop
+                            break;
+                        }
+
+                        // next item
+                        index++;
+                    }
+
+                    // if no matching tag
+                    if (index >= COMPILER__amjf__COUNT) {
+                        // error
+                        *error = COMPILER__open__error("Accounting Error: A tag name was not a valid option.", COMPILER__get__namespace_lexling_location(parsling_member.tag));
+
+                        // close members
+                        ANVIL__close__counted_list(accountling_structure.members);
+
+                        return output;
+                    }
+
+                    // check that the tag is a valid option for the variable
+                    if (accountling_member.structure_ID == COMPILER__ptt__dragon_cell && (accountling_member.tag_ID == COMPILER__amjf__integer__binary && accountling_member.tag_ID == COMPILER__amjf__integer__decimal && accountling_member.tag_ID == COMPILER__amjf__integer__hexadecimal && accountling_member.tag_ID == COMPILER__amjf__boolean)) {
+                        // error
+                        *error = COMPILER__open__error("Accounting Error: A tag name was not a valid option.", COMPILER__get__namespace_lexling_location(parsling_member.tag));
+
+                        // close members
+                        ANVIL__close__counted_list(accountling_structure.members);
+
+                        return output;
+                    }
+                    if (accountling_member.structure_ID == COMPILER__ptt__dragon_buffer && (accountling_member.tag_ID == COMPILER__amjf__buffer__addresses && accountling_member.tag_ID == COMPILER__amjf__buffer__byte_array && accountling_member.tag_ID == COMPILER__amjf__buffer__string)) {
+                        // error
+                        *error = COMPILER__open__error("Accounting Error: A tag name was not a valid option.", COMPILER__get__namespace_lexling_location(parsling_member.tag));
+
+                        // close members
+                        ANVIL__close__counted_list(accountling_structure.members);
+
+                        return output;
+                    }
+                }
+
+                // check for duplicate member
+                if (COMPILER__find__accountling_structure_member_name_index(accountling_structure, accountling_member.name) < accountling_structure.members.count) {
+                    // set error
+                    *error = COMPILER__open__error("Accounting Error: A structure has two or more arguments with the same name.", COMPILER__get__namespace_lexling_location(parsling_member.name));
+
+                    // free unused member
+                    ANVIL__close__counted_list(accountling_structure.members);
+
+                    return output;
+                }
+
+                // append member
+                COMPILER__append__accountling_structure_member(&accountling_structure.members.list, accountling_member, error);
                 if (COMPILER__check__error_occured(error)) {
                     return output;
                 }
-                output.data_table.count++;
+                accountling_structure.members.count++;
 
-                // next structure name
-                current_structure_name.start += sizeof(COMPILER__parsling_argument);
+                // next member
+                current_structure_member.start += sizeof(COMPILER__parsling_argument);
             }
 
-            // next structure
-            current_structure.start += sizeof(COMPILER__parsling_structure);
+            // append structure to list
+            COMPILER__append__accountling_structure(&output.data_table.list, accountling_structure, error);
+            if (COMPILER__check__error_occured(error)) {
+                return output;
+            }
+            output.data_table.count++;
+
+            // next structure name
+            current_structure_name.start += sizeof(COMPILER__parsling_argument);
         }
 
-        // next program
-        current_program.start += sizeof(COMPILER__parsling_program);
+        // next structure
+        current_structure.start += sizeof(COMPILER__parsling_structure);
     }
 
     // check every type for recursive type definitions
@@ -1760,68 +1736,55 @@ ANVIL__counted_list COMPILER__account__functions__user_defined_function_header_a
 }
 
 // account all user defined function headers
-COMPILER__accountling_function_headers COMPILER__account__functions__user_defined_function_headers(COMPILER__accountling_function_headers headers, ANVIL__list parsling_programs, ANVIL__counted_list structure_names, COMPILER__error* error) {
-    // for each parsling program
+COMPILER__accountling_function_headers COMPILER__account__functions__user_defined_function_headers(COMPILER__accountling_function_headers headers, COMPILER__parsling_program parsling_program, ANVIL__counted_list structure_names, COMPILER__error* error) {
+    // for each function
     // setup current
-    ANVIL__current current_program = ANVIL__calculate__current_from_list_filled_index(&parsling_programs);
+    ANVIL__current current_function = ANVIL__calculate__current_from_list_filled_index(&parsling_program.functions.list);
 
-    // for each program
-    while (ANVIL__check__current_within_range(current_program)) {
-        // get parsling program
-        COMPILER__parsling_program parsling_program = *(COMPILER__parsling_program*)current_program.start;
+    // for each function
+    while (ANVIL__check__current_within_range(current_function)) {
+        // get parsling function
+        COMPILER__parsling_function parsling_function = *(COMPILER__parsling_function*)current_function.start;
 
-        // for each function
-        // setup current
-        ANVIL__current current_function = ANVIL__calculate__current_from_list_filled_index(&parsling_program.functions.list);
+        // account header
+        {
+            // setup variable
+            COMPILER__accountling_function_header header;
 
-        // for each function
-        while (ANVIL__check__current_within_range(current_function)) {
-            // get parsling function
-            COMPILER__parsling_function parsling_function = *(COMPILER__parsling_function*)current_function.start;
+            // get name
+            header.name = parsling_function.header.name.name;
 
-            // account header
-            {
-                // setup variable
-                COMPILER__accountling_function_header header;
-
-                // get name
-                header.name = parsling_function.header.name.name;
-
-                // get inputs
-                header.input_types = COMPILER__account__functions__user_defined_function_header_arguments(structure_names, parsling_function.header.inputs, error);
-                if (COMPILER__check__error_occured(error)) {
-                    return headers;
-                }
-
-                // get outputs
-                header.output_types = COMPILER__account__functions__user_defined_function_header_arguments(structure_names, parsling_function.header.outputs, error);
-                if (COMPILER__check__error_occured(error)) {
-                    return headers;
-                }
-
-                // check if function header is already used
-                // check namespace
-                if (COMPILER__account__search_for_function_header__search_all_lists(headers, header).category_index < COMPILER__afht__COUNT) {
-                    // already defined, error
-                    *error = COMPILER__open__error("Accounting Error: Two or more functions have the same header (name & io).", COMPILER__get__namespace_lexling_location(header.name));
-
-                    return headers;
-                }
-
-                // append header
-                COMPILER__append__accountling_function_header(&headers.category[COMPILER__afht__user_defined].list, header, error);
-                if (COMPILER__check__error_occured((error))) {
-                    return headers;
-                }
-                headers.category[COMPILER__afht__user_defined].count++;
+            // get inputs
+            header.input_types = COMPILER__account__functions__user_defined_function_header_arguments(structure_names, parsling_function.header.inputs, error);
+            if (COMPILER__check__error_occured(error)) {
+                return headers;
             }
 
-            // next function
-            current_function.start += sizeof(COMPILER__parsling_function);
+            // get outputs
+            header.output_types = COMPILER__account__functions__user_defined_function_header_arguments(structure_names, parsling_function.header.outputs, error);
+            if (COMPILER__check__error_occured(error)) {
+                return headers;
+            }
+
+            // check if function header is already used
+            // check namespace
+            if (COMPILER__account__search_for_function_header__search_all_lists(headers, header).category_index < COMPILER__afht__COUNT) {
+                // already defined, error
+                *error = COMPILER__open__error("Accounting Error: Two or more functions have the same header (name & io).", COMPILER__get__namespace_lexling_location(header.name));
+
+                return headers;
+            }
+
+            // append header
+            COMPILER__append__accountling_function_header(&headers.category[COMPILER__afht__user_defined].list, header, error);
+            if (COMPILER__check__error_occured((error))) {
+                return headers;
+            }
+            headers.category[COMPILER__afht__user_defined].count++;
         }
 
-        // next parsling program
-        current_program.start += sizeof(COMPILER__parsling_program);
+        // next function
+        current_function.start += sizeof(COMPILER__parsling_function);
     }
 
     return headers;
@@ -4394,103 +4357,91 @@ void COMPILER__account__functions__predefined_variables(COMPILER__accountling_st
 }
 
 // account all functions
-COMPILER__accountling_functions COMPILER__account__functions__user_defined_function_bodies(COMPILER__accountling_functions functions, COMPILER__accountling_structures structures, ANVIL__list parsling_programs, COMPILER__error* error) {
+COMPILER__accountling_functions COMPILER__account__functions__user_defined_function_bodies(COMPILER__accountling_functions functions, COMPILER__accountling_structures structures, COMPILER__parsling_program parsling_program, COMPILER__error* error) {
     // open function body list
     functions.bodies = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_function) * functions.headers.category[COMPILER__afht__user_defined].count, error);
 
-    // account each program
-    ANVIL__current current_parsling_program = ANVIL__calculate__current_from_list_filled_index(&parsling_programs);
+    // account each function
+    ANVIL__current current_parsling_function = ANVIL__calculate__current_from_list_filled_index(&parsling_program.functions.list);
 
-    // for each parsling program
-    while (ANVIL__check__current_within_range(current_parsling_program)) {
-        // get parsling program
-        COMPILER__parsling_program parsling_program = *(COMPILER__parsling_program*)current_parsling_program.start;
+    // for each function
+    while (ANVIL__check__current_within_range(current_parsling_function)) {
+        // get function
+        COMPILER__parsling_function parsling_function = *(COMPILER__parsling_function*)current_parsling_function.start;
 
-        // account each function
-        ANVIL__current current_parsling_function = ANVIL__calculate__current_from_list_filled_index(&parsling_program.functions.list);
+        // account function
+        {
+            // setup function variable
+            COMPILER__accountling_function accountling_function;
 
-        // for each function
-        while (ANVIL__check__current_within_range(current_parsling_function)) {
-            // get function
-            COMPILER__parsling_function parsling_function = *(COMPILER__parsling_function*)current_parsling_function.start;
+            // intialize statistics
+            accountling_function.next_available_workspace_cell = ANVIL__srt__start__workspace;
 
-            // account function
-            {
-                // setup function variable
-                COMPILER__accountling_function accountling_function;
-
-                // intialize statistics
-                accountling_function.next_available_workspace_cell = ANVIL__srt__start__workspace;
-
-                // allocate scope headers list
-                accountling_function.scope_headers = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_scope_header) * 16, error);
-                if (COMPILER__check__error_occured(error)) {
-                    return functions;
-                }
-
-                // allocate offsets list
-                accountling_function.offsets = COMPILER__open__counted_list_with_error(sizeof(COMPILER__namespace) * 16, error);
-                if (COMPILER__check__error_occured(error)) {
-                    return functions;
-                }
-
-                // get scope headers & offsets
-                COMPILER__account__functions__get_function_level_data(&accountling_function, parsling_function.scope.subscope, error);
-                if (COMPILER__check__error_occured(error)) {
-                    return functions;
-                }
-
-                // allocate variables list
-                accountling_function.variables = COMPILER__open__variables(error);
-                if (COMPILER__check__error_occured(error)) {
-                    return functions;
-                }
-
-                // open strings
-                accountling_function.strings = COMPILER__open__counted_list_with_error(sizeof(ANVIL__buffer) * 16, error);
-                if (COMPILER__check__error_occured(error)) {
-                    return functions;
-                }
-
-                // get function IO
-                COMPILER__account__functions__function_io_variables(structures, &accountling_function, parsling_function, error);
-                if (COMPILER__check__error_occured(error)) {
-                    return functions;
-                }
-
-                // generate predefined variables
-                COMPILER__account__functions__predefined_variables(structures, &accountling_function, error);
-                if (COMPILER__check__error_occured(error)) {
-                    return functions;
-                }
-
-                // get statements
-                COMPILER__account__functions__function_sequential_information__one_scope(structures, functions.headers, &accountling_function, &accountling_function.scope, parsling_function.scope, error);
-                if (COMPILER__check__error_occured(error)) {
-                    return functions;
-                }
-
-                // append function
-                COMPILER__append__accountling_function(&functions.bodies.list, accountling_function, error);
-                if (COMPILER__check__error_occured(error)) {
-                    return functions;
-                }
-                functions.bodies.count++;
+            // allocate scope headers list
+            accountling_function.scope_headers = COMPILER__open__counted_list_with_error(sizeof(COMPILER__accountling_scope_header) * 16, error);
+            if (COMPILER__check__error_occured(error)) {
+                return functions;
             }
 
-            // next function
-            current_parsling_function.start += sizeof(COMPILER__parsling_function);
+            // allocate offsets list
+            accountling_function.offsets = COMPILER__open__counted_list_with_error(sizeof(COMPILER__namespace) * 16, error);
+            if (COMPILER__check__error_occured(error)) {
+                return functions;
+            }
+
+            // get scope headers & offsets
+            COMPILER__account__functions__get_function_level_data(&accountling_function, parsling_function.scope.subscope, error);
+            if (COMPILER__check__error_occured(error)) {
+                return functions;
+            }
+
+            // allocate variables list
+            accountling_function.variables = COMPILER__open__variables(error);
+            if (COMPILER__check__error_occured(error)) {
+                return functions;
+            }
+
+            // open strings
+            accountling_function.strings = COMPILER__open__counted_list_with_error(sizeof(ANVIL__buffer) * 16, error);
+            if (COMPILER__check__error_occured(error)) {
+                return functions;
+            }
+
+            // get function IO
+            COMPILER__account__functions__function_io_variables(structures, &accountling_function, parsling_function, error);
+            if (COMPILER__check__error_occured(error)) {
+                return functions;
+            }
+
+            // generate predefined variables
+            COMPILER__account__functions__predefined_variables(structures, &accountling_function, error);
+            if (COMPILER__check__error_occured(error)) {
+                return functions;
+            }
+
+            // get statements
+            COMPILER__account__functions__function_sequential_information__one_scope(structures, functions.headers, &accountling_function, &accountling_function.scope, parsling_function.scope, error);
+            if (COMPILER__check__error_occured(error)) {
+                return functions;
+            }
+
+            // append function
+            COMPILER__append__accountling_function(&functions.bodies.list, accountling_function, error);
+            if (COMPILER__check__error_occured(error)) {
+                return functions;
+            }
+            functions.bodies.count++;
         }
 
-        // next program
-        current_parsling_program.start += sizeof(COMPILER__parsling_program);
+        // next function
+        current_parsling_function.start += sizeof(COMPILER__parsling_function);
     }
 
     return functions;
 }
 
 // account all functions & headers
-COMPILER__accountling_functions COMPILER__account__functions(ANVIL__list parsling_programs, COMPILER__accountling_structures structures, COMPILER__error* error) {
+COMPILER__accountling_functions COMPILER__account__functions(COMPILER__parsling_program parsling_program, COMPILER__accountling_structures structures, COMPILER__error* error) {
     COMPILER__accountling_functions output;
 
     // open output
@@ -4506,13 +4457,13 @@ COMPILER__accountling_functions COMPILER__account__functions(ANVIL__list parslin
     }
 
     // account user defined function headers
-    output.headers = COMPILER__account__functions__user_defined_function_headers(output.headers, parsling_programs, structures.name_table, error);
+    output.headers = COMPILER__account__functions__user_defined_function_headers(output.headers, parsling_program, structures.name_table, error);
     if (COMPILER__check__error_occured(error)) {
         return output;
     }
 
     // account user defined function bodies
-    output = COMPILER__account__functions__user_defined_function_bodies(output, structures, parsling_programs, error);
+    output = COMPILER__account__functions__user_defined_function_bodies(output, structures, parsling_program, error);
 
     return output;
 }
@@ -4548,17 +4499,17 @@ COMPILER__function_index COMPILER__find__entry_point(COMPILER__accountling_funct
 }
 
 // account all files into one accountling program
-COMPILER__accountling_program COMPILER__account__program(ANVIL__list parsling_programs, COMPILER__error* error) {
+COMPILER__accountling_program COMPILER__account__program(COMPILER__parsling_program parsling_program, COMPILER__error* error) {
     COMPILER__accountling_program output;
 
     // get all structures
-    output.structures = COMPILER__account__structures(parsling_programs, error);
+    output.structures = COMPILER__account__structures(parsling_program, error);
     if (COMPILER__check__error_occured(error)) {
         return output;
     }
 
     // get all functions & function headers
-    output.functions = COMPILER__account__functions(parsling_programs, output.structures, error);
+    output.functions = COMPILER__account__functions(parsling_program, output.structures, error);
     if (COMPILER__check__error_occured(error)) {
         return output;
     }

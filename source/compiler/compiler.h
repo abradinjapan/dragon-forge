@@ -13,7 +13,7 @@
 typedef struct COMPILER__compilation_unit {
     ANVIL__buffer user_codes;
     ANVIL__list lexling_buffers; // COMPILER__lexlings
-    ANVIL__list parsling_buffers; // COMPILER__parsling_program
+    COMPILER__parsling_program parslings;
     COMPILER__accountling_program accountlings;
     COMPILER__pst stages_completed;
 } COMPILER__compilation_unit;
@@ -40,20 +40,7 @@ void COMPILER__close__compilation_unit(COMPILER__compilation_unit unit) {
 
     // close parsling buffers
     if (unit.stages_completed > COMPILER__pst__lexing) {
-        // setup current
-        ANVIL__current current = ANVIL__calculate__current_from_list_filled_index(&unit.parsling_buffers);
-
-        // close each buffer
-        while (ANVIL__check__current_within_range(current)) {
-            // close parsling buffer
-            COMPILER__close__parsling_program(*(COMPILER__parsling_program*)current.start);
-
-            // next program
-            current.start += sizeof(COMPILER__parsling_program);
-        }
-
-        // close parslings buffer
-        ANVIL__close__list(unit.parsling_buffers);
+        COMPILER__close__parsling_program(unit.parslings);
     }
 
     // close accountling data
@@ -81,10 +68,10 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt generate_kicks
         goto quit;
     }
 
-    // setup compilation unit user code list and lexling list
+    // setup compilation unit
     compilation_unit.user_codes = user_codes;
     compilation_unit.lexling_buffers = COMPILER__open__list_with_error(sizeof(COMPILER__lexlings) * 5, error);
-    compilation_unit.parsling_buffers = COMPILER__open__list_with_error(sizeof(COMPILER__parsling_program) * 5, error);
+    compilation_unit.stages_completed = COMPILER__pst__invalid;
 
     // check for error
     if (COMPILER__check__error_occured(error)) {
@@ -99,11 +86,8 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt generate_kicks
         printf("Compiling Files.\n");
     }
 
-    // lex and parse each file
+    // lex each file
     while (ANVIL__check__current_within_range(current)) {
-        // reset stage completed
-        compilation_unit.stages_completed = COMPILER__pst__invalid;
-
         // get file
         ANVIL__buffer user_code = *(ANVIL__buffer*)current.start;
 
@@ -135,34 +119,30 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt generate_kicks
             goto quit;
         }
 
-        // parse file
-        COMPILER__parsling_program parslings = COMPILER__parse__program(lexlings, error);
-
-        // append program
-        COMPILER__append__parsling_program(&compilation_unit.parsling_buffers, parslings, error);
-
-        // print parslings
-        if (print_debug) {
-            COMPILER__print__parsed_program(parslings);
-        }
-
-        // mark as done (unfinished input acceptable)
-        if (compilation_unit.stages_completed < COMPILER__pst__parsing) {
-            compilation_unit.stages_completed = COMPILER__pst__parsing;
-        }
-
-        // check for error
-        if (COMPILER__check__error_occured(error)) {
-            goto quit;
-        }
-
         // advance current
         current.start += sizeof(ANVIL__buffer);
-        current_file_index++;
+    }
+
+    // parse
+    compilation_unit.parslings = COMPILER__parse__program(compilation_unit.lexling_buffers, error);
+
+    // print parslings
+    if (print_debug) {
+        COMPILER__print__parsed_program(compilation_unit.parslings);
+    }
+
+    // mark as done (unfinished input acceptable)
+    if (compilation_unit.stages_completed < COMPILER__pst__parsing) {
+        compilation_unit.stages_completed = COMPILER__pst__parsing;
+    }
+
+    // check for error
+    if (COMPILER__check__error_occured(error)) {
+        goto quit;
     }
 
     // account
-    compilation_unit.accountlings = COMPILER__account__program(compilation_unit.parsling_buffers, error);
+    compilation_unit.accountlings = COMPILER__account__program(compilation_unit.parslings, error);
 
     // check for errors
     if (COMPILER__check__error_occured(error)) {

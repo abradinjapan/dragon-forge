@@ -1012,14 +1012,15 @@ COMPILER__parsling_function COMPILER__parse__function(ANVIL__current* current, C
 }
 
 // parse a program (file)
-COMPILER__parsling_program COMPILER__parse__program(COMPILER__lexlings lexlings, COMPILER__error* error) {
+COMPILER__parsling_program COMPILER__parse__program(ANVIL__list lexling_buffers, COMPILER__error* error) {
     COMPILER__parsling_program output;
     COMPILER__parsling_function temp_function;
     COMPILER__parsling_structure temp_structure;
-    ANVIL__current current;
+    ANVIL__current current_lexling_buffer;
+    ANVIL__current current_lexling;
 
-    // setup current
-    current = ANVIL__calculate__current_from_list_filled_index(&lexlings.data.list);
+    // setup current lexling buffer
+    current_lexling_buffer = ANVIL__calculate__current_from_list_filled_index(&lexling_buffers);
 
     // open the function list
     output.functions = COMPILER__open__counted_list_with_error(sizeof(COMPILER__parsling_function) * 64, error);
@@ -1033,35 +1034,47 @@ COMPILER__parsling_program COMPILER__parse__program(COMPILER__lexlings lexlings,
         goto quit;
     }
 
-    // parse functions & structures
-    while (ANVIL__check__current_within_range(current)) {
-        // if end of file
-        if (COMPILER__read__lexling_from_current(current).type == COMPILER__lt__end_of_file) {
-            // finished parsing
-            goto quit;
-        }
-        
-        // determine abstraction type
-        if (COMPILER__read__lexling_from_current(current).type == COMPILER__lt__exclamation_point) {
-            // parse structure
-            temp_structure = COMPILER__parse__structure(&current, error);
+    // parse over each lexling buffer
+    while (ANVIL__check__current_within_range(current_lexling_buffer)) {
+        // get lexlings
+        COMPILER__lexlings lexlings = *(COMPILER__lexlings*)current_lexling_buffer.start;
 
-            // append structure
-            COMPILER__append__parsling_structure(&output.structures.list, temp_structure, error);
-            output.structures.count++;
-        } else {
-            // parse function
-            temp_function = COMPILER__parse__function(&current, error);
+        // setup current lexling
+        current_lexling = ANVIL__calculate__list_current_buffer(&lexlings.data.list);
 
-            // append function
-            COMPILER__append__parsling_function(&output.functions.list, temp_function, error);
-            output.functions.count++;
+        // parse functions & structures
+        while (ANVIL__check__current_within_range(current_lexling)) {
+            // if end of file
+            if (COMPILER__read__lexling_from_current(current_lexling).type == COMPILER__lt__end_of_file) {
+                // finished parsing
+                goto quit;
+            }
+            
+            // determine abstraction type
+            if (COMPILER__read__lexling_from_current(current_lexling).type == COMPILER__lt__exclamation_point) {
+                // parse structure
+                temp_structure = COMPILER__parse__structure(&current_lexling, error);
+
+                // append structure
+                COMPILER__append__parsling_structure(&output.structures.list, temp_structure, error);
+                output.structures.count++;
+            } else {
+                // parse function
+                temp_function = COMPILER__parse__function(&current_lexling, error);
+
+                // append function
+                COMPILER__append__parsling_function(&output.functions.list, temp_function, error);
+                output.functions.count++;
+            }
+
+            // check for error
+            if (COMPILER__check__error_occured(error) == ANVIL__bt__true) {
+                goto quit;
+            }
         }
 
-        // check for error
-        if (COMPILER__check__error_occured(error) == ANVIL__bt__true) {
-            goto quit;
-        }
+        // next lexling buffer
+        current_lexling_buffer.start += sizeof(COMPILER__lexlings);
     }
 
     // quit
