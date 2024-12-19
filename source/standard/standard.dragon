@@ -1,0 +1,5 @@
+[ generate list code based on given structures ]
+dragon.standard.generate_list_functions()() = {
+    dragon.set("Not yet implemented.")(message)
+    dragon.print.buffer_as_string(message)()
+}
