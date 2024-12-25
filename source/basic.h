@@ -782,7 +782,27 @@ void ANVIL__print__tabs(ANVIL__tab_count tab_count) {
     return;
 }
 
-/* Dson (Dragon Script Object Notation) */
+/* Json */
+// write string to list
+void ANVIL__json__append__string(ANVIL__list* json, ANVIL__buffer string_data, ANVIL__bt* memory_error_occured) {
+    ANVIL__buffer quote = ANVIL__open__buffer_from_string("\"", ANVIL__bt__false, ANVIL__bt__false);
 
+    // append starting quote
+    ANVIL__list__append__buffer_data(json, quote, memory_error_occured);
+    if (*memory_error_occured) {
+        return;
+    }
+
+    // append string data quote
+    ANVIL__list__append__buffer_data(json, string_data, memory_error_occured);
+    if (*memory_error_occured) {
+        return;
+    }
+    
+    // append ending quote
+    ANVIL__list__append__buffer_data(json, quote, memory_error_occured);
+
+    return;
+}
 
 #endif

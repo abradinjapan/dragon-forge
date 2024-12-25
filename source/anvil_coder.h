@@ -330,7 +330,7 @@ void ANVIL__code__buffer_to_buffer__high_to_low(ANVIL__workspace* workspace, ANV
 }
 
 // write compile instruction
-void ANVIL__code__compile(ANVIL__workspace* workspace, ANVIL__cell_ID user_codes_buffers_buffer_start, ANVIL__cell_ID user_codes_buffers_buffer_end, ANVIL__cell_ID debug_enabled, ANVIL__cell_ID generate_kickstarter, ANVIL__cell_ID output_program_start, ANVIL__cell_ID output_program_end, ANVIL__cell_ID error__error_occured, ANVIL__cell_ID error__message_start, ANVIL__cell_ID error__message_end, ANVIL__cell_ID error__character_location__file_index, ANVIL__cell_ID error__character_location__line_number, ANVIL__cell_ID error__character_location__character_index) {
+void ANVIL__code__compile(ANVIL__workspace* workspace, ANVIL__cell_ID user_codes_buffers_buffer_start, ANVIL__cell_ID user_codes_buffers_buffer_end, ANVIL__cell_ID debug_enabled, ANVIL__cell_ID generate_kickstarter, ANVIL__cell_ID output_program_start, ANVIL__cell_ID output_program_end, ANVIL__cell_ID output_debug_start, ANVIL__cell_ID output_debug_end, ANVIL__cell_ID error__error_occured, ANVIL__cell_ID error__message_start, ANVIL__cell_ID error__message_end, ANVIL__cell_ID error__character_location__file_index, ANVIL__cell_ID error__character_location__line_number, ANVIL__cell_ID error__character_location__character_index) {
     // write instruction
     ANVIL__write_next__instruction_ID(workspace, ANVIL__it__compile);
     ANVIL__write_next__cell_ID(workspace, user_codes_buffers_buffer_start);
@@ -339,6 +339,8 @@ void ANVIL__code__compile(ANVIL__workspace* workspace, ANVIL__cell_ID user_codes
     ANVIL__write_next__cell_ID(workspace, generate_kickstarter);
     ANVIL__write_next__cell_ID(workspace, output_program_start);
     ANVIL__write_next__cell_ID(workspace, output_program_end);
+    ANVIL__write_next__cell_ID(workspace, output_debug_start);
+    ANVIL__write_next__cell_ID(workspace, output_debug_end);
     ANVIL__write_next__cell_ID(workspace, error__error_occured);
     ANVIL__write_next__cell_ID(workspace, error__message_start);
     ANVIL__write_next__cell_ID(workspace, error__message_end);

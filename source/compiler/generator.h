@@ -477,6 +477,8 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
                 COMPILER__generate__use_variable(compile__generate_kickstarter).cells.start,
                 COMPILER__generate__use_variable(compile__anvil_code).cells.start,
                 COMPILER__generate__use_variable(compile__anvil_code).cells.end,
+                COMPILER__generate__use_variable(compile__debug_information).cells.start,
+                COMPILER__generate__use_variable(compile__debug_information).cells.end,
                 COMPILER__generate__use_variable(compile__error__occured).cells.start,
                 COMPILER__generate__use_variable(compile__error__message).cells.start,
                 COMPILER__generate__use_variable(compile__error__message).cells.end,

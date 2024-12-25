@@ -38,8 +38,49 @@ void COMPILER__close__compilation_unit(COMPILER__compilation_unit unit) {
     return;
 }
 
+// append tab depth
+void COMPILER__generate__debug_information__tabs(ANVIL__list* json, ANVIL__tab_count tab_depth, COMPILER__error* error) {
+    // setup string
+    ANVIL__buffer data = ANVIL__open__buffer_from_string("\t", ANVIL__bt__false, ANVIL__bt__false);
+
+    // append tabs
+    for (ANVIL__tab_count index = 0; index < tab_depth; index++) {
+        // append tab
+        ANVIL__list__append__buffer_data(json, data, &(*error).memory_error_occured);
+        if (COMPILER__check__error_occured(error)) {
+            return;
+        }
+    }
+
+    return;
+}
+
+// generate one lexling's debug information
+void COMPILER__generate__debug_information__lexling(COMPILER__lexling lexling, ANVIL__tab_count tab_depth, COMPILER__error* error) {
+    
+}
+
+// generate all lexlings information
+void COMPILER__generate__debug_information__lexlings() {
+
+}
+
+// serialize debug information to json
+ANVIL__buffer COMPILER__generate__debug_information(COMPILER__compilation_unit unit, COMPILER__error* error) {
+    // setup list
+    ANVIL__list json = COMPILER__open__list_with_error(sizeof(ANVIL__character) * 65536, error);
+    if (COMPILER__check__error_occured(error)) {
+        return;
+    }
+
+    // serialize json for lexer
+
+
+    return;
+}
+
 // compile a program
-void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt generate_kickstarter, ANVIL__bt print_debug, ANVIL__buffer* final_program, COMPILER__error* error) {
+void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt generate_kickstarter, ANVIL__bt print_debug, ANVIL__bt generate_debug, ANVIL__buffer* final_program, ANVIL__buffer* debug_information, COMPILER__error* error) {
     COMPILER__compilation_unit compilation_unit;
 
     // setup blank error
@@ -109,6 +150,11 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt generate_kicks
 
     // generate program
     COMPILER__generate__program(final_program, compilation_unit.accountlings, generate_kickstarter, 65536, error);
+
+    // generate debug information
+    if (generate_debug) {
+        COMPILER__generate__debug_information(compilation_unit, error);
+    }
 
     // quit label
     quit:

@@ -104,9 +104,10 @@ int main(int argc, char** argv) {
         if (ANVIL__check__current_within_range(ANVIL__calculate__current_from_list_filled_index(&files)) == ANVIL__bt__true) {
             // setup output
             ANVIL__buffer program = ANVIL__create_null__buffer();
+            ANVIL__buffer debug_information = ANVIL__create_null__buffer();
 
             // run compiler
-            COMPILER__compile__files(ANVIL__calculate__list_current_buffer(&files), ANVIL__bt__true, debug_mode, &program, &error);
+            COMPILER__compile__files(ANVIL__calculate__list_current_buffer(&files), ANVIL__bt__true, debug_mode, ANVIL__bt__true, &program, &debug_information, &error);
 
             // if error
             if (COMPILER__check__error_occured(&error)) {
