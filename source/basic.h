@@ -42,6 +42,7 @@ typedef ANVIL__u64 ANVIL__tab_count;
 typedef ANVIL__u64 ANVIL__length;
 typedef ANVIL__u64 ANVIL__bit_count;
 typedef ANVIL__u64 ANVIL__byte_count;
+typedef ANVIL__u64 ANVIL__digit_count;
 #define ANVIL__define__bits_in_byte 8
 #define ANVIL__define__zero_length 0
 
@@ -601,14 +602,14 @@ void ANVIL__list__append__buffer_data(ANVIL__list* list, ANVIL__buffer buffer, A
     // calculate buffer length
     buffer_length = ANVIL__calculate__buffer_length(buffer);
 
-    // calculate old buffer end
-    buffer_old_end = (*list).buffer.start + (*list).filled_index - 1;
-
     // request space
     ANVIL__list__request__space(list, buffer_length, memory_error_occured);
 
+    // calculate old buffer end
+    buffer_old_end = (*list).buffer.start + (*list).filled_index - 1;
+
     // append data
-    ANVIL__copy__buffer(buffer, ANVIL__create__buffer(buffer_old_end + 1, buffer_old_end + buffer_length), memory_error_occured);
+    ANVIL__copy__buffer(buffer, ANVIL__create__buffer(buffer_old_end + 1, buffer_old_end + 1 + buffer_length - 1), memory_error_occured);
 
     // increase fill
     (*list).filled_index += buffer_length;
@@ -782,27 +783,72 @@ void ANVIL__print__tabs(ANVIL__tab_count tab_count) {
     return;
 }
 
-/* Json */
-// write string to list
-void ANVIL__json__append__string(ANVIL__list* json, ANVIL__buffer string_data, ANVIL__bt* memory_error_occured) {
-    ANVIL__buffer quote = ANVIL__open__buffer_from_string("\"", ANVIL__bt__false, ANVIL__bt__false);
-
-    // append starting quote
-    ANVIL__list__append__buffer_data(json, quote, memory_error_occured);
-    if (*memory_error_occured) {
-        return;
+// calculate character count for binary number to decimal string
+ANVIL__digit_count ANVIL__calculate__digit_count(ANVIL__u64 base, ANVIL__u64 value) {
+    // check for zero value
+    if (value == 0) {
+        return 1;
     }
 
-    // append string data quote
-    ANVIL__list__append__buffer_data(json, string_data, memory_error_occured);
-    if (*memory_error_occured) {
-        return;
+    // check for invalid denominator
+    if (base < 2) {
+        return 0;
     }
-    
-    // append ending quote
-    ANVIL__list__append__buffer_data(json, quote, memory_error_occured);
 
-    return;
+    // calculate count
+    // setup count
+    ANVIL__digit_count count = 0;
+
+    // loop through bases
+    while (value > 0) {
+        // divide
+        value /= base;
+
+        // count
+        count++;
+    }
+
+    return count;
+}
+
+// convert an integer into a base numbered number
+ANVIL__buffer ANVIL__cast__integer_to_unsigned_text_value(ANVIL__u64 value, ANVIL__u64 base, ANVIL__buffer digits, ANVIL__bt direction /* false is lower to higher, true is higher to lower */) {
+    // calculate digit count
+    ANVIL__digit_count digit_count = ANVIL__calculate__digit_count(base, value);
+
+    // allocate string
+    ANVIL__buffer output = ANVIL__open__buffer(digit_count);
+
+    // if lower to higher
+    if (direction == ANVIL__bt__false) {
+        // for each character
+        for (ANVIL__digit_count digit_index = 0; digit_index < digit_count; digit_index++) {
+            // calculate & write digit
+            ((ANVIL__u8*)output.start)[digit_index] = (value % base) + (*(ANVIL__u8*)digits.start);
+
+            // next digit
+            value /= base;
+        }
+    }
+
+    // if higher to lower
+    if (direction == ANVIL__bt__true) {
+        // for each character
+        for (ANVIL__digit_count digit_index = digit_count; digit_index > 0; digit_index--) {
+            // calculate & write digit
+            ((ANVIL__u8*)output.start)[digit_index - 1] = (value % base) + (*(ANVIL__u8*)digits.start);
+
+            // next digit
+            value /= base;
+        }
+    }
+
+    return output;
+}
+
+// cast integer to unsigned base 10 integer
+ANVIL__buffer ANVIL__cast__integer_to_unsigned_base_10(ANVIL__u64 value) {
+    return ANVIL__cast__integer_to_unsigned_text_value(value, 10, ANVIL__open__buffer_from_string((u8*)"0123456789", ANVIL__bt__false, ANVIL__bt__false), ANVIL__bt__true);
 }
 
 #endif

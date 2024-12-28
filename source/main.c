@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
                 ANVIL__bt json_error_occured = ANVIL__bt__false;
 
                 // get message
-                ANVIL__buffer json = COMPILER__serialize__error_json(error, &json_error_occured);
+                ANVIL__buffer error_json = COMPILER__serialize__error_json(error, &json_error_occured);
                 if (json_error_occured) {
                     printf("Failed to serialize json error, oops.\n");
 
@@ -124,10 +124,10 @@ int main(int argc, char** argv) {
 
                 // print error
                 fflush(stdout);
-                ANVIL__print__buffer(json);
+                ANVIL__print__buffer(error_json);
 
                 // deallocate error message
-                ANVIL__close__buffer(json);
+                ANVIL__close__buffer(error_json);
             // no error occured, run code
             } else {
                 ANVIL__bt memory_error_occured = ANVIL__bt__false;
@@ -140,10 +140,16 @@ int main(int argc, char** argv) {
                     return 1;
                 }
 
-                // add allocation
+                // add allocations
                 ANVIL__remember__allocation(&allocations, program, &memory_error_occured);
                 if (memory_error_occured) {
-                    printf("Internal Error: Program built successfully, but allocations failed to append.\n");
+                    printf("Internal Error: Program built successfully, but program allocations failed to append.\n");
+
+                    return 1;
+                }
+                ANVIL__remember__allocation(&allocations, debug_information, &memory_error_occured);
+                if (memory_error_occured) {
+                    printf("Internal Error: Program built successfully, but debug allocations failed to append.\n");
 
                     return 1;
                 }
@@ -156,6 +162,12 @@ int main(int argc, char** argv) {
                     printf("Internal Error: Program built successfully, but allocations failed to append.\n");
                 
                     return 1;
+                }
+
+                // print debug
+                if (debug_mode == ANVIL__bt__true) {
+                    // print error json
+                    ANVIL__print__buffer(debug_information);
                 }
 
                 // print debug
