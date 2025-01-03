@@ -168,10 +168,8 @@ int main(int argc, char** argv) {
                 if (debug_mode == ANVIL__bt__true) {
                     // print error json
                     ANVIL__print__buffer(debug_information);
-                }
-
-                // print debug
-                if (debug_mode == ANVIL__bt__true) {
+                
+                    // print header
                     printf("Running program...\n------------------\n");
                 }
 
@@ -182,6 +180,9 @@ int main(int argc, char** argv) {
                 if (debug_mode == ANVIL__bt__true) {
                     printf("\n");
                 }
+
+                // close debug information
+                ANVIL__close__buffer(debug_information);
 
                 // close allocations
                 ANVIL__close__allocations(&allocations);
