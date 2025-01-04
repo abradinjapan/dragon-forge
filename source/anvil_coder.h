@@ -248,24 +248,24 @@ void ANVIL__code__return_memory(ANVIL__workspace* workspace, ANVIL__cell_ID allo
 }
 
 // write address to cell instruction
-void ANVIL__code__address_to_cell(ANVIL__workspace* workspace, ANVIL__flag_ID flag_ID, ANVIL__cell_ID source_address, ANVIL__cell_ID bit_count, ANVIL__cell_ID destination_cell) {
+void ANVIL__code__address_to_cell(ANVIL__workspace* workspace, ANVIL__flag_ID flag_ID, ANVIL__cell_ID source_address, ANVIL__cell_ID byte_count, ANVIL__cell_ID destination_cell) {
     // write instruction
     ANVIL__write_next__instruction_ID(workspace, ANVIL__it__address_to_cell);
     ANVIL__write_next__flag_ID(workspace, flag_ID);
     ANVIL__write_next__cell_ID(workspace, source_address);
-    ANVIL__write_next__cell_ID(workspace, bit_count);
+    ANVIL__write_next__cell_ID(workspace, byte_count);
     ANVIL__write_next__cell_ID(workspace, destination_cell);
 
     return;
 }
 
 // write cell to address instruction
-void ANVIL__code__cell_to_address(ANVIL__workspace* workspace, ANVIL__flag_ID flag_ID, ANVIL__cell_ID source_cell, ANVIL__cell_ID bit_count, ANVIL__cell_ID destination_address) {
+void ANVIL__code__cell_to_address(ANVIL__workspace* workspace, ANVIL__flag_ID flag_ID, ANVIL__cell_ID source_cell, ANVIL__cell_ID byte_count, ANVIL__cell_ID destination_address) {
     // write instruction
     ANVIL__write_next__instruction_ID(workspace, ANVIL__it__cell_to_address);
     ANVIL__write_next__flag_ID(workspace, flag_ID);
     ANVIL__write_next__cell_ID(workspace, source_cell);
-    ANVIL__write_next__cell_ID(workspace, bit_count);
+    ANVIL__write_next__cell_ID(workspace, byte_count);
     ANVIL__write_next__cell_ID(workspace, destination_address);
 
     return;
@@ -479,7 +479,7 @@ typedef enum ANVIL__srt {
     ANVIL__srt__temp__flag_ID_0,
     ANVIL__srt__temp__flag_ID_1,
     ANVIL__srt__temp__flag_ID_2,
-    ANVIL__srt__temp__bit_count,
+    ANVIL__srt__temp__byte_count,
     ANVIL__srt__temp__length,
     ANVIL__srt__temp__buffer_0__start,
     ANVIL__srt__temp__buffer_0__end,
@@ -870,8 +870,8 @@ void ANVIL__code__retrieve_embedded_buffer(ANVIL__workspace* workspace, ANVIL__f
     ANVIL__code__calculate_dynamically__offset_address(workspace, flag, program_offset, ANVIL__srt__temp__address);
 
     // get buffer length
-    ANVIL__code__write_cell(workspace, (ANVIL__cell)sizeof(ANVIL__length), ANVIL__srt__temp__bit_count);
-    ANVIL__code__address_to_cell(workspace, flag, ANVIL__srt__temp__address, ANVIL__srt__temp__bit_count, ANVIL__srt__temp__length);
+    ANVIL__code__write_cell(workspace, (ANVIL__cell)sizeof(ANVIL__length), ANVIL__srt__temp__byte_count);
+    ANVIL__code__address_to_cell(workspace, flag, ANVIL__srt__temp__address, ANVIL__srt__temp__byte_count, ANVIL__srt__temp__length);
 
     // calculate buffer data start
     ANVIL__code__operate(workspace, flag, ANVIL__ot__integer_add, ANVIL__srt__temp__address, ANVIL__srt__constant__cell_byte_size, ANVIL__unused_cell_ID, buffer_start);

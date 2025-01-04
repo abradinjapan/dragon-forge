@@ -37,6 +37,14 @@ typedef enum STANDARD__sot {
     STANDARD__sot__append_buffer__start,
     STANDARD__sot__append_buffer__skip_reallocation,
 
+    // casting functions
+    STANDARD__sot__calculate_digit_count__start,
+    STANDARD__sot__calculate_digit_count__loop_start,
+    STANDARD__sot__calculate_digit_count__normal_exit,
+    STANDARD__sot__calculate_digit_count__value_is_zero_exit,
+    STANDARD__sot__calculate_digit_count__invalid_base_exit,
+    STANDARD__sot__cell_to_text__start,
+
     // count
     STANDARD__sot__COUNT,
 } STANDARD__sot;

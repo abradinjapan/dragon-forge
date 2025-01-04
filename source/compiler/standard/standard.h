@@ -6,6 +6,7 @@
 #include "standard_printing.h"
 #include "standard_context_related.h"
 #include "standard_list.h"
+//#include "standard_casting.h"
 
 /* Build */
 // build package
@@ -28,6 +29,9 @@ void STANDARD__code__package(ANVIL__workspace* workspace, STANDARD__offsets* sta
     STANDARD__code__open_list(workspace, standard_offsets);
     STANDARD__code__close_list(workspace, standard_offsets);
     STANDARD__code__append_buffer(workspace, standard_offsets);
+
+    // casting functions
+    //STANDARD__code__calculate_digit_count(workspace, standard_offsets);
 
     return;
 }
