@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
                 if (memory_error_occured) {
                     printf("Internal Error: Program built successfully, but allocations failed to open.\n");
 
-                    return 1;
+                    goto close_debug_information;
                 }
 
                 // add allocations
@@ -145,13 +145,13 @@ int main(int argc, char** argv) {
                 if (memory_error_occured) {
                     printf("Internal Error: Program built successfully, but program allocations failed to append.\n");
 
-                    return 1;
+                    goto close_debug_information;
                 }
                 ANVIL__remember__allocation(&allocations, debug_information, &memory_error_occured);
                 if (memory_error_occured) {
                     printf("Internal Error: Program built successfully, but debug allocations failed to append.\n");
 
-                    return 1;
+                    goto close_allocations;
                 }
 
                 // setup context
@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
                 if (memory_error_occured) {
                     printf("Internal Error: Program built successfully, but allocations failed to append.\n");
                 
-                    return 1;
+                    goto close_context;
                 }
 
                 // print debug
@@ -181,18 +181,21 @@ int main(int argc, char** argv) {
                     printf("\n");
                 }
 
-                // close debug information
-                ANVIL__close__buffer(debug_information);
-
-                // close allocations
-                ANVIL__close__allocations(&allocations);
-
-                // close context
-                ANVIL__close__buffer(context_buffer);
-
                 // close program
                 ANVIL__close__buffer(program);
+
+                // close context
+                close_context:
+                ANVIL__close__buffer(context_buffer);
+
+                // close allocations
+                close_allocations:
+                ANVIL__close__allocations(&allocations);
             }
+
+            // close debug information
+            close_debug_information:
+            ANVIL__close__buffer(debug_information);
         // if no files
         } else {
             printf("Error, no file paths were passed.\n");

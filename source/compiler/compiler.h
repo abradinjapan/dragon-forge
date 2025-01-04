@@ -324,7 +324,23 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt generate_kicks
 
     // generate debug information
     if (generate_debug) {
-        *debug_information = COMPILER__generate__debug_information(compilation_unit, 0, error);
+        // setup temp error
+        COMPILER__error json_generation_error = COMPILER__create_null__error();
+
+        // generate debug json
+        *debug_information = COMPILER__generate__debug_information(compilation_unit, 0, &json_generation_error);
+
+        // if error occured with json serialization, return failure buffer
+        if (COMPILER__check__error_occured(&json_generation_error)) {
+            // check for allocated buffer
+            if (ANVIL__check__empty_buffer(*debug_information) == ANVIL__bt__false) {
+                // close buffer
+                ANVIL__close__buffer(*debug_information);
+            }
+
+            // setup dummy string
+            *debug_information = ANVIL__open__buffer_from_string((u8*)"\"message\": \"Debug information failed to serialize. Oops...\"", ANVIL__bt__true, ANVIL__bt__false);
+        }
     }
 
     // clean up

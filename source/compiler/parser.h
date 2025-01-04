@@ -916,6 +916,9 @@ COMPILER__parsling_scope COMPILER__parse__scope(ANVIL__current* current, COMPILE
         // parse statement
         COMPILER__parsling_statement statement = COMPILER__parse__statement(current, COMPILER__palt__function_call, error);
         if (COMPILER__check__error_occured(error)) {
+            // close statement
+            COMPILER__close__parsling_statement(statement);
+            
             return output;
         }
 
