@@ -31,7 +31,7 @@ void COMPILER__close__compilation_unit(COMPILER__compilation_unit unit) {
     }
 
     // close accountling data
-    if (unit.stages_completed >= COMPILER__pst__parsing) {
+    if (unit.stages_completed > COMPILER__pst__parsing) {
         COMPILER__close__accountling_program(unit.accountlings);
     }
 

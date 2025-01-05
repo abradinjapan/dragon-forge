@@ -354,12 +354,12 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             break;
         case COMPILER__ast__predefined__mover__address_to_cell:
             ANVIL__code__address_to_cell(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(cell_address_mover__address).cells.start, COMPILER__generate__use_variable(cell_address_mover__byte_count).cells.start, COMPILER__generate__use_variable(cell_address_mover__cell).cells.start);
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, COMPILER__generate__use_variable(cell_address_mover__address).cells.start, ANVIL__srt__constant__ascii_character_byte_size, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(cell_address_mover__advancement).cells.start);
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, COMPILER__generate__use_variable(cell_address_mover__address).cells.start, COMPILER__generate__use_variable(cell_address_mover__byte_count).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(cell_address_mover__advancement).cells.start);
 
             break;
         case COMPILER__ast__predefined__mover__cell_to_address:
             ANVIL__code__cell_to_address(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(cell_address_mover__cell).cells.start, COMPILER__generate__use_variable(cell_address_mover__byte_count).cells.start, COMPILER__generate__use_variable(cell_address_mover__address).cells.start);
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, COMPILER__generate__use_variable(cell_address_mover__address).cells.start, ANVIL__srt__constant__ascii_character_byte_size, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(cell_address_mover__advancement).cells.start);
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, COMPILER__generate__use_variable(cell_address_mover__address).cells.start, COMPILER__generate__use_variable(cell_address_mover__byte_count).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(cell_address_mover__advancement).cells.start);
 
             break;
         case COMPILER__ast__predefined__mover__file_to_buffer:
