@@ -466,6 +466,33 @@ void COMPILER__append__accountling_scope_header(ANVIL__list* list, COMPILER__acc
     return;
 }
 
+// close accountling scope headers
+void COMPILER__close__accountling_scope_headers(ANVIL__counted_list headers, COMPILER__error* error) {
+    // search for dragon.master_scope
+    // setup name
+    COMPILER__namespace temp_name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".master_scope", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+
+    // search
+    for (COMPILER__scope_index scope_index = 0; scope_index < headers.count; scope_index++) {
+        // check for name
+        if (COMPILER__check__identical_namespaces(((COMPILER__accountling_scope_header*)headers.list.buffer.start)[scope_index].name, temp_name)) {
+            // free name
+            COMPILER__close__parsling_namespace(((COMPILER__accountling_scope_header*)headers.list.buffer.start)[scope_index].name);
+
+            // exit loop
+            break;
+        }
+    }
+
+    // close temporary name
+    COMPILER__close__parsling_namespace(temp_name);
+
+    // close list
+    ANVIL__close__counted_list(headers);
+
+    return;
+}
+
 // variable member range
 typedef struct COMPILER__accountling_variable_range {
     COMPILER__variable_member_index start;
@@ -626,7 +653,7 @@ void COMPILER__close__accountling_strings(ANVIL__counted_list strings) {
 }
 
 // close function
-void COMPILER__close__accountling_function(COMPILER__accountling_function function) {
+void COMPILER__close__accountling_function(COMPILER__accountling_function function, COMPILER__error* error) {
     // close offsets
     ANVIL__close__counted_list(function.offsets);
 
@@ -634,7 +661,7 @@ void COMPILER__close__accountling_function(COMPILER__accountling_function functi
     COMPILER__close__accountling_variables(function.variables);
 
     // close scope headers
-    ANVIL__close__counted_list(function.scope_headers);
+    COMPILER__close__accountling_scope_headers(function.scope_headers, error);
 
     // close strings
     COMPILER__close__accountling_strings(function.strings);
@@ -656,14 +683,14 @@ typedef struct COMPILER__accountling_functions {
 } COMPILER__accountling_functions;
 
 // close accountling functions
-void COMPILER__close__accountling_functions(COMPILER__accountling_functions functions) {
+void COMPILER__close__accountling_functions(COMPILER__accountling_functions functions, COMPILER__error* error) {
     // close headers
     COMPILER__close__accountling_function_headers(functions.headers);
 
     // close bodies
     for (COMPILER__function_index index = 0; index < functions.bodies.count; index++) {
         // close one body
-        COMPILER__close__accountling_function(((COMPILER__accountling_function*)functions.bodies.list.buffer.start)[index]);
+        COMPILER__close__accountling_function(((COMPILER__accountling_function*)functions.bodies.list.buffer.start)[index], error);
     }
     
     // close list
@@ -680,12 +707,12 @@ typedef struct COMPILER__accountling_program {
 } COMPILER__accountling_program;
 
 // close a program
-void COMPILER__close__accountling_program(COMPILER__accountling_program program) {
+void COMPILER__close__accountling_program(COMPILER__accountling_program program, COMPILER__error* error) {
     // close structures
     COMPILER__close__accountling_structures(program.structures);
 
     // close functions
-    COMPILER__close__accountling_functions(program.functions);
+    COMPILER__close__accountling_functions(program.functions, error);
 
     return;
 }
@@ -1841,8 +1868,8 @@ COMPILER__offset_index COMPILER__account__functions__get_offset_index(COMPILER__
     return output;
 }
 
-// get all data that is function wide (except variables)
-void COMPILER__account__functions__get_function_level_data(COMPILER__accountling_function* accountling_function, COMPILER__parsling_scope parsling_scope, COMPILER__error* error) {
+// get all scope level data
+void COMPILER__account__functions__get_scope_level_data(COMPILER__accountling_function* accountling_function, COMPILER__parsling_scope parsling_scope, COMPILER__error* error) {
     // search through each statement
     // setup current
     ANVIL__current current_statement = ANVIL__calculate__current_from_list_filled_index(&parsling_scope.statements.list);
@@ -1878,13 +1905,13 @@ void COMPILER__account__functions__get_function_level_data(COMPILER__accountling
 
             // if scope name does not exist, append
             COMPILER__append__accountling_scope_header(&(*accountling_function).scope_headers.list, scope_header, error);
-            (*accountling_function).scope_headers.count++;
             if (COMPILER__check__error_occured(error)) {
                 return;
             }
+            (*accountling_function).scope_headers.count++;
 
             // search for more headers in sub-scope
-            COMPILER__account__functions__get_function_level_data(accountling_function, parsling_statement.subscope, error);
+            COMPILER__account__functions__get_scope_level_data(accountling_function, parsling_statement.subscope, error);
             if (COMPILER__check__error_occured(error)) {
                 return;
             }
@@ -1916,6 +1943,27 @@ void COMPILER__account__functions__get_function_level_data(COMPILER__accountling
         // next statement
         current_statement.start += sizeof(COMPILER__parsling_statement);
     }
+
+    return;
+}
+
+// get all data that is function wide (except variables)
+void COMPILER__account__functions__get_function_level_data(COMPILER__accountling_function* accountling_function, COMPILER__parsling_scope parsling_scope, COMPILER__error* error) {
+    // create scope header for master scope
+    COMPILER__accountling_scope_header scope_header;
+    scope_header.name = COMPILER__open__namespace_from_single_lexling(COMPILER__open__lexling_from_string(COMPILER__define__master_namespace ".master_scope", COMPILER__lt__name, COMPILER__create_null__character_location()), error);
+    scope_header.starting_offset = ANVIL__invalid_offset;
+    scope_header.ending_offset = ANVIL__invalid_offset;
+
+    // append master scope header
+    COMPILER__append__accountling_scope_header(&(*accountling_function).scope_headers.list, scope_header, error);
+    if (COMPILER__check__error_occured(error)) {
+        return;
+    }
+    (*accountling_function).scope_headers.count++;
+
+    // get subscopes
+    COMPILER__account__functions__get_scope_level_data(accountling_function, parsling_scope, error);
 
     return;
 }
@@ -4006,7 +4054,16 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
 
         // setup condition
         (*accountling_scope).condition = COMPILER__account__functions__get_variable_argument_by_name((*accountling_function).variables, temp_search_name);
-        ((COMPILER__accountling_scope_header*)(*accountling_function).scope_headers.list.buffer.start)[COMPILER__account__functions__get_scope_index(accountling_function, parsling_source_statement.name.name)].argument = (*accountling_scope).condition;
+        COMPILER__scope_index scope_index_temp = COMPILER__account__functions__get_scope_index(accountling_function, parsling_source_statement.name.name);
+
+        // DEBUG
+        if (scope_index_temp >= (*accountling_function).scope_headers.count) {
+            printf("OOF! (index : %lu) \n", scope_index_temp);
+            COMPILER__print__parsed_statement(parsling_source_statement, 1);
+            printf("FOO\n");
+        }
+
+        ((COMPILER__accountling_scope_header*)(*accountling_function).scope_headers.list.buffer.start)[scope_index_temp].argument = (*accountling_scope).condition;
 
         // free temp name
         COMPILER__close__parsling_namespace(temp_search_name);
@@ -4414,7 +4471,7 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
             accountling_function.offsets = COMPILER__open__counted_list_with_error(sizeof(COMPILER__namespace) * 16, error);
             if (COMPILER__check__error_occured(error)) {
                 // close data
-                ANVIL__close__counted_list(accountling_function.scope_headers);
+                COMPILER__close__accountling_scope_headers(accountling_function.scope_headers, error);
 
                 return functions;
             }
@@ -4424,7 +4481,7 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
             if (COMPILER__check__error_occured(error)) {
                 // close data
                 ANVIL__close__counted_list(accountling_function.offsets);
-                ANVIL__close__counted_list(accountling_function.scope_headers);
+                COMPILER__close__accountling_scope_headers(accountling_function.scope_headers, error);
                 
                 return functions;
             }
@@ -4434,7 +4491,7 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
             if (COMPILER__check__error_occured(error)) {
                 // close prior data
                 ANVIL__close__counted_list(accountling_function.offsets);
-                ANVIL__close__counted_list(accountling_function.scope_headers);
+                COMPILER__close__accountling_scope_headers(accountling_function.scope_headers, error);
                 COMPILER__close__accountling_variables(accountling_function.variables);
 
                 return functions;
@@ -4445,7 +4502,7 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
             if (COMPILER__check__error_occured(error)) {
                 // close prior data
                 ANVIL__close__counted_list(accountling_function.offsets);
-                ANVIL__close__counted_list(accountling_function.scope_headers);
+                COMPILER__close__accountling_scope_headers(accountling_function.scope_headers, error);
                 COMPILER__close__accountling_variables(accountling_function.variables);
 
                 return functions;
@@ -4457,7 +4514,7 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
                 // close prior data
                 ANVIL__close__counted_list(accountling_function.offsets);
                 COMPILER__close__accountling_strings(accountling_function.strings);
-                ANVIL__close__counted_list(accountling_function.scope_headers);
+                COMPILER__close__accountling_scope_headers(accountling_function.scope_headers, error);
                 COMPILER__close__accountling_variables(accountling_function.variables);
                 ANVIL__close__counted_list(accountling_function.function_inputs);
                 ANVIL__close__counted_list(accountling_function.function_outputs);
@@ -4471,7 +4528,7 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
                 // close prior data
                 ANVIL__close__counted_list(accountling_function.offsets);
                 COMPILER__close__accountling_strings(accountling_function.strings);
-                ANVIL__close__counted_list(accountling_function.scope_headers);
+                COMPILER__close__accountling_scope_headers(accountling_function.scope_headers, error);
                 COMPILER__close__accountling_variables(accountling_function.variables);
                 ANVIL__close__counted_list(accountling_function.function_inputs);
                 ANVIL__close__counted_list(accountling_function.function_outputs);
@@ -4485,7 +4542,7 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
                 // close prior data
                 ANVIL__close__counted_list(accountling_function.offsets);
                 COMPILER__close__accountling_strings(accountling_function.strings);
-                ANVIL__close__counted_list(accountling_function.scope_headers);
+                COMPILER__close__accountling_scope_headers(accountling_function.scope_headers, error);
                 COMPILER__close__accountling_scope(accountling_function.scope);
                 COMPILER__close__accountling_variables(accountling_function.variables);
                 ANVIL__close__counted_list(accountling_function.function_inputs);
@@ -4500,7 +4557,7 @@ COMPILER__accountling_functions COMPILER__account__functions__user_defined_funct
                 // close prior data
                 ANVIL__close__counted_list(accountling_function.offsets);
                 COMPILER__close__accountling_strings(accountling_function.strings);
-                ANVIL__close__counted_list(accountling_function.scope_headers);
+                COMPILER__close__accountling_scope_headers(accountling_function.scope_headers, error);
                 COMPILER__close__accountling_scope(accountling_function.scope);
                 COMPILER__close__accountling_variables(accountling_function.variables);
                 ANVIL__close__counted_list(accountling_function.function_inputs);

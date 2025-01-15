@@ -1032,6 +1032,9 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         compile__error__character_location__file_index = ANVIL__read_next__cell_ID(execution_read_address);
         compile__error__character_location__line_number = ANVIL__read_next__cell_ID(execution_read_address);
         compile__error__character_location__character_index = ANVIL__read_next__cell_ID(execution_read_address);
+
+        // null init error
+        compile__error = COMPILER__create_null__error();
         
         // run compiler (WARNING, buffers are NOT checked for vality!)
         COMPILER__compile__files(ANVIL__create__buffer((*context).cells[compile__user_code_buffers_buffer_start], (*context).cells[compile__user_code_buffers_buffer_end]), (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__generate_kickstarter], ANVIL__bt__false, (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__debug_enabled], &compile__output_program, &compile__debug_information, &compile__error);

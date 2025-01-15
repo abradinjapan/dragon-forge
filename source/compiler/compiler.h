@@ -19,7 +19,7 @@ typedef struct COMPILER__compilation_unit {
 } COMPILER__compilation_unit;
 
 // close a compilation unit
-void COMPILER__close__compilation_unit(COMPILER__compilation_unit unit) {
+void COMPILER__close__compilation_unit(COMPILER__compilation_unit unit, COMPILER__error* error) {
     // close lexling buffer
     if (unit.stages_completed > COMPILER__pst__invalid) {
         COMPILER__close__lexlings(unit.lexlings);
@@ -32,7 +32,7 @@ void COMPILER__close__compilation_unit(COMPILER__compilation_unit unit) {
 
     // close accountling data
     if (unit.stages_completed > COMPILER__pst__parsing) {
-        COMPILER__close__accountling_program(unit.accountlings);
+        COMPILER__close__accountling_program(unit.accountlings, error);
     }
 
     return;
@@ -344,7 +344,9 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt generate_kicks
     }
 
     // clean up
-    COMPILER__close__compilation_unit(compilation_unit);
+    // setup clean up error
+    COMPILER__error closing_error = COMPILER__create_null__error();
+    COMPILER__close__compilation_unit(compilation_unit, &closing_error);
 
     return;
 }
