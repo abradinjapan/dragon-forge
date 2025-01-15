@@ -4055,14 +4055,6 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
         // setup condition
         (*accountling_scope).condition = COMPILER__account__functions__get_variable_argument_by_name((*accountling_function).variables, temp_search_name);
         COMPILER__scope_index scope_index_temp = COMPILER__account__functions__get_scope_index(accountling_function, parsling_source_statement.name.name);
-
-        // DEBUG
-        if (scope_index_temp >= (*accountling_function).scope_headers.count) {
-            printf("OOF! (index : %lu) \n", scope_index_temp);
-            COMPILER__print__parsed_statement(parsling_source_statement, 1);
-            printf("FOO\n");
-        }
-
         ((COMPILER__accountling_scope_header*)(*accountling_function).scope_headers.list.buffer.start)[scope_index_temp].argument = (*accountling_scope).condition;
 
         // free temp name
