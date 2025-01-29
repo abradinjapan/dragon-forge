@@ -691,6 +691,15 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
     // setup execution read address
     execution_read_address = ANVIL__get__cell_address_from_context(context, ANVIL__rt__program_current_address);
 
+    // check for no more instructions
+    if (ANVIL__check__valid_address_range_in_allocations(catch_addresses, allocations, ANVIL__create__buffer((*context).cells[ANVIL__rt__program_current_address], (*context).cells[ANVIL__rt__program_current_address] + sizeof(ANVIL__it) - 1)) == ANVIL__bt__false) {
+        // set error code
+        ANVIL__set__error_code_cell(context, ANVIL__et__program_ran_out_of_instructions);
+
+        // allocation does not exist, quit
+        return ANVIL__nit__return_context;
+    }
+
     // get instruction ID from program
     instruction_ID = (ANVIL__it)ANVIL__read_next__instruction_ID(execution_read_address);
 
@@ -698,26 +707,7 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
     // printf("[%lu]: instruction_ID: %lu\n", (ANVIL__u64)(*execution_read_address) - 1, (ANVIL__u64)instruction_ID);
 
     // check for valid instruction ID
-    if (instruction_ID < ANVIL__it__COUNT) {
-        // check for invalid allocation
-        if (ANVIL__check__valid_address_range_in_allocations(catch_addresses, allocations, ANVIL__create__buffer((*context).cells[ANVIL__rt__program_current_address], (*context).cells[ANVIL__rt__program_current_address] + ANVIL__convert__it_to_ilt(instruction_ID) - 2)) == ANVIL__bt__false) {
-            // set error code
-            ANVIL__set__error_code_cell(context, ANVIL__et__program_ran_out_of_instructions);
-
-            /*// DEBUG
-            printf("Ran out of instructions!\n");
-            
-            // print allocations
-            ANVIL__print__allocations(*allocations);
-
-            // print allocation
-            printf("\t[ %lu %lu ] (%li)\n", (ANVIL__cell_integer_value)(*context).cells[ANVIL__rt__program_current_address], (ANVIL__cell_integer_value)(*context).cells[ANVIL__rt__program_current_address] + ANVIL__convert__it_to_ilt(instruction_ID) - 2, (ANVIL__cell_integer_value)(*context).cells[ANVIL__rt__program_current_address] + ANVIL__convert__it_to_ilt(instruction_ID) - 2 - (ANVIL__cell_integer_value)((ANVIL__cell_integer_value)(*context).cells[ANVIL__rt__program_current_address]));*/
-
-            // allocation does not exist, quit
-            return ANVIL__nit__return_context;
-        }
-    // invalid instruction ID
-    } else {
+    if (instruction_ID >= ANVIL__it__COUNT) {
         // set error
         ANVIL__set__error_code_cell(context, ANVIL__et__invalid_instruction_ID);
 
