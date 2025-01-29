@@ -703,6 +703,15 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
     // get instruction ID from program
     instruction_ID = (ANVIL__it)ANVIL__read_next__instruction_ID(execution_read_address);
 
+    // check for no more instruction parameters
+    if (ANVIL__check__valid_address_range_in_allocations(catch_addresses, allocations, ANVIL__create__buffer((*context).cells[ANVIL__rt__program_current_address], (*context).cells[ANVIL__rt__program_current_address] + ANVIL__convert__it_to_ilt(instruction_ID) - sizeof(ANVIL__it) - 1)) == ANVIL__bt__false) {
+        // set error code
+        ANVIL__set__error_code_cell(context, ANVIL__et__program_ran_out_of_instruction_parameters);
+
+        // allocation does not exist, quit
+        return ANVIL__nit__return_context;
+    }
+
     // DEBUG
     // printf("[%lu]: instruction_ID: %lu\n", (ANVIL__u64)(*execution_read_address) - 1, (ANVIL__u64)instruction_ID);
 
