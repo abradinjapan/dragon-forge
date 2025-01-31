@@ -341,6 +341,10 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt generate_kicks
             // setup dummy string
             *debug_information = ANVIL__open__buffer_from_string((u8*)"\"message\": \"Debug information failed to serialize. Oops...\"", ANVIL__bt__true, ANVIL__bt__false);
         }
+    // otherwise, generate blank debug info
+    } else {
+        // setup no information
+        *debug_information = ANVIL__create_null__buffer();
     }
 
     // clean up

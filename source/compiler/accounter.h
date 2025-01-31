@@ -365,16 +365,12 @@ typedef struct COMPILER__accountling_statement {
     COMPILER__accountling_variable_argument structure_buffer_mover__structure;
     COMPILER__accountling_variable_argument structure_buffer_mover__buffer;
     COMPILER__accountling_variable_argument structure_buffer_mover__size;
+    COMPILER__accountling_variable_argument structure_buffer_mover__advancement;
 
     // current functions
     COMPILER__accountling_variable_argument current__current;
     COMPILER__accountling_variable_argument current__invert;
     COMPILER__accountling_variable_argument current__result;
-
-    // structure buffer functions
-    COMPILER__accountling_variable_argument structure_to_buffer__structure;
-    COMPILER__accountling_variable_argument structure_to_buffer__buffer;
-    COMPILER__accountling_variable_argument structure_to_buffer__advancement;
 
     // list functions
     COMPILER__accountling_variable_argument list__increase;
@@ -3560,9 +3556,9 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__str
         // match
         // setup output statement
         (*accountling_statement).statement_type = COMPILER__ast__predefined__structure__structure_to_buffer;
-        (*accountling_statement).structure_to_buffer__structure = structure_argument;
-        (*accountling_statement).structure_to_buffer__buffer = buffer_argument;
-        (*accountling_statement).structure_to_buffer__advancement = advancement_argument;
+        (*accountling_statement).structure_buffer_mover__structure = structure_argument;
+        (*accountling_statement).structure_buffer_mover__buffer = buffer_argument;
+        (*accountling_statement).structure_buffer_mover__advancement = advancement_argument;
         
         // match
         goto match;
@@ -3587,8 +3583,8 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__str
             // match
             // setup output statement
             (*accountling_statement).statement_type = COMPILER__ast__predefined__structure__buffer_to_structure;
-            (*accountling_statement).structure_to_buffer__structure = structure_argument;
-            (*accountling_statement).structure_to_buffer__buffer = buffer_argument;
+            (*accountling_statement).structure_buffer_mover__structure = structure_argument;
+            (*accountling_statement).structure_buffer_mover__buffer = buffer_argument;
         
             // match
             goto match;
