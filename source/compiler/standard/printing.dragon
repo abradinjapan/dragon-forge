@@ -1,5 +1,5 @@
 [ print a test ]
-dragon.standard.print.buffer_as_string(buffer !dragon.buffer)() = {
+dragon.print.buffer_as_string(buffer !dragon.buffer)() = {
     [ setup current ]
     dragon.pack(buffer, buffer:start)(current_character !dragon.current)
 

@@ -546,7 +546,6 @@ char* COMPILER__global__predefined_function_call_names[] = {
     // prints
     COMPILER__define__master_namespace ".print.debug_cell",
     COMPILER__define__master_namespace ".print.character",
-    COMPILER__define__master_namespace ".print.buffer_as_string",
     COMPILER__define__master_namespace ".print.cell_as_binary",
     COMPILER__define__master_namespace ".print.new_line",
     COMPILER__define__master_namespace ".print.tabs",
@@ -626,7 +625,6 @@ typedef enum COMPILER__pfcnt {
     // prints
     COMPILER__pfcnt__print__debug_cell,
     COMPILER__pfcnt__print__character,
-    COMPILER__pfcnt__print__buffer_as_string,
     COMPILER__pfcnt__print__cell_as_binary,
     COMPILER__pfcnt__print__new_line,
     COMPILER__pfcnt__print__tabs,
@@ -727,14 +725,6 @@ COMPILER__blueprintling COMPILER__global__predefined_one_off_function_calls[] = 
         COMPILER__pfcnt__print__debug_cell,
         1,
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
-        0,
-    
-    // print buffer as string
-    COMPILER__abt__define_function_call,
-        COMPILER__ast__predefined__print__buffer_as_string,
-        COMPILER__pfcnt__print__buffer_as_string,
-        1,
-        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
         0,
     
     // print cell as binary
