@@ -15,9 +15,6 @@ void STANDARD__code__package(ANVIL__workspace* workspace, STANDARD__offsets* sta
     // printing functions
     STANDARD__code__print_binary(workspace, standard_offsets);
 
-    // conversion functions
-	STANDARD__code__calculate_decimal_digit_count(workspace, standard_offsets);
-
     // context functions
     STANDARD__code__set_inputs_in_context_buffer(workspace, standard_offsets);
     STANDARD__code__get_outputs_from_context_buffer(workspace, standard_offsets);
