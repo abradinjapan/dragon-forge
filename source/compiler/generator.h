@@ -333,33 +333,6 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__delete_file(anvil, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start + 1);
 
             break;
-        case COMPILER__ast__predefined__list__open_list:
-            STANDARD__code__call__open_list(
-                anvil,
-                &(*workspace).standard_offsets,
-                ANVIL__sft__always_run,
-                COMPILER__generate__use_variable(list__increase).cells.start,
-                COMPILER__generate__use_variable(list__output_list).cells.start,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 1,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 2,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 3,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 4
-            );
-
-            break;
-        case COMPILER__ast__predefined__list__close_list:
-            STANDARD__code__call__close_list(
-                anvil,
-                &(*workspace).standard_offsets,
-                ANVIL__sft__always_run,
-                COMPILER__generate__use_variable(list__input_list).cells.start,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 1,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 2,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 3,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 4
-            );
-
-            break;
         case COMPILER__ast__predefined__list__calculate__content_buffer:
             ANVIL__code__cell_to_cell(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(list__input_list).cells.start, COMPILER__generate__use_variable(list__output_buffer).cells.start);
             ANVIL__code__calculate__buffer_end_address(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(list__output_buffer).cells.start, COMPILER__generate__use_variable(list__input_list).cells.start + 2, COMPILER__generate__use_variable(list__output_buffer).cells.start + 1);

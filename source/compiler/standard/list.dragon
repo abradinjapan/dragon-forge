@@ -1,0 +1,16 @@
+[ open list ]
+dragon.list.open(increase !dragon.cell)(list !dragon.list) = {
+    [ allocate buffer ]
+    dragon.buffer.request(increase)(list:allocation)
+
+    [ setup list data ]
+    dragon.copy(dragon.constant.0)(list:length)
+    dragon.copy(increase)(list:increase)
+    dragon.copy(dragon.constant.0)(list:append_count)
+}
+
+[ close list ]
+dragon.list.close(list !dragon.list)() = {
+    [ deallocate buffer ]
+    dragon.buffer.return(list:allocation)()
+}

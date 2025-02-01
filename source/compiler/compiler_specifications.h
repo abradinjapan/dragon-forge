@@ -257,8 +257,6 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__delete_file,
 
     // list calls
-    COMPILER__ast__predefined__list__open_list,
-    COMPILER__ast__predefined__list__close_list,
     COMPILER__ast__predefined__list__calculate__content_buffer,
     COMPILER__ast__predefined__list__append__structure,
     COMPILER__ast__predefined__list__append__buffer_data,
@@ -579,8 +577,6 @@ char* COMPILER__global__predefined_function_call_names[] = {
     COMPILER__define__master_namespace ".structure.byte_size",
 
     // list operations
-    COMPILER__define__master_namespace ".list.open",
-    COMPILER__define__master_namespace ".list.close",
     COMPILER__define__master_namespace ".list.calculate.content_buffer",
     COMPILER__define__master_namespace ".list.append.structure",
     COMPILER__define__master_namespace ".list.append.buffer",
@@ -648,8 +644,6 @@ typedef enum COMPILER__pfcnt {
     COMPILER__pfcnt__structure__structure_byte_size,
 
     // list operations
-    COMPILER__pfcnt__list__open,
-    COMPILER__pfcnt__list__close,
     COMPILER__pfcnt__list__calculate__content_buffer,
     COMPILER__pfcnt__list__append__structure,
     COMPILER__pfcnt__list__append__buffer_data,
@@ -891,19 +885,6 @@ COMPILER__blueprintling COMPILER__global__predefined_one_off_function_calls[] = 
         0,
     
     // list functions that dont require varying types
-    COMPILER__abt__define_function_call,
-        COMPILER__ast__predefined__list__open_list,
-        COMPILER__pfcnt__list__open,
-        1,
-        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
-        1,
-        COMPILER__aat__COUNT + COMPILER__ptt__dragon_list,
-    COMPILER__abt__define_function_call,
-        COMPILER__ast__predefined__list__close_list,
-        COMPILER__pfcnt__list__close,
-        1,
-        COMPILER__aat__COUNT + COMPILER__ptt__dragon_list,
-        0,
     COMPILER__abt__define_function_call,
         COMPILER__ast__predefined__list__calculate__content_buffer,
         COMPILER__pfcnt__list__calculate__content_buffer,

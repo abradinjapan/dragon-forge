@@ -3374,45 +3374,8 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__str
 
 // check for list functions
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__lists(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
-    // if is open list
-    if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__list__open], parsling_statement.name.name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 1) {
-        // get variables
-        ANVIL__bt is_valid_argument;
-        COMPILER__accountling_variable_argument increase_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || increase_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-        COMPILER__accountling_variable_argument output_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_list, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || output_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-
-        // match
-        // setup output statement
-        (*accountling_statement).statement_type = COMPILER__ast__predefined__list__open_list;
-        (*accountling_statement).list__increase = increase_argument;
-        (*accountling_statement).list__output_list = output_argument;
-
-        // match
-        goto match;
-    // if is close list
-    } else if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__list__close], parsling_statement.name.name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 0) {
-        // get variables
-        ANVIL__bt is_valid_argument;
-        COMPILER__accountling_variable_argument list_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_list, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || list_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-
-        // match
-        // setup output statement
-        (*accountling_statement).statement_type = COMPILER__ast__predefined__list__close_list;
-        (*accountling_statement).list__input_list = list_argument;
-
-        // match
-        goto match;
     // if is calculate content buffer
-    } else if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__list__calculate__content_buffer], parsling_statement.name.name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 1) {
+    if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__list__calculate__content_buffer], parsling_statement.name.name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 1) {
         // get variables
         ANVIL__bt is_valid_argument;
         COMPILER__accountling_variable_argument list_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_list, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
