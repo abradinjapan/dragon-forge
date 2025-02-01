@@ -1,0 +1,11 @@
+[ main ]
+dragon.standard.get_all_standard_files(files !dragon.list)(files !dragon.list) = {
+    [ setup paths ]
+    dragon.set("./source/compiler/standard/printing.dragon")(printing.file_path)
+
+    [ load files ]
+    dragon.file_to_buffer(printing.file_path)(printing.user_code)
+
+    [ append files ]
+    dragon.list.append.structure(list, printing.user_code)()
+}

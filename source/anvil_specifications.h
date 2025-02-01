@@ -123,7 +123,7 @@ typedef enum ANVIL__ilt {
     ANVIL__ilt__delete_file = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 2),
     ANVIL__ilt__buffer_to_buffer__low_to_high = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 4),
     ANVIL__ilt__buffer_to_buffer__high_to_low = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 4),
-    ANVIL__ilt__compile = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 14),
+    ANVIL__ilt__compile = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 15),
     ANVIL__ilt__run = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 3),
     ANVIL__ilt__get_time = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 2),
     ANVIL__ilt__debug__putchar = sizeof(ANVIL__instruction_ID) + sizeof(ANVIL__cell_ID),

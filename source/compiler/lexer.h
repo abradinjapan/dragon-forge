@@ -159,18 +159,227 @@ ANVIL__character_index COMPILER__calculate__character_index(ANVIL__buffer main_b
     return (ANVIL__character_index)(current.start - main_buffer.start);
 }
 
-// lex a program
-COMPILER__lexlings COMPILER__compile__lex(ANVIL__buffer user_codes, COMPILER__error* error) {
-    COMPILER__lexlings output;
-    ANVIL__current current;
-    ANVIL__current current_file;
-    ANVIL__file_index file_index;
-    ANVIL__line_number current_line_number;
+void COMPILER__compile__lex_one_buffer(COMPILER__lexlings* lexlings, ANVIL__buffer user_code, ANVIL__file_index file_index, COMPILER__error* error) {
     COMPILER__lexling_start temp_start;
     COMPILER__lexling_end temp_end;
 
+    // setup metadata
+    ANVIL__line_number current_line_number = 1;
+
+    // setup current character
+    ANVIL__current current = user_code;
+
+    // lex program
+    while (ANVIL__check__current_within_range(current)) {
+        // skip comments and whitespace
+        while (ANVIL__check__current_within_range(current) && (COMPILER__calculate__valid_character_range(current, 0, 32) || COMPILER__calculate__valid_character_range(current, '[', '['))) {
+            // skip whitespace
+            while (ANVIL__check__current_within_range(current) && COMPILER__calculate__valid_character_range(current, 0, 32)) {
+                // check for new line
+                if (COMPILER__calculate__valid_character_range(current, '\n', '\n') || COMPILER__calculate__valid_character_range(current, '\r', '\r')) {
+                    // next line
+                    current_line_number++;
+                }
+
+                // next character
+                current.start += sizeof(ANVIL__character);
+            }
+
+            // skip comments
+            if (ANVIL__check__current_within_range(current) && COMPILER__calculate__valid_character_range(current, '[', '[')) {
+                COMPILER__lexling_depth depth = 1;
+
+                // next character
+                current.start += sizeof(ANVIL__character);
+
+                // skip past characters
+                while (ANVIL__check__current_within_range(current) && depth > 0) {
+                    // check for new line
+                    if (COMPILER__calculate__valid_character_range(current, '\n', '\n') || COMPILER__calculate__valid_character_range(current, '\r', '\r')) {
+                        // next line
+                        current_line_number++;
+                    }
+                    // check for opening comment
+                    if (COMPILER__calculate__valid_character_range(current, '[', '[')) {
+                        // increase depth
+                        depth++;
+                    }
+                    // check for closing comment
+                    if (COMPILER__calculate__valid_character_range(current, ']', ']')) {
+                        // decrease depth
+                        depth--;
+                    }
+
+                    // next character
+                    current.start += sizeof(ANVIL__character);
+                }
+
+                // check for unfinished comment
+                if (depth > 0) {
+                    // set error
+                    *error = COMPILER__open__error("Lexing Error: Comment ended with end of file instead of proper closing.", COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current)));
+
+                    goto quit;
+                }
+            }
+        }
+
+        // check for out of range
+        if (ANVIL__check__current_within_range(current) == ANVIL__bt__false) {
+            break;
+        }
+
+        // check for lexlings
+        if (COMPILER__calculate__valid_character_range(current, '(', '(')) {
+            // add lexling
+            COMPILER__append__lexling(&(*lexlings).data.list, COMPILER__create__lexling(COMPILER__lt__left_parenthesis, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
+            (*lexlings).data.count++;
+
+            // next character
+            current.start += sizeof(ANVIL__character);
+        } else if (COMPILER__calculate__valid_character_range(current, ')', ')')) {
+            // add lexling
+            COMPILER__append__lexling(&(*lexlings).data.list, COMPILER__create__lexling(COMPILER__lt__right_parenthesis, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
+            (*lexlings).data.count++;
+
+            // next character
+            current.start += sizeof(ANVIL__character);
+        } else if (COMPILER__calculate__valid_character_range(current, '{', '{')) {
+            // add lexling
+            COMPILER__append__lexling(&(*lexlings).data.list, COMPILER__create__lexling(COMPILER__lt__left_curly_bracket, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
+            (*lexlings).data.count++;
+
+            // next character
+            current.start += sizeof(ANVIL__character);
+        } else if (COMPILER__calculate__valid_character_range(current, '}', '}')) {
+            // add lexling
+            COMPILER__append__lexling(&(*lexlings).data.list, COMPILER__create__lexling(COMPILER__lt__right_curly_bracket, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
+            (*lexlings).data.count++;
+
+            // next character
+            current.start += sizeof(ANVIL__character);
+        } else if (COMPILER__calculate__valid_name_character(current)) {
+            // get lexling start and setup temp end
+            temp_start = current.start;
+            temp_end = temp_start - 1;
+
+            // get lexling size
+            while (ANVIL__check__current_within_range(current) && COMPILER__calculate__valid_name_character(current)) {
+                // next character
+                current.start += sizeof(ANVIL__character);
+                temp_end += sizeof(ANVIL__character);
+            }
+
+            // record lexling
+            COMPILER__append__lexling(&(*lexlings).data.list, COMPILER__create__lexling(COMPILER__lt__name, ANVIL__create__buffer(temp_start, temp_end), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, ANVIL__create__buffer(temp_start, temp_end)))), error);
+            (*lexlings).data.count++;
+        } else if (COMPILER__calculate__valid_character_range(current, ':', ':')) {
+            // add lexling
+            COMPILER__append__lexling(&(*lexlings).data.list, COMPILER__create__lexling(COMPILER__lt__colon, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
+            (*lexlings).data.count++;
+
+            // next character
+            current.start += sizeof(ANVIL__character);
+        } else if (COMPILER__calculate__valid_character_range(current, ',', ',')) {
+            // add lexling
+            COMPILER__append__lexling(&(*lexlings).data.list, COMPILER__create__lexling(COMPILER__lt__comma, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
+            (*lexlings).data.count++;
+
+            // next character
+            current.start += sizeof(ANVIL__character);
+        } else if (COMPILER__calculate__valid_character_range(current, '@', '@')) {
+            // add lexling
+            COMPILER__append__lexling(&(*lexlings).data.list, COMPILER__create__lexling(COMPILER__lt__at, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
+            (*lexlings).data.count++;
+
+            // next character
+            current.start += sizeof(ANVIL__character);
+        } else if (COMPILER__calculate__valid_character_range(current, '=', '=')) {
+            // add lexling
+            COMPILER__append__lexling(&(*lexlings).data.list, COMPILER__create__lexling(COMPILER__lt__equals, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
+            (*lexlings).data.count++;
+
+            // next character
+            current.start += sizeof(ANVIL__character);
+        } else if (COMPILER__calculate__valid_character_range(current, '!', '!')) {
+            // add lexling
+            COMPILER__append__lexling(&(*lexlings).data.list, COMPILER__create__lexling(COMPILER__lt__exclamation_point, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
+            (*lexlings).data.count++;
+
+            // next character
+            current.start += sizeof(ANVIL__character);
+        } else if (COMPILER__calculate__valid_character_range(current, '#', '#')) {
+            // add lexling
+            COMPILER__append__lexling(&(*lexlings).data.list, COMPILER__create__lexling(COMPILER__lt__hashtag, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
+            (*lexlings).data.count++;
+
+            // next character
+            current.start += sizeof(ANVIL__character);
+        } else if (COMPILER__calculate__valid_character_range(current, '"', '"')) {
+            ANVIL__buffer data;
+
+            // get string start
+            data.start = current.start;
+
+            // advance current
+            current.start += sizeof(ANVIL__character);
+
+            // search for string end
+            while (ANVIL__check__current_within_range(current) && COMPILER__calculate__valid_character_range(current, '\"', '\"') == ANVIL__bt__false) {
+                // next character
+                current.start += sizeof(ANVIL__character);
+            }
+
+            // check for end of file
+            if (ANVIL__check__current_within_range(current) == ANVIL__bt__false) {
+                // string ended abruptly
+                *error = COMPILER__open__error("Lexical Error: String ended at the end of a file and not with a (\").", COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current)));
+
+                goto quit;
+            }
+
+            // finish string data
+            data.end = current.start;
+
+            // append lexling
+            COMPILER__append__lexling(&(*lexlings).data.list, COMPILER__create__lexling(COMPILER__lt__string_literal, data, COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, data))), error);
+            (*lexlings).data.count++;
+
+            // next character
+            current.start += sizeof(ANVIL__character);
+        // no lexling found
+        } else {
+            // open error
+            *error = COMPILER__open__error("Lexical Error: Invalid character.", COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current)));
+
+            // quit
+            goto quit;
+        }
+
+        // check for error
+        if (COMPILER__check__error_occured(error)) {
+            // return lexlings as they are
+            goto quit;
+        }
+    }
+
+    // append eof lexling
+    COMPILER__append__lexling(&(*lexlings).data.list, COMPILER__create__lexling(COMPILER__lt__end_of_file, ANVIL__open__buffer_from_string((u8*)"[EOF]", ANVIL__bt__false, ANVIL__bt__false), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
+
+    // quit
+    quit:
+
+    return;
+}
+
+// lex a program
+COMPILER__lexlings COMPILER__compile__lex(ANVIL__buffer included_files, ANVIL__bt include_standard_files, ANVIL__buffer user_codes, COMPILER__error* error) {
+    COMPILER__lexlings output;
+    ANVIL__current current_file;
+    ANVIL__file_index file_index;
+
     // setup output
-    output.data = COMPILER__open__counted_list_with_error(sizeof(COMPILER__lexling) * 1024, error);
+    output.data = COMPILER__open__counted_list_with_error(sizeof(COMPILER__lexling) * 2048, error);
 
     // check for error
     if (COMPILER__check__error_occured(error)) {
@@ -184,209 +393,16 @@ COMPILER__lexlings COMPILER__compile__lex(ANVIL__buffer user_codes, COMPILER__er
     // setup file index
     file_index = 0;
 
-    // for each file
+    // for each file made by the user
     while (ANVIL__check__current_within_range(current_file)) {
         // setup current & locations
         ANVIL__buffer user_code = *(ANVIL__buffer*)current_file.start;
-        current = user_code;
-        current_line_number = 1;
 
-        // lex program
-        while (ANVIL__check__current_within_range(current)) {
-            // skip comments and whitespace
-            while (ANVIL__check__current_within_range(current) && (COMPILER__calculate__valid_character_range(current, 0, 32) || COMPILER__calculate__valid_character_range(current, '[', '['))) {
-                // skip whitespace
-                while (ANVIL__check__current_within_range(current) && COMPILER__calculate__valid_character_range(current, 0, 32)) {
-                    // check for new line
-                    if (COMPILER__calculate__valid_character_range(current, '\n', '\n') || COMPILER__calculate__valid_character_range(current, '\r', '\r')) {
-                        // next line
-                        current_line_number++;
-                    }
-
-                    // next character
-                    current.start += sizeof(ANVIL__character);
-                }
-
-                // skip comments
-                if (ANVIL__check__current_within_range(current) && COMPILER__calculate__valid_character_range(current, '[', '[')) {
-                    COMPILER__lexling_depth depth = 1;
-
-                    // next character
-                    current.start += sizeof(ANVIL__character);
-
-                    // skip past characters
-                    while (ANVIL__check__current_within_range(current) && depth > 0) {
-                        // check for new line
-                        if (COMPILER__calculate__valid_character_range(current, '\n', '\n') || COMPILER__calculate__valid_character_range(current, '\r', '\r')) {
-                            // next line
-                            current_line_number++;
-                        }
-                        // check for opening comment
-                        if (COMPILER__calculate__valid_character_range(current, '[', '[')) {
-                            // increase depth
-                            depth++;
-                        }
-                        // check for closing comment
-                        if (COMPILER__calculate__valid_character_range(current, ']', ']')) {
-                            // decrease depth
-                            depth--;
-                        }
-
-                        // next character
-                        current.start += sizeof(ANVIL__character);
-                    }
-
-                    // check for unfinished comment
-                    if (depth > 0) {
-                        // set error
-                        *error = COMPILER__open__error("Lexing Error: Comment ended with end of file instead of proper closing.", COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current)));
-
-                        goto quit;
-                    }
-                }
-            }
-
-            // check for out of range
-            if (ANVIL__check__current_within_range(current) == ANVIL__bt__false) {
-                break;
-            }
-
-            // check for lexlings
-            if (COMPILER__calculate__valid_character_range(current, '(', '(')) {
-                // add lexling
-                COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__left_parenthesis, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
-                output.data.count++;
-
-                // next character
-                current.start += sizeof(ANVIL__character);
-            } else if (COMPILER__calculate__valid_character_range(current, ')', ')')) {
-                // add lexling
-                COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__right_parenthesis, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
-                output.data.count++;
-
-                // next character
-                current.start += sizeof(ANVIL__character);
-            } else if (COMPILER__calculate__valid_character_range(current, '{', '{')) {
-                // add lexling
-                COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__left_curly_bracket, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
-                output.data.count++;
-
-                // next character
-                current.start += sizeof(ANVIL__character);
-            } else if (COMPILER__calculate__valid_character_range(current, '}', '}')) {
-                // add lexling
-                COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__right_curly_bracket, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
-                output.data.count++;
-
-                // next character
-                current.start += sizeof(ANVIL__character);
-            } else if (COMPILER__calculate__valid_name_character(current)) {
-                // get lexling start and setup temp end
-                temp_start = current.start;
-                temp_end = temp_start - 1;
-
-                // get lexling size
-                while (ANVIL__check__current_within_range(current) && COMPILER__calculate__valid_name_character(current)) {
-                    // next character
-                    current.start += sizeof(ANVIL__character);
-                    temp_end += sizeof(ANVIL__character);
-                }
-
-                // record lexling
-                COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__name, ANVIL__create__buffer(temp_start, temp_end), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, ANVIL__create__buffer(temp_start, temp_end)))), error);
-                output.data.count++;
-            } else if (COMPILER__calculate__valid_character_range(current, ':', ':')) {
-                // add lexling
-                COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__colon, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
-                output.data.count++;
-
-                // next character
-                current.start += sizeof(ANVIL__character);
-            } else if (COMPILER__calculate__valid_character_range(current, ',', ',')) {
-                // add lexling
-                COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__comma, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
-                output.data.count++;
-
-                // next character
-                current.start += sizeof(ANVIL__character);
-            } else if (COMPILER__calculate__valid_character_range(current, '@', '@')) {
-                // add lexling
-                COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__at, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
-                output.data.count++;
-
-                // next character
-                current.start += sizeof(ANVIL__character);
-            } else if (COMPILER__calculate__valid_character_range(current, '=', '=')) {
-                // add lexling
-                COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__equals, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
-                output.data.count++;
-
-                // next character
-                current.start += sizeof(ANVIL__character);
-            } else if (COMPILER__calculate__valid_character_range(current, '!', '!')) {
-                // add lexling
-                COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__exclamation_point, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
-                output.data.count++;
-
-                // next character
-                current.start += sizeof(ANVIL__character);
-            } else if (COMPILER__calculate__valid_character_range(current, '#', '#')) {
-                // add lexling
-                COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__hashtag, ANVIL__create__buffer(current.start, current.start), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
-                output.data.count++;
-
-                // next character
-                current.start += sizeof(ANVIL__character);
-            } else if (COMPILER__calculate__valid_character_range(current, '"', '"')) {
-                ANVIL__buffer data;
-
-                // get string start
-                data.start = current.start;
-
-                // advance current
-                current.start += sizeof(ANVIL__character);
-
-                // search for string end
-                while (ANVIL__check__current_within_range(current) && COMPILER__calculate__valid_character_range(current, '\"', '\"') == ANVIL__bt__false) {
-                    // next character
-                    current.start += sizeof(ANVIL__character);
-                }
-
-                // check for end of file
-                if (ANVIL__check__current_within_range(current) == ANVIL__bt__false) {
-                    // string ended abruptly
-                    *error = COMPILER__open__error("Lexical Error: String ended at the end of a file and not with a (\").", COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current)));
-
-                    goto quit;
-                }
-
-                // finish string data
-                data.end = current.start;
-
-                // append lexling
-                COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__string_literal, data, COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, data))), error);
-                output.data.count++;
-
-                // next character
-                current.start += sizeof(ANVIL__character);
-            // no lexling found
-            } else {
-                // open error
-                *error = COMPILER__open__error("Lexical Error: Invalid character.", COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current)));
-
-                // quit
-                goto quit;
-            }
-
-            // check for error
-            if (COMPILER__check__error_occured(error)) {
-                // return lexlings as they are
-                goto quit;
-            }
+        // lex buffer
+        COMPILER__compile__lex_one_buffer(&output, user_code, file_index, error);
+        if (COMPILER__check__error_occured(error)) {
+            goto quit;
         }
-
-        // append eof lexling
-        COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__end_of_file, ANVIL__open__buffer_from_string((u8*)"[EOF]", ANVIL__bt__false, ANVIL__bt__false), COMPILER__create__character_location(file_index, current_line_number, COMPILER__calculate__character_index(user_code, current))), error);
 
         // next lexling buffer
         current_file.start += sizeof(ANVIL__buffer);
@@ -397,7 +413,7 @@ COMPILER__lexlings COMPILER__compile__lex(ANVIL__buffer user_codes, COMPILER__er
     quit:
 
     // append eofs lexling
-    COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__end_of_files, ANVIL__open__buffer_from_string((u8*)"[EOFS]", ANVIL__bt__false, ANVIL__bt__false), COMPILER__create__character_location(file_index, current_line_number, -1)), error);
+    COMPILER__append__lexling(&output.data.list, COMPILER__create__lexling(COMPILER__lt__end_of_files, ANVIL__open__buffer_from_string((u8*)"[EOFS]", ANVIL__bt__false, ANVIL__bt__false), COMPILER__create__character_location(file_index, -1, -1)), error);
 
     return output;
 }

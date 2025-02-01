@@ -7,11 +7,13 @@
 #include "parser.h"
 #include "accounter.h"
 #include "generator.h"
+#include "./standard/standard_buffering.h"
 
 /* Compilation Unit */
 // one compiled object across multiple stages
 typedef struct COMPILER__compilation_unit {
     ANVIL__buffer user_codes;
+    ANVIL__list standard_files;
     COMPILER__lexlings lexlings;
     COMPILER__parsling_program parslings;
     COMPILER__accountling_program accountlings;
@@ -248,7 +250,7 @@ ANVIL__buffer COMPILER__generate__debug_information(COMPILER__compilation_unit u
 
 /* Compile */
 // compile a program
-void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt generate_kickstarter, ANVIL__bt print_debug, ANVIL__bt generate_debug, ANVIL__buffer* final_program, ANVIL__buffer* debug_information, COMPILER__error* error) {
+void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt include_standard_files, ANVIL__bt generate_kickstarter, ANVIL__bt print_debug, ANVIL__bt generate_debug, ANVIL__buffer* final_program, ANVIL__buffer* debug_information, COMPILER__error* error) {
     COMPILER__compilation_unit compilation_unit;
 
     // setup blank error
@@ -266,13 +268,34 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt generate_kicks
     compilation_unit.user_codes = user_codes;
     compilation_unit.stages_completed = COMPILER__pst__invalid;
 
+    // setup preincluded files buffer
+    ANVIL__buffer standard_files = ANVIL__create_null__buffer();
+
+    // setup standard files
+    if (include_standard_files == ANVIL__bt__true) {
+        // create list
+        compilation_unit.standard_files = ANVIL__open__list(sizeof(ANVIL__buffer) * 16, &(*error).memory_error_occured);
+        if (COMPILER__check__error_occured(error)) {
+            goto quit;
+        }
+
+        // append files
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_printing_dragon, __source_compiler_standard_printing_dragon_len), &(*error).memory_error_occured);
+
+        // create content buffer
+        standard_files = ANVIL__calculate__list_current_buffer(&compilation_unit.standard_files);
+    // standard files are not included
+    } else {
+        compilation_unit.standard_files = ANVIL__create_null__list();
+    }
+
     // print compilation message
     if (print_debug) {
         printf("Compiling Files.\n");
     }
 
     // lex file
-    compilation_unit.lexlings = COMPILER__compile__lex(compilation_unit.user_codes, error);
+    compilation_unit.lexlings = COMPILER__compile__lex(standard_files, include_standard_files, compilation_unit.user_codes, error);
     compilation_unit.stages_completed = COMPILER__pst__lexing;
 
     // print lexlings

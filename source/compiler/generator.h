@@ -473,6 +473,7 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
                 anvil,
                 COMPILER__generate__use_variable(compile__user_code_buffers).cells.start,
                 COMPILER__generate__use_variable(compile__user_code_buffers).cells.end,
+                COMPILER__generate__use_variable(compile__include_standard).cells.start,
                 COMPILER__generate__use_variable(compile__debug_enabled).cells.start,
                 COMPILER__generate__use_variable(compile__generate_kickstarter).cells.start,
                 COMPILER__generate__use_variable(compile__anvil_code).cells.start,
