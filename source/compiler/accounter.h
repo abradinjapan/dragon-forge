@@ -2466,13 +2466,6 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
         } else {
             goto failure;
         }
-    // if is a new line
-    } else if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__print__new_line], parsling_statement.name.name) && parsling_statement.inputs.count == 0 && parsling_statement.outputs.count == 0) {
-        // setup output statement
-        (*accountling_statement).statement_type = COMPILER__ast__predefined__print__new_line;
-
-        // match
-        goto match;
     }
 
     // not a match

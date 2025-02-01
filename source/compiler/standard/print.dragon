@@ -1,3 +1,9 @@
+[ print new line ]
+dragon.print.new_line()() = {
+    dragon.set(dragon.hexadecimal.0A)(new_line)
+    dragon.print.character(new_line)()
+}
+
 [ print tabs ]
 dragon.print.tabs(tab_count !dragon.cell)() = {
     [ print tabs until finished ]
