@@ -1,3 +1,13 @@
+[ print tabs ]
+dragon.print.tabs(tab_count !dragon.cell)() = {
+    [ print tabs until finished ]
+    @loop dragon.always = {
+        [ check for more characters ]
+        dragon.integer.within_range(dragon.constant.0, tab_count, dragon.constant.0, dragon.never)(finished)
+        dragon.jump.bottom(finished, @loop)()
+    }
+}
+
 [ print a buffer as a string ]
 dragon.print.buffer_as_string(buffer !dragon.buffer)() = {
     [ setup current ]
