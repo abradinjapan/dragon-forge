@@ -11,6 +11,7 @@
 #include "../../../build_temps/buffer.c"
 #include "../../../build_temps/current.c"
 #include "../../../build_temps/list.c"
+#include "../../../build_temps/context.c"
 
 /* Turn C Files Into Buffers */
 // bufferify any file

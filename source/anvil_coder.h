@@ -454,6 +454,7 @@ typedef enum ANVIL__srt {
     ANVIL__srt__constant__32,
     ANVIL__srt__constant__64,
     ANVIL__srt__constant__cell_byte_size,
+    ANVIL__srt__constant__context_byte_size,
     ANVIL__srt__constant__return_address_offset_creation_size,
 
     // context io cells
@@ -739,6 +740,7 @@ void ANVIL__code__start(ANVIL__workspace* workspace, ANVIL__stack_size stack_siz
     ANVIL__code__write_cell(workspace, (ANVIL__cell)32, ANVIL__srt__constant__32);
     ANVIL__code__write_cell(workspace, (ANVIL__cell)64, ANVIL__srt__constant__64);
     ANVIL__code__write_cell(workspace, (ANVIL__cell)sizeof(ANVIL__cell), ANVIL__srt__constant__cell_byte_size);
+    ANVIL__code__write_cell(workspace, (ANVIL__cell)sizeof(ANVIL__context), ANVIL__srt__constant__context_byte_size);
     ANVIL__code__write_cell(workspace, (ANVIL__cell)ANVIL__silt__jump__explicit, ANVIL__srt__constant__return_address_offset_creation_size);
     ANVIL__code__write_cell(workspace, (ANVIL__cell)ANVIL__sft__always_run, ANVIL__srt__always_run__flag_ID);
     ANVIL__code__write_cell(workspace, (ANVIL__cell)ANVIL__sft__never_run, ANVIL__srt__never_run__flag_ID);

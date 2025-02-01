@@ -5,6 +5,7 @@ all:
 	xxd -i ./source/compiler/standard/buffer.dragon > ./build_temps/buffer.c
 	xxd -i ./source/compiler/standard/current.dragon > ./build_temps/current.c
 	xxd -i ./source/compiler/standard/list.dragon > ./build_temps/list.c
+	xxd -i ./source/compiler/standard/context.dragon > ./build_temps/context.c
 
 	# compile executables
 	gcc ./source/main.c -Wall -Wextra -fsanitize=address -g -o ./../dragon-debug.elf

@@ -15,8 +15,6 @@ typedef enum STANDARD__sot {
     STANDARD__sot__get_outputs_from_context_buffer__start,
 
     // list functions
-    STANDARD__sot__open_list__start,
-    STANDARD__sot__close_list__start,
     STANDARD__sot__append_buffer__start,
     STANDARD__sot__append_buffer__skip_reallocation,
 

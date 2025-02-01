@@ -3517,24 +3517,8 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__com
 
 // check for context functions
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__context_assorted(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
-    // if is a context open call
-    if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__context__open], parsling_statement.name.name) && parsling_statement.inputs.count == 0 && parsling_statement.outputs.count == 1) {
-        // check input variable type
-        // get index
-        ANVIL__bt is_valid_argument;
-        COMPILER__accountling_variable_argument context_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_buffer, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || context_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-
-        // setup output statement
-        (*accountling_statement).statement_type = COMPILER__ast__predefined__context__open;
-        (*accountling_statement).context__context_buffer = context_argument;
-
-        // match
-        goto match;
     // if is a context install program call
-    } else if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__context__install_program], parsling_statement.name.name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 0) {
+    if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__context__install_program], parsling_statement.name.name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 0) {
         // check input variable type
         // get index
         ANVIL__bt is_valid_argument;

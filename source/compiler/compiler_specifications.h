@@ -155,6 +155,7 @@ typedef enum COMPILER__pvn {
     COMPILER__pvn__error,
     COMPILER__pvn__catch_addresses,
     COMPILER__pvn__cell_byte_size,
+    COMPILER__pvn__context_byte_size,
     COMPILER__pvn__ascii_character_byte_size,
 } COMPILER__pvn;
 // all predefined variable names
@@ -178,6 +179,7 @@ char* COMPILER__global__predefined_variable_names[] = {
     COMPILER__define__master_namespace ".error",
     COMPILER__define__master_namespace ".catch_addresses",
     COMPILER__define__master_namespace ".cell.byte_size",
+    COMPILER__define__master_namespace ".context.byte_size",
     COMPILER__define__master_namespace ".ascii_character.byte_size",
 };
 
@@ -264,7 +266,6 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__compilation__compile,
 
     // context
-    COMPILER__ast__predefined__context__open,
     COMPILER__ast__predefined__context__install_program,
     COMPILER__ast__predefined__context__run,
 
@@ -517,6 +518,11 @@ COMPILER__blueprintling COMPILER__global__predefined_variables[] = {
         ANVIL__srt__constant__cell_byte_size,
         ANVIL__srt__constant__cell_byte_size,
     COMPILER__abt__define_type,
+        COMPILER__pvn__context_byte_size,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__constant__context_byte_size,
+        ANVIL__srt__constant__context_byte_size,
+    COMPILER__abt__define_type,
         COMPILER__pvn__ascii_character_byte_size,
         COMPILER__ptt__dragon_cell,
         ANVIL__srt__constant__ascii_character_byte_size,
@@ -583,7 +589,6 @@ char* COMPILER__global__predefined_function_call_names[] = {
     COMPILER__define__master_namespace ".compiler.compile",
 
     // context operations
-    COMPILER__define__master_namespace ".context.open",
     COMPILER__define__master_namespace ".context.install_program",
     COMPILER__define__master_namespace ".context.run",
 
@@ -649,7 +654,6 @@ typedef enum COMPILER__pfcnt {
     COMPILER__pfcnt__compiler__compile,
 
     // context options
-    COMPILER__pfcnt__context__open,
     COMPILER__pfcnt__context__install_program,
     COMPILER__pfcnt__context__run,
 
@@ -908,12 +912,6 @@ COMPILER__blueprintling COMPILER__global__predefined_one_off_function_calls[] = 
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
     
     // context assorted calls
-    COMPILER__abt__define_function_call,
-        COMPILER__ast__predefined__context__open,
-        COMPILER__pfcnt__context__open,
-        0,
-        1,
-        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
     COMPILER__abt__define_function_call,
         COMPILER__ast__predefined__context__install_program,
         COMPILER__pfcnt__context__install_program,

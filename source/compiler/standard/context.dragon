@@ -1,0 +1,5 @@
+[ open context ]
+dragon.context.open()(context !dragon.buffer) = {
+    [ allocate ]
+    dragon.buffer.request(dragon.context.byte_size)(context)
+}
