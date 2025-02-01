@@ -286,7 +286,8 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt include_standa
         }
 
         // append files
-        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_printing_dragon, __source_compiler_standard_printing_dragon_len), &(*error).memory_error_occured);
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_print_dragon, __source_compiler_standard_print_dragon_len), &(*error).memory_error_occured);
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_cast_dragon, __source_compiler_standard_cast_dragon_len), &(*error).memory_error_occured);
 
         // create content buffer
         standard_files = ANVIL__calculate__list_current_buffer(&compilation_unit.standard_files);

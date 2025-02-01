@@ -1,4 +1,4 @@
-[ print a test ]
+[ print a buffer as a string ]
 dragon.print.buffer_as_string(buffer !dragon.buffer)() = {
     [ setup current ]
     dragon.pack(buffer, buffer:start)(current_character !dragon.current)
@@ -18,4 +18,9 @@ dragon.print.buffer_as_string(buffer !dragon.buffer)() = {
         [ jump to loop start ]
         dragon.jump.top(dragon.always, @print)()
     }
+}
+
+[ print an unsigned integer ]
+dragon.print.integer.unsigned(value !dragon.cell)() = {
+    [  ]
 }

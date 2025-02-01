@@ -1,0 +1,186 @@
+[ count how many digits in any number system ]
+dragon.cast.calculate.digit_count(base !dragon.cell, value !dragon.cell)(count !dragon.cell) = {
+    [ check for zero value ]
+    dragon.integer.within_range(dragon.constant.0, value, dragon.constant.0, dragon.never)(is_zero_value)
+    @is_zero_value is_zero_value = {
+        [ if is zero value, then character count must be 1 to account for '0' string ]
+        dragon.set(dragon.integer.1)(count)
+
+        [ exit function ]
+        dragon.jump(dragon.always, @finished)()
+    }
+
+    [ check for invalid denominator ]
+    dragon.integer.within_range(dragon.constant.0, base, dragon.constant.1, dragon.never)(is_zero_base)
+    @is_zero_base is_zero_base = {
+        [ if is zero base, then character count must be 0 to account for an invalid denominator ]
+        dragon.set(dragon.integer.0)(count)
+
+        [ exit function ]
+        dragon.jump(dragon.always, @finished)()
+    }
+
+    [ calculate count ]
+    [ null init count ]
+    dragon.set(dragon.integer.0)(count)
+
+    [ loop start ]
+    @loop_start
+
+    [ check if value is zero ]
+    dragon.integer.within_range(dragon.constant.0, value, dragon.constant.0, dragon.never)(is_zero_value)
+    dragon.jump(is_zero_value, @finished)()
+
+    [ calculate new amount ]
+    dragon.integer.divide(value, base)(value)
+
+    [ increment counter ]
+    dragon.integer.add(count, dragon.constant.1)(count)
+
+    [ jump to loop start ]
+    dragon.jump(dragon.always, @loop_start)()
+
+    [ setup exit ]
+    @finished
+}
+
+[ convert a cell to a string of any type ]
+dragon.cast.cell_to_text.lower_to_higher(value !dragon.cell, base !dragon.cell, digits !dragon.buffer, direction !dragon.cell[ false is lower to higher, true is higher to lower ])(string !dragon.buffer) = {
+    [ calculate digit count ]
+    dragon.cast.calculate.digit_count(base, value)(digit_count)
+
+    [ allocate string ]
+    dragon.buffer.request(digit_count)(string)
+
+    [ invert direction ]
+    dragon.bits.xor(direction, dragon.constant.1)(alternate_direction)
+
+    [ if is lower to higher ]
+    @lower_to_higher alternate_direction = {
+        [ setup current ]
+        dragon.pack(string, string:start)(current !dragon.current)
+
+        [ setup loop start ]
+        @lower_to_higher.loop_start
+
+        [ check for valid current ]
+        dragon.current.within_range(current, dragon.always)(exit)
+        dragon.jump(exit, @exit)()
+
+        [ get digit ]
+        dragon.integer.modulous(value, base)(remainder)
+        dragon.integer.add(digits:start, remainder)(character_address)
+        dragon.address_to_cell(character_address, dragon.constant.1)(character, advancement)
+
+        [ setup next digit ]
+        dragon.integer.divide(value, base)(value)
+
+        [ write digit ]
+        dragon.cell_to_address(character, dragon.constant.1, current:progress)(advancement)
+
+        [ advance current ]
+        dragon.integer.add(current:progress, dragon.constant.1)(current:progress)
+
+        [ jump to beginning for next character ]
+        dragon.jump(dragon.always, @lower_to_higher.loop_start)()
+    }
+
+    [ if is higher to lower ]
+    @higher_to_lower direction = {
+        [ setup current ]
+        dragon.pack(string, string:end)(current !dragon.current)
+
+        [ setup loop start ]
+        @higher_to_lower.loop_start
+
+        [ check for valid current ]
+        dragon.current.within_range(current, dragon.always)(exit)
+        dragon.jump(exit, @exit)()
+
+        [ get digit ]
+        dragon.integer.modulous(value, base)(remainder)
+        dragon.integer.add(digits:start, remainder)(character_address)
+        dragon.address_to_cell(character_address, dragon.constant.1)(character, advancement)
+
+        [ setup next digit ]
+        dragon.integer.divide(value, base)(value)
+
+        [ write digit ]
+        dragon.cell_to_address(character, dragon.constant.1, current:progress)(advancement)
+
+        [ advance current ]
+        dragon.integer.subtract(current:progress, dragon.constant.1)(current:progress)
+
+        [ jump to beginning for next character ]
+        dragon.jump(dragon.always, @higher_to_lower.loop_start)()
+    }
+
+    [ setup loop exit ]
+    @exit
+}
+
+[ cast a cell to binary string ]
+dragon.cast.cell_to_binary_string.lower_to_higher(value !dragon.cell)(string !dragon.buffer) = {
+    [ setup data ]
+    dragon.set("01")(digits)
+    dragon.set(dragon.integer.2)(base)
+    dragon.set(dragon.boolean.false)(direction)
+
+    [ cast ]
+    dragon.cast.cell_to_text.lower_to_higher(value, base, digits, direction)(string)
+}
+
+[ cast a cell to binary string ]
+dragon.cast.cell_to_binary_string.higher_to_lower(value !dragon.cell)(string !dragon.buffer) = {
+    [ setup data ]
+    dragon.set("01")(digits)
+    dragon.set(dragon.integer.2)(base)
+    dragon.set(dragon.boolean.true)(direction)
+
+    [ cast ]
+    dragon.cast.cell_to_text.lower_to_higher(value, base, digits, direction)(string)
+}
+
+[ cast a cell to decimal string ]
+dragon.cast.cell_to_decimal_string.lower_to_higher(value !dragon.cell)(string !dragon.buffer) = {
+    [ setup data ]
+    dragon.set("0123456789")(digits)
+    dragon.set(dragon.integer.10)(base)
+    dragon.set(dragon.boolean.false)(direction)
+
+    [ cast ]
+    dragon.cast.cell_to_text.lower_to_higher(value, base, digits, direction)(string)
+}
+
+[ cast a cell to decimal string ]
+dragon.cast.cell_to_decimal_string.higher_to_lower(value !dragon.cell)(string !dragon.buffer) = {
+    [ setup data ]
+    dragon.set("0123456789")(digits)
+    dragon.set(dragon.integer.10)(base)
+    dragon.set(dragon.boolean.true)(direction)
+
+    [ cast ]
+    dragon.cast.cell_to_text.lower_to_higher(value, base, digits, direction)(string)
+}
+
+[ cast a cell to hex string ]
+dragon.cast.cell_to_hex_string.lower_to_higher(value !dragon.cell)(string !dragon.buffer) = {
+    [ setup data ]
+    dragon.set("0123456789ABCDEF")(hexits)
+    dragon.set(dragon.integer.16)(base)
+    dragon.set(dragon.boolean.false)(direction)
+
+    [ cast ]
+    dragon.cast.cell_to_text.lower_to_higher(value, base, hexits, direction)(string)
+}
+
+[ cast a cell to hex string ]
+dragon.cast.cell_to_hex_string.higher_to_lower(value !dragon.cell)(string !dragon.buffer) = {
+    [ setup data ]
+    dragon.set("0123456789ABCDEF")(hexits)
+    dragon.set(dragon.integer.16)(base)
+    dragon.set(dragon.boolean.true)(direction)
+
+    [ cast ]
+    dragon.cast.cell_to_text.lower_to_higher(value, base, hexits, direction)(string)
+}
