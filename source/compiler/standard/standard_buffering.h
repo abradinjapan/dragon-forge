@@ -9,6 +9,7 @@
 #include "../../../build_temps/print.c"
 #include "../../../build_temps/cast.c"
 #include "../../../build_temps/buffer.c"
+#include "../../../build_temps/current.c"
 
 /* Turn C Files Into Buffers */
 // bufferify any file

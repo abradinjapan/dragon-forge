@@ -240,9 +240,6 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__buffer__request,
     COMPILER__ast__predefined__buffer__return,
 
-    // current
-    COMPILER__ast__predefined__current__within_range,
-
     // structures
     COMPILER__ast__predefined__structure__size,
     COMPILER__ast__predefined__structure__structure_to_buffer,
@@ -576,9 +573,6 @@ char* COMPILER__global__predefined_function_call_names[] = {
     COMPILER__define__master_namespace ".buffer.copy.high_to_low",
     COMPILER__define__master_namespace ".delete_file",
 
-    // current operations
-    COMPILER__define__master_namespace ".current.within_range",
-
     // structure operations
     COMPILER__define__master_namespace ".structure_to_buffer",
     COMPILER__define__master_namespace ".buffer_to_structure",
@@ -647,9 +641,6 @@ typedef enum COMPILER__pfcnt {
     COMPILER__pfcnt__buffer__copy__low_to_high,
     COMPILER__pfcnt__buffer__copy__high_to_low,
     COMPILER__pfcnt__buffer__delete_file,
-
-    // current operations
-    COMPILER__pfcnt__current__within_range,
 
     // structure operations
     COMPILER__pfcnt__structure__structure_to_buffer,

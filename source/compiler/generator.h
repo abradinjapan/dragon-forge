@@ -303,19 +303,6 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__buffer_to_buffer__low_to_high(anvil, COMPILER__generate__use_variable(structure_buffer_mover__buffer).cells.start, COMPILER__generate__use_variable(structure_buffer_mover__buffer).cells.end, ANVIL__srt__temp__buffer_1__start, ANVIL__srt__temp__buffer_1__end);
 
             break;
-        case COMPILER__ast__predefined__current__within_range:
-            // setup inversion flag
-            ANVIL__code__write_cell(anvil, (ANVIL__cell)ANIVL__sft__temp_1, ANVIL__srt__temp__flag_ID_1);
-            ANVIL__code__write_cell(anvil, (ANVIL__cell)ANIVL__sft__temp_2, ANVIL__srt__temp__flag_ID_2);
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__flag_set, COMPILER__generate__use_variable(current__invert).cells.start, ANVIL__unused_cell_ID, ANVIL__unused_cell_ID, ANVIL__srt__temp__flag_ID_1);
-
-            // do comparison
-            ANVIL__code__operate__flag(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(current__current).cells.start, COMPILER__generate__use_variable(current__current).cells.start + 2, COMPILER__generate__use_variable(current__current).cells.start + 1, ANIVL__sft__temp_1, ANVIL__srt__temp__flag_ID_2);
-
-            // get result
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__flag_get, ANVIL__srt__temp__flag_ID_2, ANVIL__unused_cell_ID, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(current__result).cells.start);
-
-            break;
         case COMPILER__ast__predefined__mover__address_to_cell:
             ANVIL__code__address_to_cell(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(cell_address_mover__address).cells.start, COMPILER__generate__use_variable(cell_address_mover__byte_count).cells.start, COMPILER__generate__use_variable(cell_address_mover__cell).cells.start);
             ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, COMPILER__generate__use_variable(cell_address_mover__address).cells.start, COMPILER__generate__use_variable(cell_address_mover__byte_count).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(cell_address_mover__advancement).cells.start);

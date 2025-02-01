@@ -1,0 +1,5 @@
+[ check current within range ]
+dragon.current.within_range(current !dragon.current, invert !dragon.cell)(valid !dragon.cell) = {
+    [ check range ]
+    dragon.integer.within_range(current:buffer:start, current:progress, current:buffer:end, invert)(valid)
+}
