@@ -387,15 +387,37 @@ COMPILER__lexlings COMPILER__compile__lex(ANVIL__buffer included_files, ANVIL__b
         return COMPILER__create_null__lexlings();
     }
 
-    // setup current
-    current_file = user_codes;
-
     // setup file index
     file_index = 0;
 
+    // if standard files are included
+    if (include_standard_files == ANVIL__bt__true) {
+        // lex those files
+        // setup current
+        current_file = included_files;
+
+        // lex each file
+        while (ANVIL__check__current_within_range(current_file)) {
+            // setup buffer
+            ANVIL__buffer included_code = *(ANVIL__buffer*)current_file.start;
+
+            // lex buffer
+            COMPILER__compile__lex_one_buffer(&output, included_code, file_index, error);
+            if (COMPILER__check__error_occured(error)) {
+                goto quit;
+            }
+
+            // next lexling buffer
+            current_file.start += sizeof(ANVIL__buffer);
+        }
+    }
+
+    // setup current
+    current_file = user_codes;
+
     // for each file made by the user
     while (ANVIL__check__current_within_range(current_file)) {
-        // setup current & locations
+        // setup user code
         ANVIL__buffer user_code = *(ANVIL__buffer*)current_file.start;
 
         // lex buffer
