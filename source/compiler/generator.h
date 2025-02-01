@@ -279,21 +279,6 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__return_memory(anvil, COMPILER__generate__use_variable(buffer_acquisition__buffer_return).cells.start, COMPILER__generate__use_variable(buffer_acquisition__buffer_return).cells.end);
 
             break;
-        case COMPILER__ast__predefined__buffer__calculate__length:
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_subtract, COMPILER__generate__use_variable(buffer_calculations__buffer).cells.start + 1, COMPILER__generate__use_variable(buffer_calculations__buffer).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(buffer_calculations__length).cells.start);
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, COMPILER__generate__use_variable(buffer_calculations__length).cells.start, ANVIL__srt__constant__1, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(buffer_calculations__length).cells.start);
-
-            break;
-        case COMPILER__ast__predefined__buffer__calculate__end_address:
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, COMPILER__generate__use_variable(buffer_calculations__start_address).cells.start, COMPILER__generate__use_variable(buffer_calculations__length).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(buffer_calculations__end_address).cells.start);
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_subtract, COMPILER__generate__use_variable(buffer_calculations__end_address).cells.start, ANVIL__srt__constant__1, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(buffer_calculations__end_address).cells.start);
-
-            break;
-        case COMPILER__ast__predefined__buffer__calculate__start_address:
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_subtract, COMPILER__generate__use_variable(buffer_calculations__end_address).cells.start, COMPILER__generate__use_variable(buffer_calculations__length).cells.start, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(buffer_calculations__start_address).cells.start);
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, COMPILER__generate__use_variable(buffer_calculations__start_address).cells.start, ANVIL__srt__constant__1, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(buffer_calculations__start_address).cells.start);
-
-            break;
         case COMPILER__ast__predefined__structure__size:
             ANVIL__code__write_cell(anvil, (ANVIL__cell)(ANVIL__u64)((COMPILER__generate__use_variable(structure_buffer_mover__structure).cells.end - COMPILER__generate__use_variable(structure_buffer_mover__structure).cells.start + 1) * sizeof(ANVIL__cell)), COMPILER__generate__use_variable(structure_buffer_mover__size).cells.start);
 

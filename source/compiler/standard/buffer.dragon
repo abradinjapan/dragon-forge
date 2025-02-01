@@ -1,0 +1,20 @@
+[ calculate buffer length ]
+dragon.buffer.calculate.length(buffer !dragon.buffer)(length !dragon.cell) = {
+    [ calculate ]
+    dragon.integer.subtract(buffer:end, buffer:start)(length)
+    dragon.integer.add(length, dragon.constant.1)(length)
+}
+
+[ calculate buffer start address ]
+dragon.buffer.calculate.start_address(length !dragon.cell, end !dragon.cell)(start !dragon.cell) = {
+    [ calculate ]
+    dragon.integer.subtract(end, length)(start)
+    dragon.integer.add(start, dragon.constant.1)(start)
+}
+
+[ calculate buffer end address ]
+dragon.buffer.calculate.end_address(start !dragon.cell, length !dragon.cell)(end !dragon.cell) = {
+    [ calculate ]
+    dragon.integer.add(start, length)(end)
+    dragon.integer.subtract(end, dragon.constant.1)(end)
+}

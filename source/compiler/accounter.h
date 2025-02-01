@@ -344,12 +344,6 @@ typedef struct COMPILER__accountling_statement {
     COMPILER__accountling_variable_argument buffer_acquisition__buffer_result;
     COMPILER__accountling_variable_argument buffer_acquisition__buffer_return;
 
-    // buffer calculation data
-    COMPILER__accountling_variable_argument buffer_calculations__length;
-    COMPILER__accountling_variable_argument buffer_calculations__buffer;
-    COMPILER__accountling_variable_argument buffer_calculations__start_address;
-    COMPILER__accountling_variable_argument buffer_calculations__end_address;
-
     // cell address movers (variables for both address->cell and cell->address)
     COMPILER__accountling_variable_argument cell_address_mover__cell;
     COMPILER__accountling_variable_argument cell_address_mover__byte_count;
@@ -3082,95 +3076,6 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__buf
     return ANVIL__bt__true;
 }
 
-// check for buffer calculations
-ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__buffer_calculations(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
-    // if is calculate buffer length
-    if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__buffer__calculate__length], parsling_statement.name.name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 1) {
-        // get variables
-        ANVIL__bt is_valid_argument;
-        COMPILER__accountling_variable_argument buffer_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_buffer, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || buffer_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-        COMPILER__accountling_variable_argument output_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || output_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-
-        // match
-        // setup output statement
-        (*accountling_statement).statement_type = COMPILER__ast__predefined__buffer__calculate__length;
-        (*accountling_statement).buffer_calculations__buffer = buffer_argument;
-        (*accountling_statement).buffer_calculations__length = output_argument;
-
-        // match
-        goto match;
-    // if is a calculate buffer end address
-    } else if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__buffer__calculate__end_address], parsling_statement.name.name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 1) {
-        // get variables
-        ANVIL__bt is_valid_argument;
-        COMPILER__accountling_variable_argument start_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || start_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-        COMPILER__accountling_variable_argument length_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || length_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-        COMPILER__accountling_variable_argument end_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || end_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-
-        // match
-        // setup output statement
-        (*accountling_statement).statement_type = COMPILER__ast__predefined__buffer__calculate__end_address;
-        (*accountling_statement).buffer_calculations__start_address = start_argument;
-        (*accountling_statement).buffer_calculations__length = length_argument;
-        (*accountling_statement).buffer_calculations__end_address = end_argument;
-
-        // match
-        goto match;
-    // if is a calculate buffer start address
-    } else if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__buffer__calculate__start_address], parsling_statement.name.name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 1) {
-        // get variables
-        ANVIL__bt is_valid_argument;
-        COMPILER__accountling_variable_argument length_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || length_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-        COMPILER__accountling_variable_argument end_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || end_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-        COMPILER__accountling_variable_argument start_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || start_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-
-        // match
-        // setup output statement
-        (*accountling_statement).statement_type = COMPILER__ast__predefined__buffer__calculate__start_address;
-        (*accountling_statement).buffer_calculations__start_address = start_argument;
-        (*accountling_statement).buffer_calculations__length = length_argument;
-        (*accountling_statement).buffer_calculations__end_address = end_argument;
-
-        // match
-        goto match;
-    // not the right argument type
-    } else {
-        goto failure;
-    }
-
-    // not a match
-    failure:
-    return ANVIL__bt__false;
-
-    // match!
-    match:
-    return ANVIL__bt__true;
-}
-
 // check for current functions
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__current_assorted(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // if is structure size
@@ -4062,15 +3967,6 @@ void COMPILER__account__functions__function_sequential_information__one_scope(CO
 
             // find buffer acquisitions
             if (COMPILER__account__functions__check_and_get_statement_translation__buffer_acquisition(structures, accountling_function, parsling_statement, &accountling_statement, error)) {
-                // check for error
-                if (COMPILER__check__error_occured(error)) {
-                    return;
-                }
-                goto next_statement;
-            }
-
-            // find buffer calculations
-            if (COMPILER__account__functions__check_and_get_statement_translation__buffer_calculations(structures, accountling_function, parsling_statement, &accountling_statement, error)) {
                 // check for error
                 if (COMPILER__check__error_occured(error)) {
                     return;
