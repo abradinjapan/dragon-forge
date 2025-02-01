@@ -6,11 +6,23 @@ dragon.print.new_line()() = {
 
 [ print tabs ]
 dragon.print.tabs(tab_count !dragon.cell)() = {
+    [ set tab ]
+    dragon.set(dragon.hexadecimal.09)(tab)
+    
     [ print tabs until finished ]
     @loop dragon.always = {
         [ check for more characters ]
         dragon.integer.within_range(dragon.constant.0, tab_count, dragon.constant.0, dragon.never)(finished)
         dragon.jump.bottom(finished, @loop)()
+
+        [ print tab ]
+        dragon.print.character(tab)()
+
+        [ next index ]
+        dragon.integer.subtract(tab_count, dragon.constant.1)(tab_count)
+
+        [ jump to loop start ]
+        dragon.jump.top(dragon.always, @loop)()
     }
 }
 
@@ -38,5 +50,12 @@ dragon.print.buffer_as_string(buffer !dragon.buffer)() = {
 
 [ print an unsigned integer ]
 dragon.print.integer.unsigned(value !dragon.cell)() = {
-    [  ]
+    [ cast to string ]
+    dragon.cast.cell_to_decimal_string.higher_to_lower(value)(string)
+
+    [ print string ]
+    dragon.print.buffer_as_string(string)()
+
+    [ return string ]
+    dragon.buffer.return(string)()
 }

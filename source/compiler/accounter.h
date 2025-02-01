@@ -2400,30 +2400,8 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__set
 
 // check for printing
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__prints(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
-    // if print is a debug print
-    if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__print__debug_cell], parsling_statement.name.name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 0) {
-        // if inputs are correct parsing type
-        if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__name) {
-            // check input variable type
-            // get index
-            ANVIL__bt is_valid_argument;
-            COMPILER__accountling_variable_argument variable_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
-            if (COMPILER__check__error_occured(error) || variable_argument.type >= COMPILER__avat__COUNT) {
-                goto failure;
-            }
-
-            // setup output statement
-            (*accountling_statement).statement_type = COMPILER__ast__predefined__print__debug_cell;
-            (*accountling_statement).print__variable_argument = variable_argument;
-
-            // match
-            goto match;
-        // not the right argument type
-        } else {
-            goto failure;
-        }
     // if is a character print
-    } else if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__print__character], parsling_statement.name.name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 0) {
+    if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__print__character], parsling_statement.name.name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 0) {
         // if inputs are correct parsing type
         if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__name) {
             // check input variable type
@@ -4790,10 +4768,6 @@ void COMPILER__print__accountling_scope(COMPILER__accountling_scope statements, 
         } else if (statement.statement_type == COMPILER__ast__predefined__set__string) {
             printf("COMPILER__ast__predefined__set__string(string_index: %lu, variable_argument: ", statement.set_string__string_value_index);
             COMPILER__print__accountling_variable_argument(statement.set_string__variable_argument);
-            printf(");\n");
-        } else if (statement.statement_type == COMPILER__ast__predefined__print__debug_cell) {
-            printf("COMPILER__ast__predefined__print__debug_cell(variable_argument: ");
-            COMPILER__print__accountling_variable_argument(statement.print__variable_argument);
             printf(");\n");
         } else if (statement.statement_type == COMPILER__ast__predefined__pack__anything) {
             printf("COMPILER__ast__predefined__pack__anything(input_arguments: ");
