@@ -365,27 +365,6 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__return_memory(anvil, ANVIL__srt__temp__buffer_0__start, ANVIL__srt__temp__buffer_0__end);
 
             break;
-        case COMPILER__ast__predefined__list__append__buffer_data:
-            // append data
-            STANDARD__code__call__append_buffer(
-                anvil,
-                &(*workspace).standard_offsets,
-                ANVIL__sft__always_run,
-                COMPILER__generate__use_variable(list__input_list).cells.start,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 1,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 2,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 3,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 4,
-                COMPILER__generate__use_variable(list__append_data).cells.start,
-                COMPILER__generate__use_variable(list__append_data).cells.start + 1,
-                COMPILER__generate__use_variable(list__output_list).cells.start,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 1,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 2,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 3,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 4
-            );
-
-            break;
         case COMPILER__ast__predefined__compilation__compile:
             // compile
             ANVIL__code__compile(

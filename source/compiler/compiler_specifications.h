@@ -260,7 +260,6 @@ typedef enum COMPILER__ast {
 
     // list calls
     COMPILER__ast__predefined__list__append__structure,
-    COMPILER__ast__predefined__list__append__buffer_data,
 
     // compilation
     COMPILER__ast__predefined__compilation__compile,
@@ -583,7 +582,6 @@ char* COMPILER__global__predefined_function_call_names[] = {
 
     // list operations
     COMPILER__define__master_namespace ".list.append.structure",
-    COMPILER__define__master_namespace ".list.append.buffer",
 
     // compilation operations
     COMPILER__define__master_namespace ".compiler.compile",
@@ -648,7 +646,6 @@ typedef enum COMPILER__pfcnt {
 
     // list operations
     COMPILER__pfcnt__list__append__structure,
-    COMPILER__pfcnt__list__append__buffer_data,
 
     // compiler operations
     COMPILER__pfcnt__compiler__compile,
@@ -883,15 +880,6 @@ COMPILER__blueprintling COMPILER__global__predefined_one_off_function_calls[] = 
         COMPILER__ast__predefined__delete_file,
         COMPILER__pfcnt__buffer__delete_file,
         1,
-        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
-        0,
-    
-    // list functions that dont require varying types
-    COMPILER__abt__define_function_call,
-        COMPILER__ast__predefined__list__append__buffer_data,
-        COMPILER__pfcnt__list__append__buffer_data,
-        2,
-        COMPILER__aat__COUNT + COMPILER__ptt__dragon_list,
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
         0,
     
