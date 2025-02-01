@@ -8,7 +8,7 @@ dragon.print.new_line()() = {
 dragon.print.tabs(tab_count !dragon.cell)() = {
     [ set tab ]
     dragon.set(dragon.hexadecimal.09)(tab)
-    
+
     [ print tabs until finished ]
     @loop dragon.always = {
         [ check for more characters ]
@@ -52,6 +52,30 @@ dragon.print.buffer_as_string(buffer !dragon.buffer)() = {
 dragon.print.integer.unsigned(value !dragon.cell)() = {
     [ cast to string ]
     dragon.cast.cell_to_decimal_string.higher_to_lower(value)(string)
+
+    [ print string ]
+    dragon.print.buffer_as_string(string)()
+
+    [ return string ]
+    dragon.buffer.return(string)()
+}
+
+[ print a binary number ]
+dragon.print.binary.lower_to_higher(value !dragon.cell)() = {
+    [ cast to string ]
+    dragon.cast.cell_to_binary_string.lower_to_higher(value)(string)
+
+    [ print string ]
+    dragon.print.buffer_as_string(string)()
+
+    [ return string ]
+    dragon.buffer.return(string)()
+}
+
+[ print a binary number ]
+dragon.print.binary.higher_to_lower(value !dragon.cell)() = {
+    [ cast to string ]
+    dragon.cast.cell_to_binary_string.higher_to_lower(value)(string)
 
     [ print string ]
     dragon.print.buffer_as_string(string)()

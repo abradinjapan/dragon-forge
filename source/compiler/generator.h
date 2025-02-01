@@ -147,10 +147,6 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__debug__putchar(anvil, COMPILER__generate__use_variable(print__variable_argument).cells.start);
 
             break;
-        case COMPILER__ast__predefined__print__cell_as_binary:
-            STANDARD__code__call__print_binary(anvil, &(*workspace).standard_offsets, ANVIL__sft__always_run, COMPILER__generate__use_variable(print__variable_argument).cells.start);
-
-            break;
         case COMPILER__ast__predefined__copy__anything:
             // setup copies
             for (ANVIL__cell_index cell_index = 0; cell_index <= (ANVIL__cell_index)(COMPILER__generate__use_variable(copy__input).cells.end - COMPILER__generate__use_variable(copy__input).cells.start); cell_index++) {

@@ -402,7 +402,7 @@ COMPILER__lexlings COMPILER__compile__lex(ANVIL__buffer included_files, ANVIL__b
             ANVIL__buffer included_code = *(ANVIL__buffer*)current_file.start;
 
             // lex buffer
-            COMPILER__compile__lex_one_buffer(&output, included_code, file_index, error);
+            COMPILER__compile__lex_one_buffer(&output, included_code, -1, error);
             if (COMPILER__check__error_occured(error)) {
                 goto quit;
             }

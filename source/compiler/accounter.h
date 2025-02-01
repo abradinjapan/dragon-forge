@@ -2422,28 +2422,6 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__pri
         } else {
             goto failure;
         }
-    // if is a binary print
-    } else if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__print__cell_as_binary], parsling_statement.name.name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 0) {
-        // if inputs are correct parsing type
-        if (COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0).category == COMPILER__pat__name) {
-            // check input variable type
-            // get index
-            ANVIL__bt is_valid_argument;
-            COMPILER__accountling_variable_argument variable_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
-            if (COMPILER__check__error_occured(error) || variable_argument.type >= COMPILER__avat__COUNT) {
-                goto failure;
-            }
-
-            // setup output statement
-            (*accountling_statement).statement_type = COMPILER__ast__predefined__print__cell_as_binary;
-            (*accountling_statement).print__variable_argument = variable_argument;
-
-            // match
-            goto match;
-        // not the right argument type
-        } else {
-            goto failure;
-        }
     }
 
     // not a match

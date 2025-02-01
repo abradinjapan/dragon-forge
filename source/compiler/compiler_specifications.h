@@ -208,7 +208,6 @@ typedef enum COMPILER__ast {
 
     // print
     COMPILER__ast__predefined__print__character,
-    COMPILER__ast__predefined__print__cell_as_binary,
 
     // filling structures
     COMPILER__ast__predefined__copy__anything,
@@ -541,7 +540,6 @@ char* COMPILER__global__predefined_function_call_names[] = {
 
     // prints
     COMPILER__define__master_namespace ".print.character",
-    COMPILER__define__master_namespace ".print.cell_as_binary",
 
     // moving cells
     COMPILER__define__master_namespace ".copy",
@@ -617,7 +615,6 @@ typedef enum COMPILER__pfcnt {
 
     // prints
     COMPILER__pfcnt__print__character,
-    COMPILER__pfcnt__print__cell_as_binary,
 
     // moving cells
     COMPILER__pfcnt__copy,
@@ -708,14 +705,6 @@ COMPILER__blueprintling COMPILER__global__predefined_one_off_function_calls[] = 
         COMPILER__aat__string_index,
         1,
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
-    
-    // print cell as binary
-    COMPILER__abt__define_function_call,
-        COMPILER__ast__predefined__print__cell_as_binary,
-        COMPILER__pfcnt__print__cell_as_binary,
-        1,
-        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
-        0,
 
     // jumps
     COMPILER__abt__define_function_call,
