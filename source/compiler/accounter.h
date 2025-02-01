@@ -361,11 +361,6 @@ typedef struct COMPILER__accountling_statement {
     COMPILER__accountling_variable_argument structure_buffer_mover__size;
     COMPILER__accountling_variable_argument structure_buffer_mover__advancement;
 
-    // current functions
-    COMPILER__accountling_variable_argument current__current;
-    COMPILER__accountling_variable_argument current__invert;
-    COMPILER__accountling_variable_argument current__result;
-
     // list functions
     COMPILER__accountling_variable_argument list__increase;
     COMPILER__accountling_variable_argument list__input_list;
@@ -3374,29 +3369,8 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__str
 
 // check for list functions
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__lists(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
-    // if is calculate content buffer
-    if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__list__calculate__content_buffer], parsling_statement.name.name) && parsling_statement.inputs.count == 1 && parsling_statement.outputs.count == 1) {
-        // get variables
-        ANVIL__bt is_valid_argument;
-        COMPILER__accountling_variable_argument list_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 0), COMPILER__ptt__dragon_list, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || list_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-        COMPILER__accountling_variable_argument buffer_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_buffer, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || buffer_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-
-        // match
-        // setup output statement
-        (*accountling_statement).statement_type = COMPILER__ast__predefined__list__calculate__content_buffer;
-        (*accountling_statement).list__input_list = list_argument;
-        (*accountling_statement).list__output_buffer = buffer_argument;
-
-        // match
-        goto match;
     // if is a list append structure
-    } else if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__list__append__structure], parsling_statement.name.name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 0) {
+    if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__list__append__structure], parsling_statement.name.name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 0) {
         // get argument for structure type
         COMPILER__accountling_variable_argument structure_argument_type = COMPILER__account__functions__get_variable_argument_by_name((*accountling_function).variables, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1).name);
         if (structure_argument_type.type >= COMPILER__avat__COUNT) {

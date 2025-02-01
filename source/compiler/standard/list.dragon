@@ -14,3 +14,10 @@ dragon.list.close(list !dragon.list)() = {
     [ deallocate buffer ]
     dragon.buffer.return(list:allocation)()
 }
+
+[ calculate content buffer ]
+dragon.list.calculate.content_buffer(list !dragon.list)(content_buffer !dragon.buffer) = {
+    [ calculate content buffer ]
+    dragon.copy(list:allocation:start)(content_buffer:start)
+    dragon.buffer.calculate.end_address(content_buffer:start, list:length)(content_buffer:end)
+}
