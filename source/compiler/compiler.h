@@ -22,6 +22,12 @@ typedef struct COMPILER__compilation_unit {
 
 // close a compilation unit
 void COMPILER__close__compilation_unit(COMPILER__compilation_unit unit, COMPILER__error* error) {
+    // check for standard include files
+    if (ANVIL__check__empty_list(unit.standard_files) == ANVIL__bt__false) {
+        // close list
+        ANVIL__close__list(unit.standard_files);
+    }
+
     // close lexling buffer
     if (unit.stages_completed > COMPILER__pst__invalid) {
         COMPILER__close__lexlings(unit.lexlings);
