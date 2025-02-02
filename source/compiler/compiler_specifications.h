@@ -258,9 +258,6 @@ typedef enum COMPILER__ast {
     // file deleters
     COMPILER__ast__predefined__delete_file,
 
-    // list calls
-    COMPILER__ast__predefined__list__append__structure,
-
     // compilation
     COMPILER__ast__predefined__compilation__compile,
 
@@ -580,9 +577,6 @@ char* COMPILER__global__predefined_function_call_names[] = {
     COMPILER__define__master_namespace ".buffer_to_structure",
     COMPILER__define__master_namespace ".structure.byte_size",
 
-    // list operations
-    COMPILER__define__master_namespace ".list.append.structure",
-
     // compilation operations
     COMPILER__define__master_namespace ".compiler.compile",
 
@@ -643,9 +637,6 @@ typedef enum COMPILER__pfcnt {
     COMPILER__pfcnt__structure__structure_to_buffer,
     COMPILER__pfcnt__structure__buffer_to_structure,
     COMPILER__pfcnt__structure__structure_byte_size,
-
-    // list operations
-    COMPILER__pfcnt__list__append__structure,
 
     // compiler operations
     COMPILER__pfcnt__compiler__compile,

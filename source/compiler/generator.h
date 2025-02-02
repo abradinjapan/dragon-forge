@@ -333,38 +333,6 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__delete_file(anvil, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start + 1);
 
             break;
-        case COMPILER__ast__predefined__list__append__structure:
-            // calculate addresses
-            ANVIL__code__calculate__addresses_for_cell_range_from_context(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(list__append_data).cells.start, COMPILER__generate__use_variable(list__append_data).cells.end, ANVIL__srt__temp__buffer_1__start, ANVIL__srt__temp__buffer_1__end);
-
-            // copy buffer
-            ANVIL__code__calculate__buffer_length(anvil, ANVIL__sft__always_run, ANVIL__srt__temp__buffer_1__start, ANVIL__srt__temp__buffer_1__end, ANVIL__srt__temp__length);
-            ANVIL__code__request_memory(anvil, ANVIL__srt__temp__length, ANVIL__srt__temp__buffer_0__start, ANVIL__srt__temp__buffer_0__end);
-            ANVIL__code__buffer_to_buffer__low_to_high(anvil, ANVIL__srt__temp__buffer_1__start, ANVIL__srt__temp__buffer_1__end, ANVIL__srt__temp__buffer_0__start, ANVIL__srt__temp__buffer_0__end);
-
-            // append data
-            STANDARD__code__call__append_buffer(
-                anvil,
-                &(*workspace).standard_offsets,
-                ANVIL__sft__always_run,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 0,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 1,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 2,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 3,
-                COMPILER__generate__use_variable(list__input_list).cells.start + 4,
-                ANVIL__srt__temp__buffer_0__start,
-                ANVIL__srt__temp__buffer_0__end,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 0,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 1,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 2,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 3,
-                COMPILER__generate__use_variable(list__output_list).cells.start + 4
-            );
-
-            // free allocation
-            ANVIL__code__return_memory(anvil, ANVIL__srt__temp__buffer_0__start, ANVIL__srt__temp__buffer_0__end);
-
-            break;
         case COMPILER__ast__predefined__compilation__compile:
             // compile
             ANVIL__code__compile(

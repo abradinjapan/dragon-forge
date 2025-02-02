@@ -73,3 +73,21 @@ dragon.list.append.buffer_data(list !dragon.list, data !dragon.buffer)(list !dra
     [ update append count ]
     dragon.integer.add(list:append_count, dragon.constant.1)(list:append_count)
 }
+
+[ append buffer structure to list ]
+dragon.list.append.structure.buffer(list !dragon.list, buffer !dragon.buffer)(list !dragon.list) = {
+    [ setup data ]
+    dragon.structure.byte_size(buffer)(buffer.byte_size)
+
+    [ allocate temp buffer ]
+    dragon.buffer.request(buffer.byte_size)(temp_allocation)
+
+    [ copy structure to buffer ]
+    dragon.structure_to_buffer(buffer, temp_allocation)(advancement)
+
+    [ append data ]
+    dragon.list.append.buffer_data(list, temp_allocation)(list)
+
+    [ close temp buffer ]
+    dragon.buffer.return(temp_allocation)()
+}
