@@ -315,7 +315,7 @@ char* COMPILER__global__predefined_type_names[] = {
     COMPILER__define__master_namespace ".cell",
     COMPILER__define__master_namespace ".buffer",
     COMPILER__define__master_namespace ".current",
-    COMPILER__define__master_namespace ".list",
+    //COMPILER__define__master_namespace ".list",
     COMPILER__define__master_namespace ".time",
 };
 // predefined type's member names
@@ -323,12 +323,8 @@ const char* COMPILER__global__predefined_type_member_names[] = {
     "value",
     "start",
     "end",
-    "allocation",
     "buffer",
     "progress",
-    "length",
-    "increase",
-    "append_count",
     "seconds",
     "nanoseconds",
     "INTERNAL",
@@ -338,12 +334,8 @@ typedef enum COMPILER__ptmnt {
     COMPILER__ptmnt__value,
     COMPILER__ptmnt__start,
     COMPILER__ptmnt__end,
-    COMPILER__ptmnt__allocation,
     COMPILER__ptmnt__buffer,
     COMPILER__ptmnt__progress,
-    COMPILER__ptmnt__content_length,
-    COMPILER__ptmnt__increase,
-    COMPILER__ptmnt__append_count,
     COMPILER__ptmnt__seconds,
     COMPILER__ptmnt__nanoseconds,
     COMPILER__ptmnt__COUNT,
@@ -357,7 +349,6 @@ typedef enum COMPILER__ptt {
     COMPILER__ptt__dragon_cell = COMPILER__ptt__START,
     COMPILER__ptt__dragon_buffer,
     COMPILER__ptt__dragon_current,
-    COMPILER__ptt__dragon_list,
     COMPILER__ptt__dragon_time,
 
     // user defined start
@@ -393,18 +384,6 @@ COMPILER__blueprintling COMPILER__global__predefined_types[] = {
             COMPILER__ptmnt__buffer,
         COMPILER__ptt__dragon_cell, // progress
             COMPILER__ptmnt__progress,
-    // list
-    COMPILER__abt__define_type,
-        COMPILER__ptt__dragon_list,
-        4,
-        COMPILER__ptt__dragon_buffer, // allocated memory
-            COMPILER__ptmnt__allocation,
-        COMPILER__ptt__dragon_cell, // filled memory
-            COMPILER__ptmnt__content_length,
-        COMPILER__ptt__dragon_cell, // increase
-            COMPILER__ptmnt__increase,
-        COMPILER__ptt__dragon_cell, // append counter
-            COMPILER__ptmnt__append_count,
     // time
     COMPILER__abt__define_type,
         COMPILER__ptt__dragon_time,

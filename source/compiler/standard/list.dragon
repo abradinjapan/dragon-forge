@@ -1,3 +1,11 @@
+[ list definition ]
+!dragon.list(
+    allocation !dragon.buffer,
+    length !dragon.cell, [ length of content ]
+    increase !dragon.cell, [ when more space is needed, allocate in increments of 'increase' ]
+    append_count !dragon.cell [ stats ]
+)
+
 [ open list ]
 dragon.list.open(increase !dragon.cell)(list !dragon.list) = {
     [ allocate buffer ]
