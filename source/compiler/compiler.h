@@ -7,7 +7,7 @@
 #include "parser.h"
 #include "accounter.h"
 #include "generator.h"
-#include "./standard/standard_buffering.h"
+#include "./standard/standard.h"
 
 /* Compilation Unit */
 // one compiled object across multiple stages

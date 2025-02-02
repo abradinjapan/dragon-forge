@@ -3,7 +3,6 @@
 
 /* Include */
 #include "accounter.h"
-#include "standard/standard.h"
 
 /* Generation */
 // one function
@@ -27,11 +26,11 @@ typedef struct COMPILER__generation_function {
 // one program's workspace
 // (program buffer is not in workspace as it needs to be freed separately)
 typedef struct COMPILER__generation_workspace {
+    // anvil two pass workspace
     ANVIL__workspace workspace;
 
     // functions
     ANVIL__counted_list user_defined_functions; // COMPILER__generation_function
-    STANDARD__offsets standard_offsets;
 } COMPILER__generation_workspace;
 
 // open generation function
@@ -563,10 +562,6 @@ void COMPILER__generate__program(ANVIL__buffer* final_program, COMPILER__account
                 return;
             }
         }
-
-        // build built in functions
-        // build standard library
-        STANDARD__code__package(&workspace.workspace, &workspace.standard_offsets);
     }
 
     // close workspace

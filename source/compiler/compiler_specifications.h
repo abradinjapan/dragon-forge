@@ -157,6 +157,8 @@ typedef enum COMPILER__pvn {
     COMPILER__pvn__cell_byte_size,
     COMPILER__pvn__context_byte_size,
     COMPILER__pvn__ascii_character_byte_size,
+    COMPILER__pvn__context__input,
+    COMPILER__pvn__context__output,
 } COMPILER__pvn;
 // all predefined variable names
 char* COMPILER__global__predefined_variable_names[] = {
@@ -181,6 +183,8 @@ char* COMPILER__global__predefined_variable_names[] = {
     COMPILER__define__master_namespace ".cell.byte_size",
     COMPILER__define__master_namespace ".context.byte_size",
     COMPILER__define__master_namespace ".ascii_character.byte_size",
+    COMPILER__define__master_namespace ".context.input",
+    COMPILER__define__master_namespace ".context.output",
 };
 
 // statement type type
@@ -315,7 +319,6 @@ char* COMPILER__global__predefined_type_names[] = {
     COMPILER__define__master_namespace ".cell",
     COMPILER__define__master_namespace ".buffer",
     COMPILER__define__master_namespace ".current",
-    //COMPILER__define__master_namespace ".list",
     COMPILER__define__master_namespace ".time",
 };
 // predefined type's member names
@@ -502,6 +505,16 @@ COMPILER__blueprintling COMPILER__global__predefined_variables[] = {
         COMPILER__ptt__dragon_cell,
         ANVIL__srt__constant__ascii_character_byte_size,
         ANVIL__srt__constant__ascii_character_byte_size,
+    COMPILER__abt__define_type,
+        COMPILER__pvn__context__input,
+        COMPILER__ptt__dragon_buffer,
+        ANVIL__srt__input_buffer_start,
+        ANVIL__srt__input_buffer_end,
+    COMPILER__abt__define_type,
+        COMPILER__pvn__context__output,
+        COMPILER__ptt__dragon_buffer,
+        ANVIL__srt__output_buffer_start,
+        ANVIL__srt__output_buffer_end,
     COMPILER__abt__end_blueprint,
 };
 
