@@ -1,3 +1,6 @@
+[ current structure ]
+!dragon.current(buffer !dragon.buffer, progress !dragon.cell)
+
 [ check current within range ]
 dragon.current.within_range(current !dragon.current, invert !dragon.cell)(valid !dragon.cell) = {
     [ check range ]
