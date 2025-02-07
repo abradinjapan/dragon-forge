@@ -77,20 +77,58 @@ dragon.list.append.buffer_data(list !dragon.list, data !dragon.buffer)(list !dra
     dragon.copy(required_length)(list:length)
 }
 
-[ append buffer structure to list ]
-dragon.list.append.structure.buffer(list !dragon.list, buffer !dragon.buffer)(list !dragon.list) = {
-    [ setup data ]
-    dragon.structure.byte_size(buffer)(buffer.byte_size)
+[ append cell structure to list ]
+dragon.list.append.cell(list !dragon.list, data !dragon.cell)(list !dragon.list) = {
+    [ calculate lengths ]
+    dragon.structure.byte_size(data)(data.length)
+    dragon.buffer.calculate.length(list:allocation)(old_allocation.length)
 
-    [ allocate temp buffer ]
-    dragon.buffer.request(buffer.byte_size)(temp_allocation)
+    [ calculate required length ]
+    dragon.integer.add(list:length, data.length)(required_length)
 
-    [ copy structure to buffer ]
-    dragon.structure_to_buffer(buffer, temp_allocation)(advancement)
+    [ reallocate buffer if necessary ]
+    dragon.integer.within_range(dragon.constant.0, required_length, old_allocation.length, dragon.always)(reallocate)
+    @reallocate reallocate = {
+        [ calculate chunk count ]
+        dragon.integer.divide(required_length, list:increase)(increase_chunk_count)
+        dragon.integer.add(increase_chunk_count, dragon.constant.1)(increase_chunk_count)
+
+        [ calculate required new allocation size ]
+        dragon.integer.multiply(increase_chunk_count, list:increase)(new_allocation.length)
+
+        [ allocate ]
+        dragon.buffer.request(new_allocation.length)(new_allocation)
+
+        [ calculate data copy buffers ]
+        dragon.list.calculate.content_buffer(list)(copy.source)
+        dragon.buffer.calculate.end_address(new_allocation:start, list:length)(destination.end)
+        dragon.pack(new_allocation:start, destination.end)(copy.destination !dragon.buffer)
+
+        [ copy old data ]
+        dragon.buffer.copy.low_to_high(copy.source, copy.destination)()
+
+        [ delete old allocation ]
+        dragon.buffer.return(list:allocation)()
+
+        [ install new allocation ]
+        dragon.copy(new_allocation)(list:allocation)
+    }
+
+    [ calculate appending addresses ]
+    dragon.integer.add(list:allocation:start, list:length)(append_destination.start)
+    dragon.buffer.calculate.end_address(append_destination.start, data.length)(append_destination.end)
+    dragon.pack(append_destination.start, append_destination.end)(append_destination !dragon.buffer)
 
     [ append data ]
-    dragon.list.append.buffer_data(list, temp_allocation)(list)
+    dragon.structure_to_buffer(data, append_destination)(advancement)
 
-    [ close temp buffer ]
-    dragon.buffer.return(temp_allocation)()
+    [ update length ]
+    dragon.copy(required_length)(list:length)
+}
+
+[ append buffer structure to list ]
+dragon.list.append.structure.buffer(list !dragon.list, data !dragon.buffer)(list !dragon.list) = {
+    [ append members ]
+    dragon.list.append.cell(list, data:start)(list)
+    dragon.list.append.cell(list, data:end)(list)
 }

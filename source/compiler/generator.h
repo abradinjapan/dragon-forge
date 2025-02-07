@@ -284,10 +284,10 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             break;
         case COMPILER__ast__predefined__structure__structure_to_buffer:
             // calculate addresses
-            ANVIL__code__calculate__addresses_for_cell_range_from_context(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(structure_buffer_mover__structure).cells.start, COMPILER__generate__use_variable(structure_buffer_mover__structure).cells.start + 1, ANVIL__srt__temp__buffer_1__start, ANVIL__srt__temp__buffer_1__end);
+            ANVIL__code__calculate__addresses_for_cell_range_from_context(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(structure_buffer_mover__structure).cells.start, COMPILER__generate__use_variable(structure_buffer_mover__structure).cells.end, ANVIL__srt__temp__buffer_1__start, ANVIL__srt__temp__buffer_1__end);
 
             // perform write
-            ANVIL__code__buffer_to_buffer__low_to_high(anvil, ANVIL__srt__temp__buffer_1__start, ANVIL__srt__temp__buffer_1__end, COMPILER__generate__use_variable(structure_buffer_mover__buffer).cells.start, COMPILER__generate__use_variable(structure_buffer_mover__buffer).cells.start + 1);
+            ANVIL__code__buffer_to_buffer__low_to_high(anvil, ANVIL__srt__temp__buffer_1__start, ANVIL__srt__temp__buffer_1__end, COMPILER__generate__use_variable(structure_buffer_mover__buffer).cells.start, COMPILER__generate__use_variable(structure_buffer_mover__buffer).cells.end);
 
             // calculate advancement
             ANVIL__code__write_cell(anvil, (ANVIL__cell)(ANVIL__u64)((COMPILER__generate__use_variable(structure_buffer_mover__structure).cells.end - COMPILER__generate__use_variable(structure_buffer_mover__structure).cells.start + 1) * sizeof(ANVIL__cell)), ANVIL__srt__temp__length);
