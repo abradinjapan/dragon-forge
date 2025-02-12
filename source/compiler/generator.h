@@ -332,6 +332,10 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__delete_file(anvil, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start, COMPILER__generate__use_variable(file_buffer_mover__file_path).cells.start + 1);
 
             break;
+        case COMPILER__ast__predefined__allocation__find:
+            ANVIL__code__debug__search_for_allocation(anvil, COMPILER__generate__use_variable(allocation__source_buffer).cells.start, COMPILER__generate__use_variable(allocation__source_buffer).cells.end, COMPILER__generate__use_variable(allocation__was_found).cells.start, COMPILER__generate__use_variable(allocation__found_buffer).cells.start, COMPILER__generate__use_variable(allocation__found_buffer).cells.end);
+            
+            break;
         case COMPILER__ast__predefined__compilation__compile:
             // compile
             ANVIL__code__compile(

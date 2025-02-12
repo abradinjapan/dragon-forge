@@ -127,8 +127,16 @@ dragon.list.append.cell(list !dragon.list, data !dragon.cell)(list !dragon.list)
 }
 
 [ append buffer structure to list ]
-dragon.list.append.structure.buffer(list !dragon.list, data !dragon.buffer)(list !dragon.list) = {
+dragon.list.append.buffer(list !dragon.list, data !dragon.buffer)(list !dragon.list) = {
     [ append members ]
     dragon.list.append.cell(list, data:start)(list)
     dragon.list.append.cell(list, data:end)(list)
+}
+
+[ append list structure to list ]
+dragon.list.append.list(list !dragon.list, data !dragon.list)(list !dragon.list) = {
+    [ append members ]
+    dragon.list.append.buffer(list, data:allocation)(list)
+    dragon.list.append.cell(list, data:length)(list)
+    dragon.list.append.cell(list, data:increase)(list)
 }

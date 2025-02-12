@@ -262,6 +262,9 @@ typedef enum COMPILER__ast {
     // file deleters
     COMPILER__ast__predefined__delete_file,
 
+    // allocations
+    COMPILER__ast__predefined__allocation__find,
+
     // compilation
     COMPILER__ast__predefined__compilation__compile,
 
@@ -549,6 +552,7 @@ char* COMPILER__global__predefined_function_call_names[] = {
     COMPILER__define__master_namespace ".buffer.copy.low_to_high",
     COMPILER__define__master_namespace ".buffer.copy.high_to_low",
     COMPILER__define__master_namespace ".delete_file",
+    COMPILER__define__master_namespace ".find_allocation",
 
     // structure operations
     COMPILER__define__master_namespace ".structure_to_buffer",
@@ -610,6 +614,7 @@ typedef enum COMPILER__pfcnt {
     COMPILER__pfcnt__buffer__copy__low_to_high,
     COMPILER__pfcnt__buffer__copy__high_to_low,
     COMPILER__pfcnt__buffer__delete_file,
+    COMPILER__pfcnt__buffer__find_allocation,
 
     // structure operations
     COMPILER__pfcnt__structure__structure_to_buffer,
@@ -851,6 +856,16 @@ COMPILER__blueprintling COMPILER__global__predefined_one_off_function_calls[] = 
         1,
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
         0,
+
+    // allocations
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__allocation__find,
+        COMPILER__pfcnt__buffer__find_allocation,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+        2,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_cell,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
     
     // compiler assorted calls
     COMPILER__abt__define_function_call,

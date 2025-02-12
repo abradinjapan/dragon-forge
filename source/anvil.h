@@ -67,6 +67,31 @@ void ANVIL__forget__allocation(ANVIL__allocations* allocations, ANVIL__buffer al
     return;
 }
 
+// search for and return a valid allocation buffer from another buffer
+ANVIL__buffer ANVIL__search__valid_allocation_from_sub_buffer(ANVIL__allocations* allocations, ANVIL__buffer range, ANVIL__bt* found) {
+    ANVIL__buffer current;
+    
+    // setup current
+    current = ANVIL__calculate__list_current_buffer(&(*allocations).buffers);
+
+    // check for valid allocation range
+    while (current.start <= current.end) {
+        // check one allocation
+        if (ANVIL__calculate__buffer_range_in_buffer_range_inclusive(*(ANVIL__buffer*)current.start, range)) {
+            // allocation is valid
+            *found = ANVIL__bt__true;
+            return *(ANVIL__buffer*)current.start;
+        }
+        
+        // next allocation
+        current.start += sizeof(ANVIL__buffer);
+    }
+
+    // allocation not valid
+    *found = ANVIL__bt__false;
+    return ANVIL__create_null__buffer();
+}
+
 // check to see if an address is valid
 ANVIL__bt ANVIL__check__valid_address_range_in_allocations(ANVIL__bt catch_addresses, ANVIL__allocations* allocations, ANVIL__buffer range) {
     ANVIL__buffer current;
@@ -77,7 +102,7 @@ ANVIL__bt ANVIL__check__valid_address_range_in_allocations(ANVIL__bt catch_addre
     }
     
     // setup current
-    current = ANVIL__calculate__list_current_buffer(&allocations->buffers); //ANVIL__create__buffer((*allocations).buffers.buffer.start, ANVIL__calculate__list_current_address(&((*allocations).buffers)) - 1);
+    current = ANVIL__calculate__list_current_buffer(&(*allocations).buffers);
 
     // check for valid allocation range
     while (current.start <= current.end) {
@@ -160,6 +185,7 @@ ANVIL__ilt ANVIL__convert__it_to_ilt(ANVIL__it instruction) {
         ANVIL__ilt__debug__mark_data_section,
         ANVIL__ilt__debug__mark_code_section,
         ANVIL__ilt__debug__get_current_context,
+        ANVIL__ilt__debug__search_for_allocation,
     };
 
     return lengths[instruction];
@@ -685,6 +711,16 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
     // debug get current context
     ANVIL__cell_ID get_current_context__buffer_start;
     ANVIL__cell_ID get_current_context__buffer_end;
+
+    // debug search for allocation
+    ANVIL__cell_ID search_for_allocation__source_buffer_start;
+    ANVIL__cell_ID search_for_allocation__source_buffer_end;
+    ANVIL__buffer search_for_allocation__source_buffer;
+    ANVIL__cell_ID search_for_allocation__was_found;
+    ANVIL__bt search_for_allocation__was_found_boolean;
+    ANVIL__cell_ID search_for_allocation__found_buffer_start;
+    ANVIL__cell_ID search_for_allocation__found_buffer_end;
+    ANVIL__buffer search_for_allocation__found_buffer;
 
     // setup address catcher toggle
     catch_addresses = (ANVIL__bt)(ANVIL__u64)ANVIL__get__cell_from_context(context, ANVIL__rt__address_catch_toggle);
@@ -1243,6 +1279,28 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         // setup output
         (*context).cells[get_current_context__buffer_start] = (void*)ANVIL__get__cell_address_from_context(context, 0);
         (*context).cells[get_current_context__buffer_end] = ((void*)ANVIL__get__cell_address_from_context(context, 0)) + sizeof(ANVIL__context) - 1;
+
+        break;
+    // search for an allocation given a buffer
+    case ANVIL__it__debug__search_for_allocation:
+        // get parameters
+        search_for_allocation__source_buffer_start = ANVIL__read_next__cell_ID(execution_read_address);
+        search_for_allocation__source_buffer_end = ANVIL__read_next__cell_ID(execution_read_address);
+        search_for_allocation__was_found = ANVIL__read_next__cell_ID(execution_read_address);
+        search_for_allocation__found_buffer_start = ANVIL__read_next__cell_ID(execution_read_address);
+        search_for_allocation__found_buffer_end = ANVIL__read_next__cell_ID(execution_read_address);
+
+        // setup inputs
+        search_for_allocation__source_buffer.start = (*context).cells[search_for_allocation__source_buffer_start];
+        search_for_allocation__source_buffer.end = (*context).cells[search_for_allocation__source_buffer_end];
+
+        // search for allocation
+        search_for_allocation__found_buffer = ANVIL__search__valid_allocation_from_sub_buffer(allocations, search_for_allocation__source_buffer, &search_for_allocation__was_found_boolean);
+
+        // pass outputs
+        (*context).cells[search_for_allocation__was_found] = (ANVIL__cell)(ANVIL__u64)search_for_allocation__was_found_boolean;
+        (*context).cells[search_for_allocation__found_buffer_start] = search_for_allocation__found_buffer.start;
+        (*context).cells[search_for_allocation__found_buffer_end] = search_for_allocation__found_buffer.end;
 
         break;
     // in case instruction ID was invalid

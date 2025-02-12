@@ -429,6 +429,19 @@ void ANVIL__code__debug__get_current_context(ANVIL__workspace* workspace, ANVIL_
     return;
 }
 
+// write debug search for allocation instruction
+void ANVIL__code__debug__search_for_allocation(ANVIL__workspace* workspace, ANVIL__cell_ID source_buffer_start, ANVIL__cell_ID source_buffer_end, ANVIL__cell_ID was_found, ANVIL__cell_ID found_buffer_start, ANVIL__cell_ID found_buffer_end) {
+    // write instruction
+    ANVIL__write_next__instruction_ID(workspace, ANVIL__it__debug__search_for_allocation);
+    ANVIL__write_next__cell_ID(workspace, source_buffer_start);
+    ANVIL__write_next__cell_ID(workspace, source_buffer_end);
+    ANVIL__write_next__cell_ID(workspace, was_found);
+    ANVIL__write_next__cell_ID(workspace, found_buffer_start);
+    ANVIL__write_next__cell_ID(workspace, found_buffer_end);
+
+    return;
+}
+
 /* Stack ABI Defines */
 // types
 typedef u64 ANVIL__preserve;
