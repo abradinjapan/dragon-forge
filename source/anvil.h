@@ -7,7 +7,7 @@
 /* Allocations */
 // allocations
 typedef struct ANVIL__allocations {
-    ANVIL__list buffers;
+    ANVIL__list buffers; // ANVIL__buffer
 } ANVIL__allocations;
 
 // find an allocation
@@ -58,6 +58,9 @@ void ANVIL__forget__allocation(ANVIL__allocations* allocations, ANVIL__buffer al
     if (found == ANVIL__bt__true) {
         // erase from list
         ANVIL__list__erase__space(&((*allocations).buffers), start_index, start_index + sizeof(ANVIL__buffer) - 1);
+
+        // set error
+        *buffer_did_not_exist = ANVIL__bt__false;
     // not found, so not removed
     } else {
         // set error
