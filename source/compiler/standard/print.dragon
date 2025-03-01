@@ -26,6 +26,21 @@ dragon.print.tabs(tab_count !dragon.cell)() = {
     }
 }
 
+[ print a buffer as a set of two addresses ]
+dragon.print.buffer(buffer !dragon.buffer)() = {
+    [ setup strings ]
+    dragon.set("[ ")(header)
+    dragon.set(", ")(separator)
+    dragon.set(" ]")(footer)
+
+    [ print buffer ]
+    dragon.print.buffer_as_string(header)()
+    dragon.print.integer.unsigned(buffer:start)()
+    dragon.print.buffer_as_string(separator)()
+    dragon.print.integer.unsigned(buffer:start)()
+    dragon.print.buffer_as_string(footer)()
+}
+
 [ print a buffer as a string ]
 dragon.print.buffer_as_string(buffer !dragon.buffer)() = {
     [ setup current ]

@@ -126,6 +126,37 @@ dragon.list.append.cell(list !dragon.list, data !dragon.cell)(list !dragon.list)
     dragon.copy(required_length)(list:length)
 }
 
+[ append new line ]
+dragon.list.append.new_line(list !dragon.list)(list !dragon.list) = {
+    [ setup string ]
+    dragon.set("%0a;")(new_line)
+
+    [ append buffer ]
+    dragon.list.append.buffer_data(list, new_line)(list)
+}
+
+[ print tabs ]
+dragon.list.append.tabs(list !dragon.list, tab_count !dragon.cell)(list !dragon.list) = {
+    [ set tab ]
+    dragon.set("%09;")(tab)
+
+    [ print tabs until finished ]
+    @loop dragon.always = {
+        [ check for more characters ]
+        dragon.integer.within_range(dragon.constant.0, tab_count, dragon.constant.0, dragon.never)(finished)
+        dragon.jump.bottom(finished, @loop)()
+
+        [ print tab ]
+        dragon.list.append.buffer_data(list, tab)(list)
+
+        [ next index ]
+        dragon.integer.subtract(tab_count, dragon.constant.1)(tab_count)
+
+        [ jump to loop start ]
+        dragon.jump.top(dragon.always, @loop)()
+    }
+}
+
 [ append buffer structure to list ]
 dragon.list.append.buffer(list !dragon.list, data !dragon.buffer)(list !dragon.list) = {
     [ append members ]
@@ -139,4 +170,17 @@ dragon.list.append.list(list !dragon.list, data !dragon.list)(list !dragon.list)
     dragon.list.append.buffer(list, data:allocation)(list)
     dragon.list.append.cell(list, data:length)(list)
     dragon.list.append.cell(list, data:increase)(list)
+}
+
+[ copy content to new buffer ]
+dragon.list.duplicate_content(list !dragon.list)(new_allocation !dragon.buffer) = {
+    [ calculate content buffer and size ]
+    dragon.list.calculate.content_buffer(list)(content)
+    dragon.buffer.calculate.length(content)(content.length)
+
+    [ allocate new buffer ]
+    dragon.buffer.request(content.length)(new_allocation)
+
+    [ duplicate data ]
+    dragon.buffer.copy.low_to_high(content, new_allocation)()
 }
