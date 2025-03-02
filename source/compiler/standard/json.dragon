@@ -1,0 +1,1524 @@
+[
+    Compile
+]
+[ master type ]
+!dragon.json
+(
+    [ translated data ]
+    nodes !dragon.cell [ type TODO ]
+)
+
+[ translation data ]
+!dragon.json.workspace
+(
+    [ defines ]
+    lexling.types !dragon.json.lexling.types,
+    parsling.types !dragon.json.parsling.types,
+
+    [ error data ]
+    error !dragon.error,
+
+    [ lexing data ]
+    current_character !dragon.current,
+    lexlings !dragon.json.lexlings,
+
+    [ parsing data ]
+    current_lexling !dragon.current,
+    parslings !dragon.json.parslings
+)
+
+[ compile ]
+dragon.json.compile(text !dragon.buffer, verbose !dragon.cell)(workspace !dragon.json.workspace) = {
+    [ setup json ]
+    dragon.pack.null()(json !dragon.json)
+
+    [ setup workspace ]
+    dragon.pack.null()(workspace !dragon.json.workspace)
+    dragon.pack(text, text:start)(workspace:current_character !dragon.current)
+    dragon.json.lexling.types.setup()(workspace:lexling.types)
+    dragon.json.parsling.types.setup()(workspace:parsling.types)
+
+    [ lex ]
+    dragon.json.compile.lex(json, workspace)(json, workspace)
+    @verbose.lexlings verbose = {
+        dragon.json.compile.lex.print(workspace)()
+    }
+
+    [ parse ]
+    dragon.json.compile.parse(workspace)(workspace)
+    @verbose.parslings verbose = {
+        dragon.json.compile.print.parslings(workspace)()
+    }
+
+    [ exit compilation ]
+    @compilation.exit
+
+    [ setup output ]
+    dragon.copy(workspace:error)(error)
+}
+
+[ setup error for json reader ]
+dragon.json.compile.raise_error(workspace !dragon.json.workspace, message !dragon.buffer)(workspace !dragon.json.workspace) = {
+    [ setup strings ]
+    dragon.set("%22;error%22;: {%0A;%09;%22;occured%22;: true,%0A;%09;%22;message%22;: %22;")(header)
+    dragon.set("%22;%0A;}%0A;")(footer)
+
+    [ open list ]
+    dragon.set(dragon.integer.1024)(increase)
+    dragon.copy(dragon.true)(workspace:error:occured)
+    dragon.list.open(increase)(workspace:error:json)
+
+    [ create error json ]
+    dragon.list.append.buffer_data(workspace:error:json, header)(workspace:error:json) [ append header ]
+    dragon.list.append.buffer_data(workspace:error:json, message)(workspace:error:json) [ append message ]
+    dragon.list.append.buffer_data(workspace:error:json, footer)(workspace:error:json) [ append footer ]
+}
+
+[ close workspace ]
+dragon.json.compile.close.workspace(workspace !dragon.json.workspace)() = {
+    [ close lexlings ]
+    dragon.json.lexlings.close(workspace:lexlings)()
+
+    [ close parslings ]
+    
+}
+
+
+
+[
+    Lexing
+]
+[ lexlings type ]
+!dragon.json.lexlings
+(
+    list !dragon.list [ !dragon.json.lexling ]
+)
+
+[ open lexlings ]
+dragon.json.lexlings.open()(lexlings !dragon.json.lexlings) = {
+    [ create dummy lexling ]
+    dragon.pack.null()(lexling.dummy !dragon.json.lexling)
+
+    [ calculate current ]
+    dragon.set(dragon.integer.1024)(increase)
+    dragon.structure.byte_size(lexling.dummy)(lexling.size)
+    dragon.integer.multiply(increase, lexling.size)(increase)
+
+    [ open list ]
+    dragon.list.open(increase)(lexlings:list)
+}
+
+[ close lexlings ]
+dragon.json.lexlings.close(lexlings !dragon.json.lexlings)() = {
+    [ close list ]
+    dragon.list.close(lexlings:list)()
+}
+
+[ print lexlings ]
+dragon.json.lexlings.print(lexlings !dragon.json.lexlings)() = {
+    [ TODO ]
+}
+
+[ lexling type ]
+!dragon.json.lexling
+(
+    raw !dragon.buffer,
+    type !dragon.cell,
+    location !dragon.text.location
+)
+
+[ print lexling ]
+dragon.json.lexling.print(lexling !dragon.json.lexling)() = {
+    [ setup strings ]
+    dragon.set("[ ")(header)
+    dragon.set(", ")(separator)
+    dragon.set(" ]")(footer)
+
+    [ print data ]
+    dragon.print.buffer_as_string(header)()
+    dragon.print.integer.unsigned(lexling:type)()
+    dragon.print.buffer_as_string(separator)()
+    dragon.print.buffer_as_string(lexling:raw)()
+    dragon.print.buffer_as_string(footer)()
+}
+
+[ append lexling ]
+dragon.json.append.lexling(list !dragon.list, lexling !dragon.json.lexling)(list !dragon.list) = {
+    [ append members ]
+    dragon.list.append.buffer(list, lexling:raw)(list)
+    dragon.list.append.cell(list, lexling:type)(list)
+    dragon.json.append.location(list, lexling:location)(list)
+}
+
+[ lexling location ]
+!dragon.text.location
+(
+    file_index !dragon.cell,
+    line_index !dragon.cell,
+    character_index !dragon.cell
+)
+
+[ append lexling location ]
+dragon.json.append.location(list !dragon.list, location !dragon.text.location)(list !dragon.list) = {
+    dragon.list.append.cell(list, location:file_index)(list)
+    dragon.list.append.cell(list, location:line_index)(list)
+    dragon.list.append.cell(list, location:character_index)(list)
+}
+
+[ lexling type structure ]
+!dragon.json.lexling.types
+(
+    invalid !dragon.cell,
+    left_square_bracket !dragon.cell,
+    right_square_bracket !dragon.cell,
+    left_curly_bracket !dragon.cell,
+    right_curly_bracket !dragon.cell,
+    string !dragon.cell,
+    integer !dragon.cell,
+    comma !dragon.cell,
+    colon !dragon.cell,
+    name !dragon.cell,
+    end_of_file !dragon.cell
+)
+
+[ setup json lexling type structure ]
+dragon.json.lexling.types.setup()(types !dragon.json.lexling.types) = {
+    [ set values ]
+    dragon.set(dragon.integer.0)(types:invalid)
+    dragon.set(dragon.integer.1)(types:left_square_bracket)
+    dragon.set(dragon.integer.2)(types:right_square_bracket)
+    dragon.set(dragon.integer.3)(types:left_curly_bracket)
+    dragon.set(dragon.integer.4)(types:right_curly_bracket)
+    dragon.set(dragon.integer.5)(types:string)
+    dragon.set(dragon.integer.6)(types:integer)
+    dragon.set(dragon.integer.7)(types:comma)
+    dragon.set(dragon.integer.8)(types:colon)
+    dragon.set(dragon.integer.9)(types:name)
+    dragon.set(dragon.integer.10)(types:end_of_file)
+}
+
+[ lex json ]
+dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(json !dragon.json, workspace !dragon.json.workspace) = {
+    [ setup data ]
+    dragon.set(dragon.integer.32)(whitespace.range.end)
+    dragon.pack(dragon.constant.0, whitespace.range.end)(whitespace !dragon.buffer)
+    dragon.set(dragon.hexadecimal.7B)(left_curly_bracket)
+    dragon.set(dragon.hexadecimal.7D)(right_curly_bracket)
+    dragon.set(dragon.hexadecimal.5B)(left_square_bracket)
+    dragon.set(dragon.hexadecimal.5D)(right_square_bracket)
+    dragon.set(dragon.hexadecimal.22)(double_quote)
+    dragon.set(dragon.hexadecimal.2C)(comma)
+    dragon.set(dragon.hexadecimal.3A)(colon)
+    dragon.set(dragon.hexadecimal.30)(decimal_digits.start)
+    dragon.set(dragon.hexadecimal.39)(decimal_digits.end)
+    dragon.pack.null()(null_location !dragon.text.location)
+
+    [ open lexlings ]
+    dragon.json.lexlings.open()(workspace:lexlings)
+
+    [ setup loop start ]
+    @lexing.loop.start
+
+    [ check if current is in range ]
+    dragon.current.within_range(workspace:current_character, dragon.always)(should_quit)
+    dragon.jump(should_quit, @lexing.loop.exit)()
+
+    [ get character ]
+    dragon.address_to_cell(workspace:current_character:progress, dragon.ascii_character.byte_size)(character, advancement)
+
+    [ if whitespace, go back to beginning of loop ]
+    dragon.integer.within_range(whitespace:start, character, whitespace:end, dragon.never)(whitespace_detected)
+    @whitespace whitespace_detected = {
+        [ next character ]
+        dragon.copy(advancement)(workspace:current_character:progress)
+
+        [ jump ]
+        dragon.jump(whitespace_detected, @lexing.loop.start)()
+    }
+
+    [ otherwise, detect lexling ]
+    [ detect left_curly_bracket ]
+    dragon.integer.within_range(left_curly_bracket, character, left_curly_bracket, dragon.never)(detected)
+    @check.left_curly_bracket detected = {
+        [ create lexling ]
+        dragon.pack(workspace:current_character:progress, workspace:current_character:progress)(text !dragon.buffer)
+        dragon.pack(text, workspace:lexling.types:left_curly_bracket, null_location)(lexling !dragon.json.lexling)
+
+        [ next character ]
+        dragon.copy(advancement)(workspace:current_character:progress)
+
+        [ append lexling ]
+        dragon.json.append.lexling(workspace:lexlings:list, lexling)(workspace:lexlings:list)
+
+        [ jump to loop start ]
+        dragon.jump(dragon.always, @lexing.loop.start)()
+    }
+
+    [ detect right_curly_bracket ]
+    dragon.integer.within_range(right_curly_bracket, character, right_curly_bracket, dragon.never)(detected)
+    @check.right_curly_bracket detected = {
+        [ create lexling ]
+        dragon.pack(workspace:current_character:progress, workspace:current_character:progress)(text !dragon.buffer)
+        dragon.pack(text, workspace:lexling.types:right_curly_bracket, null_location)(lexling !dragon.json.lexling)
+
+        [ next character ]
+        dragon.copy(advancement)(workspace:current_character:progress)
+
+        [ append lexling ]
+        dragon.json.append.lexling(workspace:lexlings:list, lexling)(workspace:lexlings:list)
+
+        [ jump to loop start ]
+        dragon.jump(dragon.always, @lexing.loop.start)()
+    }
+
+    [ detect left_square_bracket ]
+    dragon.integer.within_range(left_square_bracket, character, left_square_bracket, dragon.never)(detected)
+    @check.left_square_bracket detected = {
+        [ create lexling ]
+        dragon.pack(workspace:current_character:progress, workspace:current_character:progress)(text !dragon.buffer)
+        dragon.pack(text, workspace:lexling.types:left_square_bracket, null_location)(lexling !dragon.json.lexling)
+
+        [ next character ]
+        dragon.copy(advancement)(workspace:current_character:progress)
+
+        [ append lexling ]
+        dragon.json.append.lexling(workspace:lexlings:list, lexling)(workspace:lexlings:list)
+
+        [ jump to loop start ]
+        dragon.jump(dragon.always, @lexing.loop.start)()
+    }
+
+    [ detect right_square_bracket ]
+    dragon.integer.within_range(right_square_bracket, character, right_square_bracket, dragon.never)(detected)
+    @check.right_square_bracket detected = {
+        [ create lexling ]
+        dragon.pack(workspace:current_character:progress, workspace:current_character:progress)(text !dragon.buffer)
+        dragon.pack(text, workspace:lexling.types:right_square_bracket, null_location)(lexling !dragon.json.lexling)
+
+        [ next character ]
+        dragon.copy(advancement)(workspace:current_character:progress)
+
+        [ append lexling ]
+        dragon.json.append.lexling(workspace:lexlings:list, lexling)(workspace:lexlings:list)
+
+        [ jump to loop start ]
+        dragon.jump(dragon.always, @lexing.loop.start)()
+    }
+    
+    [ detect comma ]
+    dragon.integer.within_range(comma, character, comma, dragon.never)(detected)
+    @check.comma detected = {
+        [ create lexling ]
+        dragon.pack(workspace:current_character:progress, workspace:current_character:progress)(text !dragon.buffer)
+        dragon.pack(text, workspace:lexling.types:comma, null_location)(lexling !dragon.json.lexling)
+
+        [ next character ]
+        dragon.copy(advancement)(workspace:current_character:progress)
+
+        [ append lexling ]
+        dragon.json.append.lexling(workspace:lexlings:list, lexling)(workspace:lexlings:list)
+
+        [ jump to loop start ]
+        dragon.jump(dragon.always, @lexing.loop.start)()
+    }
+    
+    [ detect colon ]
+    dragon.integer.within_range(colon, character, colon, dragon.never)(detected)
+    @check.colon detected = {
+        [ create lexling ]
+        dragon.pack(workspace:current_character:progress, workspace:current_character:progress)(text !dragon.buffer)
+        dragon.pack(text, workspace:lexling.types:colon, null_location)(lexling !dragon.json.lexling)
+
+        [ next character ]
+        dragon.copy(advancement)(workspace:current_character:progress)
+
+        [ append lexling ]
+        dragon.json.append.lexling(workspace:lexlings:list, lexling)(workspace:lexlings:list)
+
+        [ jump to loop start ]
+        dragon.jump(dragon.always, @lexing.loop.start)()
+    }
+
+    [ detect string ]
+    dragon.integer.within_range(double_quote, character, double_quote, dragon.never)(detected)
+    @check.double_quote detected = {
+        [ setup lexling start ]
+        dragon.copy(workspace:current_character:progress)(text.start)
+
+        [ advance progress past starting quote ]
+        dragon.copy(advancement)(workspace:current_character:progress)
+
+        [ setup search for double quote loop ]
+        @string.loop.start
+
+        [ check for end of characters ]
+        dragon.current.within_range(workspace:current_character, dragon.always)(ran_out_of_characters)
+        @string.ran_out_of_characters ran_out_of_characters = {
+            [ setup error ]
+            dragon.set("Lexing Error: A string ran out of characters.")(error_message)
+            dragon.json.compile.raise_error(workspace, error_message)(workspace)
+
+            [ exit loop ]
+            dragon.jump(dragon.always, @lexing.loop.exit)()
+        }
+
+        [ check for ending quote ]
+        dragon.address_to_cell(workspace:current_character:progress, dragon.ascii_character.byte_size)(character, advancement)
+        dragon.integer.within_range(double_quote, character, double_quote, dragon.never)(detected)
+        @check.string.end_quote detected = {
+            [ setup lexling ]
+            dragon.copy(workspace:current_character:progress)(text.end)
+            dragon.pack(text.start, text.end)(text !dragon.buffer)
+            dragon.pack(text, workspace:lexling.types:string, null_location)(lexling !dragon.json.lexling)
+
+            [ next character ]
+            dragon.copy(advancement)(workspace:current_character:progress)
+
+            [ append lexling ]
+            dragon.json.append.lexling(workspace:lexlings:list, lexling)(workspace:lexlings:list)
+
+            [ jump to loop start ]
+            dragon.jump(dragon.always, @lexing.loop.start)()
+        }
+
+        [ not detected, go to loop start to check next character ]
+        dragon.copy(advancement)(workspace:current_character:progress)
+        dragon.jump(dragon.always, @string.loop.start)()
+    }
+
+    [ detect integer ]
+    dragon.integer.within_range(decimal_digits.start, character, decimal_digits.end, dragon.never)(detected)
+    @check.decimal_digit detected = {
+        [ setup lexling start ]
+        dragon.copy(workspace:current_character:progress)(text.start)
+
+        [ advance progress past starting digit ]
+        dragon.copy(advancement)(workspace:current_character:progress)
+
+        [ setup search for decimal digits loop ]
+        @decimal_digit.loop.start
+
+        [ check for end of characters ]
+        dragon.current.within_range(workspace:current_character, dragon.always)(ran_out_of_characters)
+        @decimal_digit.ran_out_of_characters ran_out_of_characters = {
+            [ exit loop ]
+            dragon.jump(dragon.always, @lexing.decimal_digit.finished)()
+        }
+
+        [ check for next character ]
+        dragon.address_to_cell(workspace:current_character:progress, dragon.ascii_character.byte_size)(character, advancement)
+        dragon.integer.within_range(decimal_digits.start, character, decimal_digits.end, dragon.never)(detected)
+        @decimal_digits.next_character detected = {
+            [ next character ]
+            dragon.copy(advancement)(workspace:current_character:progress)
+
+            [ jump to loop start ]
+            dragon.jump(dragon.always, @decimal_digit.loop.start)()
+        }
+
+        [ no more characters detected ]
+        [ setup offset ]
+        @lexing.decimal_digit.finished
+
+        [ setup lexling ]
+        dragon.integer.subtract(workspace:current_character:progress, dragon.constant.1)(text.end)
+        dragon.pack(text.start, text.end)(text !dragon.buffer)
+        dragon.pack(text, workspace:lexling.types:integer, null_location)(lexling !dragon.json.lexling)
+
+        [ append lexling ]
+        dragon.json.append.lexling(workspace:lexlings:list, lexling)(workspace:lexlings:list)
+
+        [ jump to start of lexing loop ]
+        dragon.jump(dragon.always, @lexing.loop.start)()
+    }
+
+    [ detect name ]
+    dragon.json.compile.lex.check_for_name_character(character)(detected)
+    @check.name detected = {
+        [ setup lexling start ]
+        dragon.copy(workspace:current_character:progress)(text.start)
+
+        [ advance progress past starting character ]
+        dragon.copy(advancement)(workspace:current_character:progress)
+
+        [ setup search for characters loop ]
+        @name.loop.start
+
+        [ check for end of characters ]
+        dragon.current.within_range(workspace:current_character, dragon.always)(ran_out_of_characters)
+        @name.ran_out_of_characters ran_out_of_characters = {
+            [ exit loop ]
+            dragon.jump(dragon.always, @lexing.name.finished)()
+        }
+
+        [ check for next character ]
+        dragon.address_to_cell(workspace:current_character:progress, dragon.ascii_character.byte_size)(character, advancement)
+        dragon.json.compile.lex.check_for_name_character(character)(detected)
+        @name.next_character detected = {
+            [ next character ]
+            dragon.copy(advancement)(workspace:current_character:progress)
+
+            [ jump to loop start ]
+            dragon.jump(dragon.always, @name.loop.start)()
+        }
+
+        [ @oof detected = {} ]
+
+        [ no more characters detected ]
+        [ setup offset ]
+        @lexing.name.finished
+
+        [ setup lexling ]
+        dragon.integer.subtract(workspace:current_character:progress, dragon.constant.1)(text.end)
+        dragon.pack(text.start, text.end)(text !dragon.buffer)
+        dragon.pack(text, workspace:lexling.types:name, null_location)(lexling !dragon.json.lexling)
+
+        [ append lexling ]
+        dragon.json.append.lexling(workspace:lexlings:list, lexling)(workspace:lexlings:list)
+
+        [ jump to start of lexing loop ]
+        dragon.jump(dragon.always, @lexing.loop.start)()
+    }
+
+    [ if nothing was matched, set error ]
+    dragon.set("Lexing Error: No lexling was matched.")(error_message)
+    dragon.json.compile.raise_error(workspace, error_message)(workspace)
+
+    [ setup lexing loop end ]
+    @lexing.loop.exit
+
+    [ setup end of file lexling ]
+    dragon.set("[end_of_file]")(end_of_file_message)
+    dragon.pack(end_of_file_message, workspace:lexling.types:end_of_file, null_location)(lexling !dragon.json.lexling)
+    dragon.json.append.lexling(workspace:lexlings:list, lexling)(workspace:lexlings:list)
+}
+
+[ detect and get name character ]
+dragon.json.compile.lex.check_for_name_character(character !dragon.cell)(valid !dragon.cell) = {
+    [ setup name ranges ]
+    dragon.set(dragon.hexadecimal.41)(uppercase_start)
+    dragon.set(dragon.hexadecimal.5A)(uppercase_end)
+    dragon.set(dragon.hexadecimal.61)(lowercase_start)
+    dragon.set(dragon.hexadecimal.7A)(lowercase_end)
+    dragon.set(dragon.hexadecimal.30)(numbers_start)
+    dragon.set(dragon.hexadecimal.39)(numbers_end)
+    dragon.set(dragon.hexadecimal.5F)(underscore)
+
+    [ check ranges ]
+    [ check uppercase ]
+    dragon.integer.within_range(uppercase_start, character, uppercase_end, dragon.never)(valid)
+    dragon.jump(valid, @exit)()
+
+    [ check lowercase ]
+    dragon.integer.within_range(lowercase_start, character, lowercase_end, dragon.never)(valid)
+    dragon.jump(valid, @exit)()
+
+    [ check numbers ]
+    dragon.integer.within_range(numbers_start, character, numbers_end, dragon.never)(valid)
+    dragon.jump(valid, @exit)()
+
+    [ check underscore ]
+    dragon.integer.within_range(underscore, character, underscore, dragon.never)(valid)
+    dragon.jump(valid, @exit)()
+
+    [ not found ]
+    dragon.copy(dragon.false)(valid)
+
+    [ exit ]
+    @exit
+}
+
+[ print lexling list ]
+dragon.json.compile.lex.print(workspace !dragon.json.workspace)() = {
+    [ setup variables ]
+    dragon.pack.null()(lexling.dummy !dragon.json.lexling)
+    dragon.structure.byte_size(lexling.dummy)(lexling.size)
+
+    [ setup current ]
+    dragon.list.calculate.content_buffer(workspace:lexlings:list)(content)
+    dragon.pack(content, content:start)(current !dragon.current)
+
+    [ setup loop start ]
+    @loop_start
+
+    [ check for end of current ]
+    dragon.current.within_range(current, dragon.always)(should_quit)
+    dragon.jump(should_quit, @loop_exit)()
+
+    [ get lexling ]
+    dragon.buffer.calculate.end_address(current:progress, lexling.size)(structure.end)
+    dragon.pack(current:progress, structure.end)(lexling_source !dragon.buffer)
+    dragon.buffer_to_structure(lexling_source)(lexling !dragon.json.lexling)
+
+    [ next lexling ]
+    dragon.integer.add(current:progress, lexling.size)(current:progress)
+
+    [ print lexling ]
+    dragon.json.lexling.print(lexling)()
+    dragon.print.new_line()()
+
+    [ jump to start of loop ]
+    dragon.jump(dragon.always, @loop_start)()
+
+    [ setup loop end ]
+    @loop_exit
+}
+
+
+
+[
+    Parsing
+]
+[ parslings ]
+!dragon.json.parslings
+(
+    root !dragon.json.parsling
+)
+
+[ parsling ]
+!dragon.json.parsling
+(
+    type !dragon.cell,
+    name !dragon.json.lexling,
+    value.datum !dragon.json.lexling,
+    value.members !dragon.list [ !dragon.json.parsling ]
+)
+
+[ append parsling ]
+dragon.json.append.parsling(list !dragon.list, parsling !dragon.json.parsling)(list !dragon.list) = {
+    [ append members ]
+    dragon.list.append.cell(list, parsling:type)(list)
+    dragon.json.append.lexling(list, parsling:name)(list)
+    dragon.json.append.lexling(list, parsling:value.datum)(list)
+    dragon.list.append.list(list, parsling:value.members)(list)
+}
+
+[ parsling types ]
+!dragon.json.parsling.types
+(
+    invalid !dragon.cell,
+    object !dragon.cell,
+    array !dragon.cell,
+    string !dragon.cell,
+    integer !dragon.cell,
+    boolean_false !dragon.cell,
+    boolean_true !dragon.cell,
+    null !dragon.cell
+)
+
+[ setup parsling types ]
+dragon.json.parsling.types.setup()(types !dragon.json.parsling.types) = {
+    [ setup data ]
+    dragon.set(dragon.integer.0)(types:invalid)
+    dragon.set(dragon.integer.1)(types:object)
+    dragon.set(dragon.integer.2)(types:array)
+    dragon.set(dragon.integer.3)(types:string)
+    dragon.set(dragon.integer.4)(types:integer)
+    dragon.set(dragon.integer.5)(types:boolean_false)
+    dragon.set(dragon.integer.6)(types:boolean_true)
+    dragon.set(dragon.integer.7)(types:null)
+}
+
+[ parse json lexlings ]
+dragon.json.compile.parse(workspace !dragon.json.workspace)(workspace !dragon.json.workspace) = {
+    [ setup current ]
+    dragon.list.calculate.content_buffer(workspace:lexlings:list)(lexlings_buffer)
+    dragon.pack(lexlings_buffer, lexlings_buffer:start)(workspace:current_lexling !dragon.current)
+
+    [ parse ]
+    dragon.json.compile.parse.object_body(workspace)(workspace, workspace:parslings:root)
+
+    [ consolidate all objects into one buffer ]
+    [ TODO ]
+}
+
+[ parse object ]
+dragon.json.compile.parse.object_body(workspace !dragon.json.workspace)(workspace !dragon.json.workspace, output !dragon.json.parsling) = {
+    [ setup strings ]
+    dragon.set("true")(string.true)
+    dragon.set("false")(string.false)
+    dragon.set("null")(string.null)
+
+    [ setup type ]
+    dragon.copy(workspace:parsling.types:object)(output:type)
+
+    [ null init output name ]
+    dragon.pack.null()(output:name !dragon.json.lexling)
+
+    [ parse contents ]
+    [ check for opener ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:left_curly_bracket, dragon.true)(workspace, recent_lexling, valid)
+    dragon.bits.xor(valid, dragon.constant.1)(invalid)
+    @missing_opener invalid = {
+        [ setup error ]
+        dragon.set("Parsing Error: An object did not start with an opening left curly bracket.")(error_message)
+        dragon.json.compile.raise_error(workspace, error_message)(workspace)
+
+        [ exit function ]
+        dragon.jump(dragon.always, @exit)()
+    }
+
+    [ allocate members list ]
+    dragon.pack.null()(dummy_parsling !dragon.json.parsling)
+    dragon.structure.byte_size(dummy_parsling)(parsling.size)
+    dragon.integer.multiply(parsling.size, dragon.constant.64)(increase)
+    dragon.list.open(increase)(output:value.members)
+
+    [ setup member index ]
+    dragon.copy(dragon.constant.0)(member_index)
+
+    [ get members ]
+    [ setup loop offset ]
+    @check_for_members.loop_start
+
+    [ check for closing right curly bracket ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:right_curly_bracket, dragon.false)(workspace, recent_lexling, valid)
+    dragon.jump(valid, @check_for_members.loop_exit)()
+
+    [ check for comma ]
+    dragon.integer.within_range(dragon.constant.0, member_index, dragon.constant.0, dragon.always)(comma_required)
+    @comma_required comma_required = {
+        [ check for comma ]
+        dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:comma, dragon.true)(workspace, recent_lexling, valid)
+        dragon.bits.xor(valid, dragon.constant.1)(invalid)
+        @missing_comma invalid = {
+            [ setup error ]
+            dragon.set("Parsing Error: When searching for the members of a json object, a comma was missing.")(error_message)
+            dragon.json.compile.raise_error(workspace, error_message)(workspace)
+
+            [ exit function ]
+            dragon.jump(dragon.always, @exit)()
+        }
+    }
+
+    [ check for name string ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:string, dragon.true)(workspace, name, valid)
+    dragon.bits.xor(valid, dragon.constant.1)(invalid)
+    @missing_name invalid = {
+        [ setup error ]
+        dragon.set("Parsing Error: When searching for the members of a json object, an invalid lexling was detected.")(error_message)
+        dragon.json.compile.raise_error(workspace, error_message)(workspace)
+
+        [ exit function ]
+        dragon.jump(dragon.always, @exit)()
+    }
+
+    [ setup pushing parsling ]
+    dragon.pack.null()(pushing_parsling !dragon.json.parsling)
+    dragon.pack.null()(null_list !dragon.list)
+
+    [ setup name ]
+    dragon.copy(name)(pushing_parsling:name)
+
+    [ next index ]
+    dragon.integer.add(member_index, dragon.constant.1)(member_index)
+
+    [ check for colon ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:colon, dragon.true)(workspace, recent_lexling, valid)
+    dragon.bits.xor(valid, dragon.constant.1)(invalid)
+    @missing_colon invalid = {
+        [ setup error ]
+        dragon.set("Parsing Error: When searching for the colon of a json member, an invalid lexling was detected.")(error_message)
+        dragon.json.compile.raise_error(workspace, error_message)(workspace)
+
+        [ exit function ]
+        dragon.jump(dragon.always, @exit)()
+    }
+
+    [ detect type ]
+    [ detect object ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:left_curly_bracket, dragon.false)(workspace, recent_lexling, valid)
+    @found_new_object valid = {
+        [ parse sub-object ]
+        dragon.json.compile.parse.object_body(workspace)(workspace, temp_parsling)
+
+        [ check for error ]
+        dragon.jump(workspace:error:occured, @exit)()
+
+        [ setup object name ]
+        dragon.copy(pushing_parsling:name)(temp_parsling:name)
+
+        [ append object ]
+        dragon.json.append.parsling(output:value.members, temp_parsling)(output:value.members)
+
+        [ next iteration ]
+        dragon.jump(dragon.always, @check_for_members.loop_start)()
+    }
+
+    [ detect array ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:left_square_bracket, dragon.false)(workspace, recent_lexling, valid)
+    @found_new_array valid = {
+        [ parse array ]
+        dragon.json.compile.parse.array(workspace)(workspace, temp_parsling)
+
+        [ check for error ]
+        dragon.jump(workspace:error:occured, @exit)()
+
+        [ setup array name ]
+        dragon.copy(pushing_parsling:name)(temp_parsling:name)
+
+        [ append array ]
+        dragon.json.append.parsling(output:value.members, temp_parsling)(output:value.members)
+
+        [ next iteration ]
+        dragon.jump(dragon.always, @check_for_members.loop_start)()
+    }
+
+    [ detect number ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:integer, dragon.true)(workspace, recent_lexling, valid)
+    @found_new_number valid = {
+        [ setup data ]
+        dragon.pack(workspace:parsling.types:integer, name, recent_lexling, null_list)(pushing_parsling !dragon.json.parsling)
+
+        [ append object ]
+        dragon.json.append.parsling(output:value.members, pushing_parsling)(output:value.members)
+
+        [ next iteration ]
+        dragon.jump(dragon.always, @check_for_members.loop_start)()
+    }
+
+    [ detect string ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:string, dragon.true)(workspace, recent_lexling, valid)
+    @found_new_string valid = {
+        [ setup data ]
+        dragon.pack(workspace:parsling.types:string, name, recent_lexling, null_list)(pushing_parsling !dragon.json.parsling)
+
+        [ append object ]
+        dragon.json.append.parsling(output:value.members, pushing_parsling)(output:value.members)
+
+        [ next iteration ]
+        dragon.jump(dragon.always, @check_for_members.loop_start)()
+    }
+
+    [ detect boolean true ]
+    dragon.json.compile.parse.check_current_lexling.by_value(workspace, string.true, dragon.true)(workspace, recent_lexling, valid)
+    @found_new_boolean_true valid = {
+        [ setup data ]
+        dragon.pack(workspace:parsling.types:boolean_true, name, recent_lexling, null_list)(pushing_parsling !dragon.json.parsling)
+
+        [ append object ]
+        dragon.json.append.parsling(output:value.members, pushing_parsling)(output:value.members)
+
+        [ next iteration ]
+        dragon.jump(dragon.always, @check_for_members.loop_start)()
+    }
+
+    [ detect boolean false ]
+    dragon.json.compile.parse.check_current_lexling.by_value(workspace, string.false, dragon.true)(workspace, recent_lexling, valid)
+    @found_new_boolean_false valid = {
+        [ setup data ]
+        dragon.pack(workspace:parsling.types:boolean_false, name, recent_lexling, null_list)(pushing_parsling !dragon.json.parsling)
+
+        [ append object ]
+        dragon.json.append.parsling(output:value.members, pushing_parsling)(output:value.members)
+
+        [ next iteration ]
+        dragon.jump(dragon.always, @check_for_members.loop_start)()
+    }
+
+    [ detect null data ]
+    dragon.json.compile.parse.check_current_lexling.by_value(workspace, string.null, dragon.true)(workspace, recent_lexling, valid)
+    @found_new_null valid = {
+        [ setup data ]
+        dragon.pack(workspace:parsling.types:null, name, recent_lexling, null_list)(pushing_parsling !dragon.json.parsling)
+
+        [ append object ]
+        dragon.json.append.parsling(output:value.members, pushing_parsling)(output:value.members)
+
+        [ next iteration ]
+        dragon.jump(dragon.always, @check_for_members.loop_start)()
+    }
+
+    [ invalid value lexling ]
+    [ raise error ]
+    dragon.set("Parsing Error: When breaking down a json object, an unusable lexling was found.")(error_message)
+    dragon.json.compile.raise_error(workspace, error_message)(workspace)
+
+    [ exit function ]
+    dragon.jump(dragon.always, @exit)()
+
+    [ exit loop ]
+    @check_for_members.loop_exit
+
+    [ skip past closer ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:right_curly_bracket, dragon.true)(workspace, recent_lexling, valid)
+
+    [ exit function ]
+    @exit
+}
+
+[ check for any value ]
+dragon.json.compile.parse.array(workspace !dragon.json.workspace)(workspace !dragon.json.workspace, output !dragon.json.parsling) = {
+    [ setup strings ]
+    dragon.set("true")(string.true)
+    dragon.set("false")(string.false)
+    dragon.set("null")(string.null)
+
+
+    [ setup type ]
+    dragon.copy(workspace:parsling.types:array)(output:type)
+
+    [ parse contents ]
+    [ check for opener ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:left_square_bracket, dragon.true)(workspace, recent_lexling, valid)
+    dragon.bits.xor(valid, dragon.constant.1)(invalid)
+    @missing_opener invalid = {
+        [ setup error ]
+        dragon.set("Parsing Error: An array did not start with an opening left square bracket.")(error_message)
+        dragon.json.compile.raise_error(workspace, error_message)(workspace)
+
+        [ exit function ]
+        dragon.jump.bottom(dragon.always, @dragon.master_scope)()
+    }
+
+    [ allocate members list ]
+    dragon.pack.null()(dummy_parsling !dragon.json.parsling)
+    dragon.structure.byte_size(dummy_parsling)(parsling.size)
+    dragon.integer.multiply(parsling.size, dragon.constant.64)(increase)
+    dragon.list.open(increase)(output:value.members)
+
+    [ setup member index ]
+    dragon.copy(dragon.constant.0)(member_index)
+
+    [ get members ]
+    [ setup loop offset ]
+    @check_for_members.loop_start
+
+    [ check for closing right square bracket ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:right_square_bracket, dragon.false)(workspace, recent_lexling, valid)
+    dragon.jump(valid, @check_for_members.loop_exit)()
+
+    [ check for comma ]
+    dragon.integer.within_range(dragon.constant.0, member_index, dragon.constant.0, dragon.always)(comma_required)
+    @comma_required comma_required = {
+        [ check for comma ]
+        dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:comma, dragon.true)(workspace, recent_lexling, valid)
+        dragon.bits.xor(valid, dragon.constant.1)(invalid)
+        @missing_comma invalid = {
+            [ setup error ]
+            dragon.set("Parsing Error: When searching for the members of a json array, a comma was missing.")(error_message)
+            dragon.json.compile.raise_error(workspace, error_message)(workspace)
+
+            [ exit function ]
+            dragon.jump.bottom(dragon.always, @dragon.master_scope)()
+        }
+    }
+
+    [ setup pushing parsling ]
+    dragon.pack.null()(pushing_parsling !dragon.json.parsling)
+    dragon.pack.null()(name !dragon.json.lexling)
+    dragon.pack.null()(null_list !dragon.list)
+
+    [ next index ]
+    dragon.integer.add(member_index, dragon.constant.1)(member_index)
+
+    [ detect type ]
+    [ detect object ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:left_curly_bracket, dragon.false)(workspace, recent_lexling, valid)
+    @found_new_object valid = {
+        [ parse sub-object ]
+        dragon.json.compile.parse.object_body(workspace)(workspace, temp_parsling)
+
+        [ check for error ]
+        dragon.jump.bottom(workspace:error:occured, @dragon.master_scope)()
+
+        [ setup object name ]
+        dragon.copy(pushing_parsling:name)(temp_parsling:name)
+
+        [ append object ]
+        dragon.json.append.parsling(output:value.members, temp_parsling)(output:value.members)
+
+        [ next iteration ]
+        dragon.jump(dragon.always, @check_for_members.loop_start)()
+    }
+
+    [ detect number ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:integer, dragon.true)(workspace, recent_lexling, valid)
+    @found_new_number valid = {
+        [ setup data ]
+        dragon.pack(workspace:parsling.types:integer, name, recent_lexling, null_list)(pushing_parsling !dragon.json.parsling)
+
+        [ append object ]
+        dragon.json.append.parsling(output:value.members, pushing_parsling)(output:value.members)
+
+        [ next iteration ]
+        dragon.jump(dragon.always, @check_for_members.loop_start)()
+    }
+
+    [ detect string ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:string, dragon.true)(workspace, recent_lexling, valid)
+    @found_new_string valid = {
+        [ setup data ]
+        dragon.pack(workspace:parsling.types:string, name, recent_lexling, null_list)(pushing_parsling !dragon.json.parsling)
+
+        [ append object ]
+        dragon.json.append.parsling(output:value.members, pushing_parsling)(output:value.members)
+
+        [ next iteration ]
+        dragon.jump(dragon.always, @check_for_members.loop_start)()
+    }
+
+    [ detect boolean true ]
+    dragon.json.compile.parse.check_current_lexling.by_value(workspace, string.true, dragon.true)(workspace, recent_lexling, valid)
+    @found_new_boolean_true valid = {
+        [ setup data ]
+        dragon.pack(workspace:parsling.types:boolean_true, name, recent_lexling, null_list)(pushing_parsling !dragon.json.parsling)
+
+        [ append object ]
+        dragon.json.append.parsling(output:value.members, pushing_parsling)(output:value.members)
+
+        [ next iteration ]
+        dragon.jump(dragon.always, @check_for_members.loop_start)()
+    }
+
+    [ detect boolean false ]
+    dragon.json.compile.parse.check_current_lexling.by_value(workspace, string.false, dragon.true)(workspace, recent_lexling, valid)
+    @found_new_boolean_false valid = {
+        [ setup data ]
+        dragon.pack(workspace:parsling.types:boolean_false, name, recent_lexling, null_list)(pushing_parsling !dragon.json.parsling)
+
+        [ append object ]
+        dragon.json.append.parsling(output:value.members, pushing_parsling)(output:value.members)
+
+        [ next iteration ]
+        dragon.jump(dragon.always, @check_for_members.loop_start)()
+    }
+
+    [ detect null data ]
+    dragon.json.compile.parse.check_current_lexling.by_value(workspace, string.null, dragon.true)(workspace, recent_lexling, valid)
+    @found_new_null valid = {
+        [ setup data ]
+        dragon.pack(workspace:parsling.types:null, name, recent_lexling, null_list)(pushing_parsling !dragon.json.parsling)
+
+        [ append object ]
+        dragon.json.append.parsling(output:value.members, pushing_parsling)(output:value.members)
+
+        [ next iteration ]
+        dragon.jump(dragon.always, @check_for_members.loop_start)()
+    }
+
+    [ invalid value lexling ]
+    [ raise error ]
+    dragon.set("Parsing Error: When breaking down a json array, an unusable lexling was found.")(error_message)
+    dragon.json.compile.raise_error(workspace, error_message)(workspace)
+
+    [ exit function ]
+    dragon.jump.bottom(dragon.always, @dragon.master_scope)()
+
+    [ exit loop ]
+    @check_for_members.loop_exit
+
+    [ skip past closer ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:right_square_bracket, dragon.true)(workspace, recent_lexling, valid)
+}
+
+[ check lexling ]
+dragon.json.compile.parse.check_current_lexling.by_type(workspace !dragon.json.workspace, expected_type !dragon.cell, advance !dragon.cell)(workspace !dragon.json.workspace, lexling !dragon.json.lexling, validity !dragon.cell) = {
+    [ check valid lexling ]
+    dragon.json.compile.parse.retrieve_lexling(workspace)(workspace, lexling, validity)
+    dragon.bits.xor(validity, dragon.constant.1)(invalid)
+    dragon.jump(invalid, @exit)()
+
+    [ check for lexling type ]
+    dragon.integer.within_range(expected_type, lexling:type, expected_type, dragon.never)(validity)
+    dragon.bits.xor(validity, dragon.constant.1)(invalid)
+    dragon.jump(invalid, @exit)()
+
+    [ advance ]
+    dragon.json.compile.parse.advance_lexling_current(workspace, advance, dragon.constant.1)(workspace)
+
+    [ exit function ]
+    @exit
+}
+
+[ check lexling ]
+dragon.json.compile.parse.check_current_lexling.by_value(workspace !dragon.json.workspace, value !dragon.buffer, advance !dragon.cell)(workspace !dragon.json.workspace, lexling !dragon.json.lexling, validity !dragon.cell) = {
+    [ check valid lexling ]
+    dragon.json.compile.parse.retrieve_lexling(workspace)(workspace, lexling, validity)
+    dragon.bits.xor(validity, dragon.constant.1)(invalid)
+    dragon.jump(invalid, @exit)()
+
+    [ check for lexling name ]
+    dragon.check.buffer_contents_are_equal(lexling:raw, value)(validity)
+    dragon.bits.xor(validity, dragon.constant.1)(invalid)
+    dragon.jump(invalid, @exit)()
+
+    [ set validity ]
+    dragon.copy(dragon.true)(validity)
+
+    [ advance ]
+    dragon.json.compile.parse.advance_lexling_current(workspace, advance, dragon.constant.1)(workspace)
+
+    [ exit function ]
+    @exit
+}
+
+[ advance lexling ]
+dragon.json.compile.parse.advance_lexling_current(workspace !dragon.json.workspace, advance !dragon.cell, change_by_n_lexlings !dragon.cell)(workspace !dragon.json.workspace) = {
+    [ if advanceable ]
+    @advance advance = {
+        [ calculate step ]
+        dragon.pack.null()(dummy !dragon.json.lexling)
+        dragon.structure.byte_size(dummy)(lexling.size)
+        dragon.integer.multiply(lexling.size, change_by_n_lexlings)(new_progress)
+
+        [ perform step ]
+        dragon.integer.add(workspace:current_lexling:progress, new_progress)(workspace:current_lexling:progress)
+    }
+}
+
+[ check valid lexling location and retrieve if possible ]
+dragon.json.compile.parse.retrieve_lexling(workspace !dragon.json.workspace)(workspace !dragon.json.workspace, lexling !dragon.json.lexling, validity !dragon.cell) = {
+    [ check for valid lexling range ]
+    dragon.current.within_range(workspace:current_lexling, dragon.true)(out_of_range)
+    @out_of_range out_of_range = {
+        [ set validity ]
+        dragon.copy(dragon.false)(validity)
+
+        [ exit function ]
+        dragon.jump(dragon.always, @exit)()
+    }
+
+    [ setup lexling read buffer ]
+    dragon.pack.null()(dummy !dragon.json.lexling)
+    dragon.structure.byte_size(dummy)(lexling.byte_size)
+    dragon.buffer.calculate.end_address(workspace:current_lexling:progress, lexling.byte_size)(lexling.end)
+    dragon.pack(workspace:current_lexling:progress, lexling.end)(lexling.source !dragon.buffer)
+
+    [ get lexling ]
+    dragon.buffer_to_structure(lexling.source)(lexling !dragon.json.lexling)
+
+    [ set validity to true (as far as the lexling location goes) ]
+    dragon.copy(dragon.true)(validity)
+
+    [ exit function ]
+    @exit
+}
+
+[ print json parslings ]
+dragon.json.compile.print.parslings(workspace !dragon.json.workspace)() = {
+    [ print parslings ]
+    dragon.json.compile.print.parsling(workspace, workspace:parslings:root, dragon.constant.0)()
+}
+
+[ print json parsling object ]
+dragon.json.compile.print.parsling(workspace !dragon.json.workspace, parsling !dragon.json.parsling, tabs !dragon.cell)() = {
+    [ predefine variables ]
+    dragon.pack.null()(temp_parsling !dragon.json.parsling)
+    dragon.structure.byte_size(temp_parsling !dragon.json.parsling)(parsling.byte_size)
+
+    [ setup current ]
+    dragon.list.calculate.content_buffer(parsling:value.members)(members_content_buffer)
+    dragon.pack(members_content_buffer, members_content_buffer:start)(members_content_buffer.current !dragon.current)
+
+    [ print tabs ]
+    dragon.print.tabs(tabs)()
+
+    [ print name if has name ]
+    dragon.integer.within_range(dragon.constant.0, parsling:name:raw:start, dragon.constant.0, dragon.never)(has_no_name)
+    dragon.bits.xor(has_no_name, dragon.constant.1)(has_a_name)
+    @has_a_name has_a_name = {
+        [ print name ]
+        dragon.print.buffer_as_string(parsling:name:raw)()
+    }
+    @has_no_name has_no_name = {
+        [ print alias for no name ]
+        dragon.set("[no_name]")(message)
+        dragon.print.buffer_as_string(message)()
+    }
+
+    [ print separator ]
+    dragon.set(": ")(message)
+    dragon.print.buffer_as_string(message)()
+
+    [ determine type ]
+    dragon.integer.within_range(workspace:parsling.types:invalid, parsling:type, workspace:parsling.types:invalid, dragon.never)(is_invalid)
+    dragon.integer.within_range(workspace:parsling.types:object, parsling:type, workspace:parsling.types:object, dragon.never)(is_object)
+    dragon.integer.within_range(workspace:parsling.types:array, parsling:type, workspace:parsling.types:array, dragon.never)(is_array)
+    dragon.integer.within_range(workspace:parsling.types:string, parsling:type, workspace:parsling.types:null, dragon.never)(is_literal)
+
+    [ print invalid ]
+    @is_invalid is_invalid = {
+        [ print message ]
+        dragon.set("[invalid]")(message)
+        dragon.print.buffer_as_string(message)()
+        dragon.print.new_line()()
+    }
+
+    [ print object ]
+    @is_object is_object = {
+        [ print new line ]
+        dragon.print.new_line()()
+
+        [ setup loop start ]
+        @is_object.loop_members dragon.always = {
+            [ check current within range ]
+            dragon.current.within_range(members_content_buffer.current, dragon.always)(out_of_range)
+            dragon.jump.bottom(out_of_range, @is_object.loop_members)()
+
+            [ get parsling ]
+            dragon.buffer.calculate.end_address(members_content_buffer.current:progress, parsling.byte_size)(parsling.end)
+            dragon.pack(members_content_buffer.current:progress, parsling.end)(temp_parsling.source !dragon.buffer)
+            dragon.buffer_to_structure(temp_parsling.source)(temp_parsling !dragon.json.parsling)
+
+            [ call print of parsling ]
+            dragon.integer.add(tabs, dragon.constant.1)(sub_tabs)
+            dragon.json.compile.print.parsling(workspace, temp_parsling, sub_tabs)()
+
+            [ next member ]
+            dragon.integer.add(members_content_buffer.current:progress, parsling.byte_size)(members_content_buffer.current:progress)
+
+            [ jump to loop start ]
+            dragon.jump.top(dragon.always, @is_object.loop_members)()
+        }
+    }
+
+    [ print array ]
+    @is_array is_array = {
+        [ print new line ]
+        dragon.print.new_line()()
+
+        [ setup loop start ]
+        @is_array.loop_members dragon.always = {
+            [ check current within range ]
+            dragon.current.within_range(members_content_buffer.current, dragon.always)(out_of_range)
+            dragon.jump.bottom(out_of_range, @is_array.loop_members)()
+
+            [ get parsling ]
+            dragon.buffer.calculate.end_address(members_content_buffer.current:progress, parsling.byte_size)(parsling.end)
+            dragon.pack(members_content_buffer.current:progress, parsling.end)(temp_parsling.source !dragon.buffer)
+            dragon.buffer_to_structure(temp_parsling.source)(temp_parsling !dragon.json.parsling)
+
+            [ call print of parsling ]
+            dragon.integer.add(tabs, dragon.constant.1)(sub_tabs)
+            dragon.json.compile.print.parsling(workspace, temp_parsling, sub_tabs)()
+
+            [ next member ]
+            dragon.integer.add(members_content_buffer.current:progress, parsling.byte_size)(members_content_buffer.current:progress)
+
+            [ jump to loop start ]
+            dragon.jump.top(dragon.always, @is_array.loop_members)()
+        }
+    }
+
+    [ print raw ]
+    @is_literal is_literal = {
+        [ print value ]
+        dragon.print.buffer_as_string(parsling:value.datum:raw)()
+
+        [ next line ]
+        dragon.print.new_line()()
+    }
+}
+
+
+
+[
+    Traversing
+]
+[ traverse based on name ]
+dragon.json.traverse.retrieve_parsling.by_name(source_parsling !dragon.json.parsling, name !dragon.buffer)(found_parsling !dragon.json.parsling, not_found !dragon.cell) = {
+    [ null init output ]
+    dragon.pack.null()(found_parsling !dragon.json.parsling)
+
+    [ setup metadata ]
+    dragon.structure.byte_size(source_parsling)(parsling.byte_size)
+
+    [ setup buffer ]
+    dragon.list.calculate.content_buffer(source_parsling:value.members)(members_buffer)
+
+    [ setup current ]
+    dragon.pack(members_buffer, members_buffer:start)(current_member !dragon.current)
+
+    [ setup search condition ]
+    dragon.copy(dragon.true)(not_found)
+
+    [ search for member with name ]
+    @search not_found = {
+        [ check for current within range ]
+        dragon.current.within_range(current_member, dragon.always)(no_more_parslings)
+        dragon.jump.bottom(no_more_parslings, @search)()
+
+        [ setup parsling read buffer ]
+        dragon.pack.null()(dummy !dragon.json.parsling)
+        dragon.structure.byte_size(dummy)(parsling.byte_size)
+        dragon.buffer.calculate.end_address(current_member:progress, parsling.byte_size)(parsling.end)
+        dragon.pack(current_member:progress, parsling.end)(parsling.source !dragon.buffer)
+
+        [ get parsling ]
+        dragon.buffer_to_structure(parsling.source)(parsling !dragon.json.parsling)
+
+        [ get name ]
+        dragon.json.compile.get_name_from_lexling(parsling:name)(parsling_name)
+
+        [ check name ]
+        dragon.check.buffer_contents_are_equal(name, parsling_name)(found_name)
+
+        [ if name was matched ]
+        @match found_name = {
+            [ disable not found ]
+            dragon.copy(dragon.false)(not_found)
+
+            [ setup output ]
+            dragon.copy(parsling)(found_parsling)
+
+            [ return ]
+            dragon.jump.bottom(dragon.always, @search)()
+        }
+
+        [ advance current ]
+        dragon.integer.add(current_member:progress, parsling.byte_size)(current_member:progress)
+
+        [ next parsling ]
+        dragon.jump.top(dragon.always, @search)()
+    }
+}
+
+[ traverse based on index ]
+dragon.json.traverse.retrieve_parsling.by_index(source_parsling !dragon.json.parsling, index !dragon.cell)(found_parsling !dragon.json.parsling, invalid_index !dragon.cell) = {
+    [ init outputs ]
+    dragon.pack.null()(found_parsling !dragon.json.parsling)
+
+    [ calculate list metadata ]
+    dragon.json.traverse.calculate.parsling_list_metadata(source_parsling)(parsling_members_content, parsling_byte_size, member_count)
+
+    [ check if the index is valid ]
+    [ if member count is zero ]
+    dragon.integer.within_range(dragon.constant.0, member_count, dragon.constant.0, dragon.never)(no_members_available)
+    @no_members_available no_members_available = {
+        [ setup output ]
+        dragon.copy(dragon.true)(invalid_index)
+
+        [ exit function ]
+        dragon.jump.bottom(dragon.always, @dragon.master_scope)()
+    }
+
+    [ check member index ]
+    dragon.integer.subtract(member_count, dragon.constant.1)(max_member_index)
+    dragon.integer.within_range(dragon.constant.0, index, max_member_index, dragon.never)(valid_index)
+    dragon.bits.xor(valid_index, dragon.constant.1)(invalid_index)
+
+    [ if valid index ]
+    @valid_index valid_index = {
+        [ calculate structure ]
+        dragon.integer.multiply(index, parsling_byte_size)(member_offset)
+        dragon.integer.add(member_offset, parsling_members_content:start)(parsling.start)
+        dragon.buffer.calculate.end_address(parsling.start, parsling_byte_size)(parsling.end)
+        dragon.pack(parsling.start, parsling.end)(parsling.buffer !dragon.buffer)
+
+        [ setup structure ]
+        dragon.buffer_to_structure(parsling.buffer)(found_parsling !dragon.json.parsling)
+
+        [ setup other outputs ]
+        dragon.copy(dragon.false)(invalid_index)
+    }
+}
+
+[ calculate length ]
+dragon.json.traverse.calculate.parsling_list_metadata(parsling !dragon.json.parsling)(content !dragon.buffer, parsling_byte_size !dragon.cell, parsling_count !dragon.cell) = {
+    [ setup metadata ]
+    dragon.structure.byte_size(parsling)(parsling_byte_size)
+
+    [ calculate content length, content buffer and member count ]
+    dragon.list.calculate.content_buffer(parsling:value.members)(content)
+    dragon.buffer.calculate.length(content)(content.byte_length)
+    dragon.integer.divide(content.byte_length, parsling_byte_size)(parsling_count)
+}
+
+[ return lexling string without surrounding double quotes ]
+dragon.json.compile.get_name_from_lexling(source_lexling !dragon.json.lexling)(name !dragon.buffer) = {
+    [ copy string ]
+    dragon.copy(source_lexling:raw)(name)
+
+    [ clip quotes ]
+    dragon.integer.add(name:start, dragon.ascii_character.byte_size)(name:start)
+    dragon.integer.subtract(name:end, dragon.ascii_character.byte_size)(name:end)
+}
+
+
+
+[
+    Stringify
+]
+[ stringify json parslings ]
+dragon.json.stringify.parslings(workspace !dragon.json.workspace)(string !dragon.buffer) = {
+    [ setup list ]
+    [ dragon.set(dragon.integer.1048576)(increase) ]
+    dragon.set(dragon.integer.100)(increase)
+    dragon.list.open(increase)(list)
+
+    [ stringify parslings ]
+    dragon.json.stringify.parsling(workspace, workspace:parslings:root, list, dragon.constant.0)(list)
+
+    [ turn string list into buffer ]
+    dragon.list.duplicate_content(list)(string)
+
+    [ deallocate original list ]
+    dragon.list.close(list)()
+}
+
+[ stringify json parsling object ]
+dragon.json.stringify.parsling(workspace !dragon.json.workspace, parsling !dragon.json.parsling, string !dragon.list, tabs !dragon.cell)(string !dragon.list) = {
+    [ predefine variables ]
+    dragon.pack.null()(temp_parsling !dragon.json.parsling)
+    dragon.structure.byte_size(temp_parsling !dragon.json.parsling)(parsling.byte_size)
+    dragon.set("{")(left_curly_bracket)
+    dragon.set("}")(right_curly_bracket)
+    dragon.set("[")(left_square_bracket)
+    dragon.set("]")(right_square_bracket)
+    dragon.set(": ")(separator)
+    dragon.set(",")(comma)
+
+    [ setup current ]
+    dragon.list.calculate.content_buffer(parsling:value.members)(members_content_buffer)
+    dragon.pack(members_content_buffer, members_content_buffer:start)(members_content_buffer.current !dragon.current)
+
+    [ print tabs ]
+    dragon.list.append.tabs(string, tabs)(string)
+
+    [ print name if has name ]
+    dragon.integer.within_range(dragon.constant.0, parsling:name:raw:start, dragon.constant.0, dragon.always)(has_a_name)
+    @has_a_name has_a_name = {
+        [ append name ]
+        dragon.list.append.buffer_data(string, parsling:name:raw)(string)
+
+        [ print separator ]
+        dragon.list.append.buffer_data(string, separator)(string)
+    }
+
+    [ determine type ]
+    dragon.integer.within_range(workspace:parsling.types:invalid, parsling:type, workspace:parsling.types:invalid, dragon.never)(is_invalid)
+    dragon.integer.within_range(workspace:parsling.types:object, parsling:type, workspace:parsling.types:object, dragon.never)(is_object)
+    dragon.integer.within_range(workspace:parsling.types:array, parsling:type, workspace:parsling.types:array, dragon.never)(is_array)
+    dragon.integer.within_range(workspace:parsling.types:string, parsling:type, workspace:parsling.types:null, dragon.never)(is_literal)
+
+    [ print invalid ]
+    @is_invalid is_invalid = {
+        [ print message ]
+        dragon.set("[invalid]")(message)
+        dragon.list.append.buffer_data(string, message)(string)
+        dragon.list.append.new_line(string)(string)
+    }
+
+    [ print object ]
+    @is_object is_object = {
+        [ append opener ]
+        dragon.list.append.buffer_data(string, left_curly_bracket)(string)
+
+        [ append new line ]
+        dragon.list.append.new_line(string)(string)
+
+        [ setup member count ]
+        dragon.copy(dragon.constant.0)(member_index)
+
+        [ setup loop start ]
+        @is_object.loop_members dragon.always = {
+            [ check current within range ]
+            dragon.current.within_range(members_content_buffer.current, dragon.always)(out_of_range)
+            dragon.jump.bottom(out_of_range, @is_object.loop_members)()
+
+            [ get parsling ]
+            dragon.buffer.calculate.end_address(members_content_buffer.current:progress, parsling.byte_size)(parsling.end)
+            dragon.pack(members_content_buffer.current:progress, parsling.end)(temp_parsling.source !dragon.buffer)
+            dragon.buffer_to_structure(temp_parsling.source)(temp_parsling !dragon.json.parsling)
+
+            [ call print of parsling ]
+            dragon.integer.add(tabs, dragon.constant.1)(sub_tabs)
+            dragon.json.stringify.parsling(workspace, temp_parsling, string, sub_tabs)(string)
+
+            [ check for comma ]
+            dragon.json.calculate.comma_required(parsling, member_index)(comma_required)
+            @comma_required.object comma_required = {
+                dragon.list.append.buffer_data(string, comma)(string)
+            }
+
+            [ new line ]
+            dragon.list.append.new_line(string)(string)
+
+            [ next member ]
+            dragon.integer.add(members_content_buffer.current:progress, parsling.byte_size)(members_content_buffer.current:progress)
+            dragon.integer.add(member_index, dragon.constant.1)(member_index)
+
+            [ jump to loop start ]
+            dragon.jump.top(dragon.always, @is_object.loop_members)()
+        }
+
+        [ append closer ]
+        dragon.list.append.tabs(string, tabs)(string)
+        dragon.list.append.buffer_data(string, right_curly_bracket)(string)
+    }
+
+    [ print array ]
+    @is_array is_array = {
+        [ append opener ]
+        dragon.list.append.buffer_data(string, left_square_bracket)(string)
+
+        [ print new line ]
+        dragon.list.append.new_line(string)(string)
+
+        [ setup loop start ]
+        @is_array.loop_members dragon.always = {
+            [ check current within range ]
+            dragon.current.within_range(members_content_buffer.current, dragon.always)(out_of_range)
+            dragon.jump.bottom(out_of_range, @is_array.loop_members)()
+
+            [ get parsling ]
+            dragon.buffer.calculate.end_address(members_content_buffer.current:progress, parsling.byte_size)(parsling.end)
+            dragon.pack(members_content_buffer.current:progress, parsling.end)(temp_parsling.source !dragon.buffer)
+            dragon.buffer_to_structure(temp_parsling.source)(temp_parsling !dragon.json.parsling)
+
+            [ call print of parsling ]
+            dragon.integer.add(tabs, dragon.constant.1)(sub_tabs)
+            dragon.json.stringify.parsling(workspace, temp_parsling, string, sub_tabs)(string)
+
+            [ check for comma ]
+            dragon.json.calculate.comma_required(parsling, member_index)(comma_required)
+            @comma_required.array comma_required = {
+                dragon.list.append.buffer_data(string, comma)(string)
+            }
+
+            [ new line ]
+            dragon.list.append.new_line(string)(string)
+
+            [ next member ]
+            dragon.integer.add(members_content_buffer.current:progress, parsling.byte_size)(members_content_buffer.current:progress)
+            dragon.integer.add(member_index, dragon.constant.1)(member_index)
+
+            [ jump to loop start ]
+            dragon.jump.top(dragon.always, @is_array.loop_members)()
+        }
+
+        [ append closer ]
+        dragon.list.append.tabs(string, tabs)(string)
+        dragon.list.append.buffer_data(string, right_square_bracket)(string)
+    }
+
+    [ print raw ]
+    @is_literal is_literal = {
+        [ print value ]
+        dragon.list.append.buffer_data(string, parsling:value.datum:raw)(string)
+    }
+}
+
+[ check if a comma is required ]
+dragon.json.calculate.comma_required(parsling !dragon.json.parsling, index !dragon.cell)(comma_required !dragon.cell) = {
+    [ calculate max count ]
+    dragon.json.calculate.parsling_count_in_list(parsling)(count)
+    dragon.integer.subtract(count, dragon.constant.1)(max_index)
+
+    [ calculate if is last comma ]
+    dragon.integer.within_range(max_index, index, max_index, dragon.always)(comma_required)
+}
+
+[ calculate parsling member count ]
+dragon.json.calculate.parsling_count_in_list(parsling !dragon.json.parsling)(count !dragon.cell) = {
+    [ calculate parsling size ]
+    dragon.structure.byte_size(parsling)(size)
+
+    [ get content buffer length ]
+    dragon.list.calculate.content_buffer(parsling:value.members)(content)
+    dragon.buffer.calculate.length(content)(length)
+
+    [ calculate count ]
+    dragon.integer.divide(length, size)(count)
+}

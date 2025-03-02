@@ -12,6 +12,9 @@
 #include "../../../build_temps/current.c"
 #include "../../../build_temps/list.c"
 #include "../../../build_temps/context.c"
+#include "../../../build_temps/check.c"
+#include "../../../build_temps/error.c"
+#include "../../../build_temps/json.c"
 
 /* Turn C Files Into Buffers */
 // bufferify any file
