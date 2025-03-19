@@ -462,8 +462,6 @@ dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(jso
             dragon.jump(dragon.always, @name.loop.start)()
         }
 
-        [ @oof detected = {} ]
-
         [ no more characters detected ]
         [ setup offset ]
         @lexing.name.finished
