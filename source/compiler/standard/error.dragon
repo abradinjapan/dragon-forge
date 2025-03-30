@@ -30,3 +30,9 @@ dragon.error.print_if_occured(error !dragon.error)() = {
         dragon.print.buffer_as_string(message)()
     }
 }
+
+[ close error ]
+dragon.error.close(error !dragon.error)() = {
+    [ deallocate error list ]
+    dragon.list.close(error:json)()
+}

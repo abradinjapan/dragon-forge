@@ -80,7 +80,10 @@ dragon.json.compile.close.workspace(workspace !dragon.json.workspace)() = {
     dragon.json.lexlings.close(workspace:lexlings)()
 
     [ close parslings ]
-    
+    dragon.json.parslings.close(workspace, workspace:parslings)()
+
+    [ close error ]
+    dragon.error.close(workspace:error)()
 }
 
 
@@ -591,6 +594,52 @@ dragon.json.append.parsling(list !dragon.list, parsling !dragon.json.parsling)(l
     dragon.list.append.list(list, parsling:value.members)(list)
 }
 
+[ close parslings ]
+dragon.json.parslings.close(workspace !dragon.json.workspace, parslings !dragon.json.parslings)() = {
+    [ close root parsling and recurse ]
+    dragon.json.close.parsling(workspace, parslings:root)()
+}
+
+[ close parsling ]
+dragon.json.close.parsling(workspace !dragon.json.workspace, master_parsling !dragon.json.parsling)() = {
+    [ check if parsling is an array or object ]
+    dragon.integer.within_range(workspace:parsling.types:object, master_parsling:type, workspace:parsling.types:array, dragon.never)(is_list_type)
+    @is_list_type is_list_type = {
+        [ close by loop ]
+        [ setup current ]
+        dragon.structure.byte_size(master_parsling)(parsling.byte_size)
+        dragon.list.calculate.content_buffer(master_parsling:value.members)(content_buffer)
+        dragon.pack(content_buffer, content_buffer:start)(current_member !dragon.current)
+
+        [ setup loop ]
+        @is_list_type.loop dragon.always = {
+            [ check for end of loop ]
+            dragon.current.within_range(current_member, dragon.always)(should_quit)
+            dragon.jump.bottom(should_quit, @is_list_type.loop)()
+
+            [ get sub-parsling ]
+            [ calculate structure ]
+            dragon.buffer.calculate.end_address(current_member:progress, parsling.byte_size)(parsling.end)
+            dragon.pack(current_member:progress, parsling.end)(parsling.buffer !dragon.buffer)
+
+            [ setup structure ]
+            dragon.buffer_to_structure(parsling.buffer)(found_parsling !dragon.json.parsling)
+
+            [ close parsling ]
+            dragon.json.close.parsling(workspace, found_parsling)()
+
+            [ advance current ]
+            dragon.integer.add(current_member:progress, parsling.byte_size)(current_member:progress)
+
+            [ jump to start of loop ]
+            dragon.jump.top(dragon.always, @is_list_type.loop)()
+        }
+
+        [ close list ]
+        dragon.list.close(master_parsling:value.members)()
+    }
+}
+
 [ parsling types ]
 !dragon.json.parsling.types
 (
@@ -851,7 +900,6 @@ dragon.json.compile.parse.array(workspace !dragon.json.workspace)(workspace !dra
     dragon.set("true")(string.true)
     dragon.set("false")(string.false)
     dragon.set("null")(string.null)
-
 
     [ setup type ]
     dragon.copy(workspace:parsling.types:array)(output:type)
