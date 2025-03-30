@@ -45,7 +45,7 @@ dragon.cast.calculate.digit_count(base !dragon.cell, value !dragon.cell)(count !
 }
 
 [ convert a cell to a string of any type ]
-dragon.cast.cell_to_text.lower_to_higher(value !dragon.cell, base !dragon.cell, digits !dragon.buffer, direction !dragon.cell[ false is lower to higher, true is higher to lower ])(string !dragon.buffer) = {
+dragon.cast.cell_to_text(value !dragon.cell, base !dragon.cell, digits !dragon.buffer, direction !dragon.cell[ false is lower to higher, true is higher to lower ])(string !dragon.buffer) = {
     [ calculate digit count ]
     dragon.cast.calculate.digit_count(base, value)(digit_count)
 
@@ -127,7 +127,7 @@ dragon.cast.cell_to_binary_string.lower_to_higher(value !dragon.cell)(string !dr
     dragon.set(dragon.boolean.false)(direction)
 
     [ cast ]
-    dragon.cast.cell_to_text.lower_to_higher(value, base, digits, direction)(string)
+    dragon.cast.cell_to_text(value, base, digits, direction)(string)
 }
 
 [ cast a cell to binary string ]
@@ -138,7 +138,7 @@ dragon.cast.cell_to_binary_string.higher_to_lower(value !dragon.cell)(string !dr
     dragon.set(dragon.boolean.true)(direction)
 
     [ cast ]
-    dragon.cast.cell_to_text.lower_to_higher(value, base, digits, direction)(string)
+    dragon.cast.cell_to_text(value, base, digits, direction)(string)
 }
 
 [ cast a cell to decimal string ]
@@ -149,7 +149,7 @@ dragon.cast.cell_to_decimal_string.lower_to_higher(value !dragon.cell)(string !d
     dragon.set(dragon.boolean.false)(direction)
 
     [ cast ]
-    dragon.cast.cell_to_text.lower_to_higher(value, base, digits, direction)(string)
+    dragon.cast.cell_to_text(value, base, digits, direction)(string)
 }
 
 [ cast a cell to decimal string ]
@@ -160,7 +160,7 @@ dragon.cast.cell_to_decimal_string.higher_to_lower(value !dragon.cell)(string !d
     dragon.set(dragon.boolean.true)(direction)
 
     [ cast ]
-    dragon.cast.cell_to_text.lower_to_higher(value, base, digits, direction)(string)
+    dragon.cast.cell_to_text(value, base, digits, direction)(string)
 }
 
 [ cast a cell to hex string ]
@@ -171,7 +171,7 @@ dragon.cast.cell_to_hex_string.lower_to_higher(value !dragon.cell)(string !drago
     dragon.set(dragon.boolean.false)(direction)
 
     [ cast ]
-    dragon.cast.cell_to_text.lower_to_higher(value, base, hexits, direction)(string)
+    dragon.cast.cell_to_text(value, base, hexits, direction)(string)
 }
 
 [ cast a cell to hex string ]
@@ -182,5 +182,5 @@ dragon.cast.cell_to_hex_string.higher_to_lower(value !dragon.cell)(string !drago
     dragon.set(dragon.boolean.true)(direction)
 
     [ cast ]
-    dragon.cast.cell_to_text.lower_to_higher(value, base, hexits, direction)(string)
+    dragon.cast.cell_to_text(value, base, hexits, direction)(string)
 }
