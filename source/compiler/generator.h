@@ -234,15 +234,16 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             break;
         case COMPILER__ast__predefined__check__integer_within_range:
             // setup inversion flag
-            ANVIL__code__write_cell(anvil, (ANVIL__cell)ANIVL__sft__temp_1, ANVIL__srt__temp__flag_ID_1);
+            //ANVIL__code__write_cell(anvil, (ANVIL__cell)ANIVL__sft__temp_1, ANVIL__srt__temp__flag_ID_1);
             ANVIL__code__write_cell(anvil, (ANVIL__cell)ANIVL__sft__temp_2, ANVIL__srt__temp__flag_ID_2);
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__flag_set, COMPILER__generate__use_variable(within_range__invert_result).cells.start, ANVIL__unused_cell_ID, ANVIL__unused_cell_ID, ANVIL__srt__temp__flag_ID_1);
+            //ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__flag_set, , ANVIL__unused_cell_ID, ANVIL__unused_cell_ID, ANVIL__srt__temp__flag_ID_1);
 
             // do comparison
-            ANVIL__code__operate__flag(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(within_range__lower_bound).cells.start, COMPILER__generate__use_variable(within_range__checking).cells.start, COMPILER__generate__use_variable(within_range__higher_bound).cells.start, ANIVL__sft__temp_1, ANVIL__srt__temp__flag_ID_2);
+            ANVIL__code__operate__flag(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(within_range__lower_bound).cells.start, COMPILER__generate__use_variable(within_range__checking).cells.start, COMPILER__generate__use_variable(within_range__higher_bound).cells.start, ANVIL__sft__never_run, ANVIL__srt__temp__flag_ID_2);
 
-            // get result
-            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__flag_get, ANVIL__srt__temp__flag_ID_2, ANVIL__unused_cell_ID, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(within_range__output).cells.start);
+            // get results
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__flag_get, ANVIL__srt__temp__flag_ID_2, ANVIL__unused_cell_ID, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(within_range__normal_result).cells.start);
+            ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__bits_xor, COMPILER__generate__use_variable(within_range__normal_result).cells.start, ANVIL__srt__constant__1, ANVIL__unused_cell_ID, COMPILER__generate__use_variable(within_range__inverted_result).cells.start);
 
             break;
         case COMPILER__ast__predefined__integer__addition:

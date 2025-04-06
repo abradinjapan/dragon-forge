@@ -12,7 +12,7 @@ dragon.print.tabs(tab_count !dragon.cell)() = {
     [ print tabs until finished ]
     @loop dragon.always = {
         [ check for more characters ]
-        dragon.integer.within_range(dragon.constant.0, tab_count, dragon.constant.0, dragon.never)(finished)
+        dragon.integer.within_range(dragon.constant.0, tab_count, dragon.constant.0)(finished, unfinished)
         dragon.jump.bottom(finished, @loop)()
 
         [ print tab ]
@@ -49,7 +49,7 @@ dragon.print.buffer_as_string(buffer !dragon.buffer)() = {
     [ print characters ]
     @print dragon.always = {
         [ check for end of string ]
-        dragon.current.within_range(current_character, dragon.always)(out_of_characters)
+        dragon.current.within_range(current_character)(more_characters, out_of_characters)
         dragon.jump.bottom(out_of_characters, @print)()
 
         [ read character ]

@@ -223,14 +223,14 @@ dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(jso
     @lexing.loop.start
 
     [ check if current is in range ]
-    dragon.current.within_range(workspace:current_character, dragon.always)(should_quit)
+    dragon.current.within_range(workspace:current_character)(should_not_quit, should_quit)
     dragon.jump(should_quit, @lexing.loop.exit)()
 
     [ get character ]
     dragon.address_to_cell(workspace:current_character:progress, dragon.ascii_character.byte_size)(character, advancement)
 
     [ if whitespace, go back to beginning of loop ]
-    dragon.integer.within_range(whitespace:start, character, whitespace:end, dragon.never)(whitespace_detected)
+    dragon.integer.within_range(whitespace:start, character, whitespace:end)(whitespace_detected, no_whitespace_detected)
     @whitespace whitespace_detected = {
         [ next character ]
         dragon.copy(advancement)(workspace:current_character:progress)
@@ -241,7 +241,7 @@ dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(jso
 
     [ otherwise, detect lexling ]
     [ detect left_curly_bracket ]
-    dragon.integer.within_range(left_curly_bracket, character, left_curly_bracket, dragon.never)(detected)
+    dragon.integer.within_range(left_curly_bracket, character, left_curly_bracket)(detected, not_detected)
     @check.left_curly_bracket detected = {
         [ create lexling ]
         dragon.pack(workspace:current_character:progress, workspace:current_character:progress)(text !dragon.buffer)
@@ -258,7 +258,7 @@ dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(jso
     }
 
     [ detect right_curly_bracket ]
-    dragon.integer.within_range(right_curly_bracket, character, right_curly_bracket, dragon.never)(detected)
+    dragon.integer.within_range(right_curly_bracket, character, right_curly_bracket)(detected, not_detected)
     @check.right_curly_bracket detected = {
         [ create lexling ]
         dragon.pack(workspace:current_character:progress, workspace:current_character:progress)(text !dragon.buffer)
@@ -275,7 +275,7 @@ dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(jso
     }
 
     [ detect left_square_bracket ]
-    dragon.integer.within_range(left_square_bracket, character, left_square_bracket, dragon.never)(detected)
+    dragon.integer.within_range(left_square_bracket, character, left_square_bracket)(detected, not_detected)
     @check.left_square_bracket detected = {
         [ create lexling ]
         dragon.pack(workspace:current_character:progress, workspace:current_character:progress)(text !dragon.buffer)
@@ -292,7 +292,7 @@ dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(jso
     }
 
     [ detect right_square_bracket ]
-    dragon.integer.within_range(right_square_bracket, character, right_square_bracket, dragon.never)(detected)
+    dragon.integer.within_range(right_square_bracket, character, right_square_bracket)(detected, not_detected)
     @check.right_square_bracket detected = {
         [ create lexling ]
         dragon.pack(workspace:current_character:progress, workspace:current_character:progress)(text !dragon.buffer)
@@ -309,7 +309,7 @@ dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(jso
     }
     
     [ detect comma ]
-    dragon.integer.within_range(comma, character, comma, dragon.never)(detected)
+    dragon.integer.within_range(comma, character, comma)(detected, not_detected)
     @check.comma detected = {
         [ create lexling ]
         dragon.pack(workspace:current_character:progress, workspace:current_character:progress)(text !dragon.buffer)
@@ -326,7 +326,7 @@ dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(jso
     }
     
     [ detect colon ]
-    dragon.integer.within_range(colon, character, colon, dragon.never)(detected)
+    dragon.integer.within_range(colon, character, colon)(detected, not_detected)
     @check.colon detected = {
         [ create lexling ]
         dragon.pack(workspace:current_character:progress, workspace:current_character:progress)(text !dragon.buffer)
@@ -343,7 +343,7 @@ dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(jso
     }
 
     [ detect string ]
-    dragon.integer.within_range(double_quote, character, double_quote, dragon.never)(detected)
+    dragon.integer.within_range(double_quote, character, double_quote)(detected, not_detected)
     @check.double_quote detected = {
         [ setup lexling start ]
         dragon.copy(workspace:current_character:progress)(text.start)
@@ -355,7 +355,7 @@ dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(jso
         @string.loop.start
 
         [ check for end of characters ]
-        dragon.current.within_range(workspace:current_character, dragon.always)(ran_out_of_characters)
+        dragon.current.within_range(workspace:current_character)(more_characters, ran_out_of_characters)
         @string.ran_out_of_characters ran_out_of_characters = {
             [ setup error ]
             dragon.set("Lexing Error: A string ran out of characters.")(error_message)
@@ -367,7 +367,7 @@ dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(jso
 
         [ check for ending quote ]
         dragon.address_to_cell(workspace:current_character:progress, dragon.ascii_character.byte_size)(character, advancement)
-        dragon.integer.within_range(double_quote, character, double_quote, dragon.never)(detected)
+        dragon.integer.within_range(double_quote, character, double_quote)(detected, not_detected)
         @check.string.end_quote detected = {
             [ setup lexling ]
             dragon.copy(workspace:current_character:progress)(text.end)
@@ -390,7 +390,7 @@ dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(jso
     }
 
     [ detect integer ]
-    dragon.integer.within_range(decimal_digits.start, character, decimal_digits.end, dragon.never)(detected)
+    dragon.integer.within_range(decimal_digits.start, character, decimal_digits.end)(detected, not_detected)
     @check.decimal_digit detected = {
         [ setup lexling start ]
         dragon.copy(workspace:current_character:progress)(text.start)
@@ -402,7 +402,7 @@ dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(jso
         @decimal_digit.loop.start
 
         [ check for end of characters ]
-        dragon.current.within_range(workspace:current_character, dragon.always)(ran_out_of_characters)
+        dragon.current.within_range(workspace:current_character)(more_characters, ran_out_of_characters)
         @decimal_digit.ran_out_of_characters ran_out_of_characters = {
             [ exit loop ]
             dragon.jump(dragon.always, @lexing.decimal_digit.finished)()
@@ -410,7 +410,7 @@ dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(jso
 
         [ check for next character ]
         dragon.address_to_cell(workspace:current_character:progress, dragon.ascii_character.byte_size)(character, advancement)
-        dragon.integer.within_range(decimal_digits.start, character, decimal_digits.end, dragon.never)(detected)
+        dragon.integer.within_range(decimal_digits.start, character, decimal_digits.end)(detected, not_detected)
         @decimal_digits.next_character detected = {
             [ next character ]
             dragon.copy(advancement)(workspace:current_character:progress)
@@ -448,7 +448,7 @@ dragon.json.compile.lex(json !dragon.json, workspace !dragon.json.workspace)(jso
         @name.loop.start
 
         [ check for end of characters ]
-        dragon.current.within_range(workspace:current_character, dragon.always)(ran_out_of_characters)
+        dragon.current.within_range(workspace:current_character)(more_characters, ran_out_of_characters)
         @name.ran_out_of_characters ran_out_of_characters = {
             [ exit loop ]
             dragon.jump(dragon.always, @lexing.name.finished)()
@@ -507,19 +507,19 @@ dragon.json.compile.lex.check_for_name_character(character !dragon.cell)(valid !
 
     [ check ranges ]
     [ check uppercase ]
-    dragon.integer.within_range(uppercase_start, character, uppercase_end, dragon.never)(valid)
+    dragon.integer.within_range(uppercase_start, character, uppercase_end)(valid, invalid)
     dragon.jump(valid, @exit)()
 
     [ check lowercase ]
-    dragon.integer.within_range(lowercase_start, character, lowercase_end, dragon.never)(valid)
+    dragon.integer.within_range(lowercase_start, character, lowercase_end)(valid, invalid)
     dragon.jump(valid, @exit)()
 
     [ check numbers ]
-    dragon.integer.within_range(numbers_start, character, numbers_end, dragon.never)(valid)
+    dragon.integer.within_range(numbers_start, character, numbers_end)(valid, invalid)
     dragon.jump(valid, @exit)()
 
     [ check underscore ]
-    dragon.integer.within_range(underscore, character, underscore, dragon.never)(valid)
+    dragon.integer.within_range(underscore, character, underscore)(valid, invalid)
     dragon.jump(valid, @exit)()
 
     [ not found ]
@@ -543,7 +543,7 @@ dragon.json.compile.lex.print(workspace !dragon.json.workspace)() = {
     @loop_start
 
     [ check for end of current ]
-    dragon.current.within_range(current, dragon.always)(should_quit)
+    dragon.current.within_range(current)(should_not_quit, should_quit)
     dragon.jump(should_quit, @loop_exit)()
 
     [ get lexling ]
@@ -603,7 +603,7 @@ dragon.json.parslings.close(workspace !dragon.json.workspace, parslings !dragon.
 [ close parsling ]
 dragon.json.close.parsling(workspace !dragon.json.workspace, master_parsling !dragon.json.parsling)() = {
     [ check if parsling is an array or object ]
-    dragon.integer.within_range(workspace:parsling.types:object, master_parsling:type, workspace:parsling.types:array, dragon.never)(is_list_type)
+    dragon.integer.within_range(workspace:parsling.types:object, master_parsling:type, workspace:parsling.types:array)(is_list_type, is_not_list_type)
     @is_list_type is_list_type = {
         [ close by loop ]
         [ setup current ]
@@ -614,7 +614,7 @@ dragon.json.close.parsling(workspace !dragon.json.workspace, master_parsling !dr
         [ setup loop ]
         @is_list_type.loop dragon.always = {
             [ check for end of loop ]
-            dragon.current.within_range(current_member, dragon.always)(should_quit)
+            dragon.current.within_range(current_member)(should_not_quit, should_quit)
             dragon.jump.bottom(should_quit, @is_list_type.loop)()
 
             [ get sub-parsling ]
@@ -723,7 +723,7 @@ dragon.json.compile.parse.object_body(workspace !dragon.json.workspace)(workspac
     dragon.jump(valid, @check_for_members.loop_exit)()
 
     [ check for comma ]
-    dragon.integer.within_range(dragon.constant.0, member_index, dragon.constant.0, dragon.always)(comma_required)
+    dragon.integer.within_range(dragon.constant.0, member_index, dragon.constant.0)(comma_not_required, comma_required)
     @comma_required comma_required = {
         [ check for comma ]
         dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:comma, dragon.true)(workspace, recent_lexling, valid)
@@ -935,7 +935,7 @@ dragon.json.compile.parse.array(workspace !dragon.json.workspace)(workspace !dra
     dragon.jump(valid, @check_for_members.loop_exit)()
 
     [ check for comma ]
-    dragon.integer.within_range(dragon.constant.0, member_index, dragon.constant.0, dragon.always)(comma_required)
+    dragon.integer.within_range(dragon.constant.0, member_index, dragon.constant.0)(comma_not_required, comma_required)
     @comma_required comma_required = {
         [ check for comma ]
         dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:comma, dragon.true)(workspace, recent_lexling, valid)
@@ -1066,7 +1066,7 @@ dragon.json.compile.parse.check_current_lexling.by_type(workspace !dragon.json.w
     dragon.jump(invalid, @exit)()
 
     [ check for lexling type ]
-    dragon.integer.within_range(expected_type, lexling:type, expected_type, dragon.never)(validity)
+    dragon.integer.within_range(expected_type, lexling:type, expected_type)(validity, invalidity)
     dragon.bits.xor(validity, dragon.constant.1)(invalid)
     dragon.jump(invalid, @exit)()
 
@@ -1116,7 +1116,7 @@ dragon.json.compile.parse.advance_lexling_current(workspace !dragon.json.workspa
 [ check valid lexling location and retrieve if possible ]
 dragon.json.compile.parse.retrieve_lexling(workspace !dragon.json.workspace)(workspace !dragon.json.workspace, lexling !dragon.json.lexling, validity !dragon.cell) = {
     [ check for valid lexling range ]
-    dragon.current.within_range(workspace:current_lexling, dragon.true)(out_of_range)
+    dragon.current.within_range(workspace:current_lexling)(within_range, out_of_range)
     @out_of_range out_of_range = {
         [ set validity ]
         dragon.copy(dragon.false)(validity)
@@ -1161,7 +1161,7 @@ dragon.json.compile.print.parsling(workspace !dragon.json.workspace, parsling !d
     dragon.print.tabs(tabs)()
 
     [ print name if has name ]
-    dragon.integer.within_range(dragon.constant.0, parsling:name:raw:start, dragon.constant.0, dragon.never)(has_no_name)
+    dragon.integer.within_range(dragon.constant.0, parsling:name:raw:start, dragon.constant.0)(has_no_name, has_a_name)
     dragon.bits.xor(has_no_name, dragon.constant.1)(has_a_name)
     @has_a_name has_a_name = {
         [ print name ]
@@ -1178,10 +1178,10 @@ dragon.json.compile.print.parsling(workspace !dragon.json.workspace, parsling !d
     dragon.print.buffer_as_string(message)()
 
     [ determine type ]
-    dragon.integer.within_range(workspace:parsling.types:invalid, parsling:type, workspace:parsling.types:invalid, dragon.never)(is_invalid)
-    dragon.integer.within_range(workspace:parsling.types:object, parsling:type, workspace:parsling.types:object, dragon.never)(is_object)
-    dragon.integer.within_range(workspace:parsling.types:array, parsling:type, workspace:parsling.types:array, dragon.never)(is_array)
-    dragon.integer.within_range(workspace:parsling.types:string, parsling:type, workspace:parsling.types:null, dragon.never)(is_literal)
+    dragon.integer.within_range(workspace:parsling.types:invalid, parsling:type, workspace:parsling.types:invalid)(is_invalid, not)
+    dragon.integer.within_range(workspace:parsling.types:object, parsling:type, workspace:parsling.types:object)(is_object, not)
+    dragon.integer.within_range(workspace:parsling.types:array, parsling:type, workspace:parsling.types:array)(is_array, not)
+    dragon.integer.within_range(workspace:parsling.types:string, parsling:type, workspace:parsling.types:null)(is_literal, not)
 
     [ print invalid ]
     @is_invalid is_invalid = {
@@ -1199,7 +1199,7 @@ dragon.json.compile.print.parsling(workspace !dragon.json.workspace, parsling !d
         [ setup loop start ]
         @is_object.loop_members dragon.always = {
             [ check current within range ]
-            dragon.current.within_range(members_content_buffer.current, dragon.always)(out_of_range)
+            dragon.current.within_range(members_content_buffer.current)(within_range, out_of_range)
             dragon.jump.bottom(out_of_range, @is_object.loop_members)()
 
             [ get parsling ]
@@ -1227,7 +1227,7 @@ dragon.json.compile.print.parsling(workspace !dragon.json.workspace, parsling !d
         [ setup loop start ]
         @is_array.loop_members dragon.always = {
             [ check current within range ]
-            dragon.current.within_range(members_content_buffer.current, dragon.always)(out_of_range)
+            dragon.current.within_range(members_content_buffer.current)(within_range, out_of_range)
             dragon.jump.bottom(out_of_range, @is_array.loop_members)()
 
             [ get parsling ]
@@ -1282,7 +1282,7 @@ dragon.json.traverse.retrieve_parsling.by_name(source_parsling !dragon.json.pars
     [ search for member with name ]
     @search not_found = {
         [ check for current within range ]
-        dragon.current.within_range(current_member, dragon.always)(no_more_parslings)
+        dragon.current.within_range(current_member)(more_parslings, no_more_parslings)
         dragon.jump.bottom(no_more_parslings, @search)()
 
         [ setup parsling read buffer ]
@@ -1330,7 +1330,7 @@ dragon.json.traverse.retrieve_parsling.by_index(source_parsling !dragon.json.par
 
     [ check if the index is valid ]
     [ if member count is zero ]
-    dragon.integer.within_range(dragon.constant.0, member_count, dragon.constant.0, dragon.never)(no_members_available)
+    dragon.integer.within_range(dragon.constant.0, member_count, dragon.constant.0)(no_members_available, members_available)
     @no_members_available no_members_available = {
         [ setup output ]
         dragon.copy(dragon.true)(invalid_index)
@@ -1341,7 +1341,7 @@ dragon.json.traverse.retrieve_parsling.by_index(source_parsling !dragon.json.par
 
     [ check member index ]
     dragon.integer.subtract(member_count, dragon.constant.1)(max_member_index)
-    dragon.integer.within_range(dragon.constant.0, index, max_member_index, dragon.never)(valid_index)
+    dragon.integer.within_range(dragon.constant.0, index, max_member_index)(valid_index, invalid_index)
     dragon.bits.xor(valid_index, dragon.constant.1)(invalid_index)
 
     [ if valid index ]
@@ -1423,7 +1423,7 @@ dragon.json.stringify.parsling(workspace !dragon.json.workspace, parsling !drago
     dragon.list.append.tabs(string, tabs)(string)
 
     [ print name if has name ]
-    dragon.integer.within_range(dragon.constant.0, parsling:name:raw:start, dragon.constant.0, dragon.always)(has_a_name)
+    dragon.integer.within_range(dragon.constant.0, parsling:name:raw:start, dragon.constant.0)(has_no_name, has_a_name)
     @has_a_name has_a_name = {
         [ append name ]
         dragon.list.append.buffer_data(string, parsling:name:raw)(string)
@@ -1433,10 +1433,10 @@ dragon.json.stringify.parsling(workspace !dragon.json.workspace, parsling !drago
     }
 
     [ determine type ]
-    dragon.integer.within_range(workspace:parsling.types:invalid, parsling:type, workspace:parsling.types:invalid, dragon.never)(is_invalid)
-    dragon.integer.within_range(workspace:parsling.types:object, parsling:type, workspace:parsling.types:object, dragon.never)(is_object)
-    dragon.integer.within_range(workspace:parsling.types:array, parsling:type, workspace:parsling.types:array, dragon.never)(is_array)
-    dragon.integer.within_range(workspace:parsling.types:string, parsling:type, workspace:parsling.types:null, dragon.never)(is_literal)
+    dragon.integer.within_range(workspace:parsling.types:invalid, parsling:type, workspace:parsling.types:invalid)(is_invalid, not)
+    dragon.integer.within_range(workspace:parsling.types:object, parsling:type, workspace:parsling.types:object)(is_object, not)
+    dragon.integer.within_range(workspace:parsling.types:array, parsling:type, workspace:parsling.types:array)(is_array, not)
+    dragon.integer.within_range(workspace:parsling.types:string, parsling:type, workspace:parsling.types:null)(is_literal, not)
 
     [ print invalid ]
     @is_invalid is_invalid = {
@@ -1460,7 +1460,7 @@ dragon.json.stringify.parsling(workspace !dragon.json.workspace, parsling !drago
         [ setup loop start ]
         @is_object.loop_members dragon.always = {
             [ check current within range ]
-            dragon.current.within_range(members_content_buffer.current, dragon.always)(out_of_range)
+            dragon.current.within_range(members_content_buffer.current)(within_range, out_of_range)
             dragon.jump.bottom(out_of_range, @is_object.loop_members)()
 
             [ get parsling ]
@@ -1505,7 +1505,7 @@ dragon.json.stringify.parsling(workspace !dragon.json.workspace, parsling !drago
         [ setup loop start ]
         @is_array.loop_members dragon.always = {
             [ check current within range ]
-            dragon.current.within_range(members_content_buffer.current, dragon.always)(out_of_range)
+            dragon.current.within_range(members_content_buffer.current)(within_range, out_of_range)
             dragon.jump.bottom(out_of_range, @is_array.loop_members)()
 
             [ get parsling ]
@@ -1553,7 +1553,7 @@ dragon.json.calculate.comma_required(parsling !dragon.json.parsling, index !drag
     dragon.integer.subtract(count, dragon.constant.1)(max_index)
 
     [ calculate if is last comma ]
-    dragon.integer.within_range(max_index, index, max_index, dragon.always)(comma_required)
+    dragon.integer.within_range(max_index, index, max_index)(comma_not_required, comma_required)
 }
 
 [ calculate parsling member count ]

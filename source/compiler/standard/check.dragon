@@ -5,7 +5,7 @@ dragon.check.buffer_contents_are_equal(a !dragon.buffer, b !dragon.buffer)(equiv
     dragon.buffer.calculate.length(b)(b.length)
 
     [ check length equivalency ]
-    dragon.integer.within_range(a.length, b.length, a.length, dragon.always)(invalid)
+    dragon.integer.within_range(a.length, b.length, a.length)(valid, invalid)
     @invalid_lengths invalid = {
         [ set equivalent ]
         dragon.copy(dragon.false)(equivalent)
@@ -23,7 +23,7 @@ dragon.check.buffer_contents_are_equal(a !dragon.buffer, b !dragon.buffer)(equiv
     @check_loop_start
 
     [ check currents ]
-    dragon.current.within_range(a.current, dragon.always)(a.current.invalid)
+    dragon.current.within_range(a.current)(a.current.valid, a.current.invalid)
     @check_currents a.current.invalid = {
         [ not an error, only reachable by equivalent string ]
         dragon.copy(dragon.true)(equivalent)
@@ -37,7 +37,7 @@ dragon.check.buffer_contents_are_equal(a !dragon.buffer, b !dragon.buffer)(equiv
     dragon.address_to_cell(b.current:progress, dragon.ascii_character.byte_size)(b.character, b.current:progress)
 
     [ check for character equivalency ]
-    dragon.integer.within_range(a.character, b.character, a.character, dragon.always)(not_a_match)
+    dragon.integer.within_range(a.character, b.character, a.character)(match, not_a_match)
     @not_a_match not_a_match = {
         [ set not equivalent ]
         dragon.copy(dragon.false)(equivalent)

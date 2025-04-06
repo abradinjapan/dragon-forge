@@ -2,7 +2,7 @@
 !dragon.current(buffer !dragon.buffer, progress !dragon.cell)
 
 [ check current within range ]
-dragon.current.within_range(current !dragon.current, invert !dragon.cell)(valid !dragon.cell) = {
+dragon.current.within_range(current !dragon.current)(within_range !dragon.cell, outside_range !dragon.cell) = {
     [ check range ]
-    dragon.integer.within_range(current:buffer:start, current:progress, current:buffer:end, invert)(valid)
+    dragon.integer.within_range(current:buffer:start, current:progress, current:buffer:end)(within_range, outside_range)
 }

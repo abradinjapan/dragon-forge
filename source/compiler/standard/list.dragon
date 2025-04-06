@@ -38,7 +38,7 @@ dragon.list.append.buffer_data(list !dragon.list, data !dragon.buffer)(list !dra
     dragon.integer.add(list:length, data.length)(required_length)
 
     [ reallocate buffer if necessary ]
-    dragon.integer.within_range(dragon.constant.0, required_length, old_allocation.length, dragon.always)(reallocate)
+    dragon.integer.within_range(dragon.constant.0, required_length, old_allocation.length)(skip, reallocate)
     @reallocate reallocate = {
         [ calculate chunk count ]
         dragon.integer.divide(required_length, list:increase)(increase_chunk_count)
@@ -87,7 +87,7 @@ dragon.list.append.cell(list !dragon.list, data !dragon.cell)(list !dragon.list)
     dragon.integer.add(list:length, data.length)(required_length)
 
     [ reallocate buffer if necessary ]
-    dragon.integer.within_range(dragon.constant.0, required_length, old_allocation.length, dragon.always)(reallocate)
+    dragon.integer.within_range(dragon.constant.0, required_length, old_allocation.length)(skip, reallocate)
     @reallocate reallocate = {
         [ calculate chunk count ]
         dragon.integer.divide(required_length, list:increase)(increase_chunk_count)
@@ -143,7 +143,7 @@ dragon.list.append.tabs(list !dragon.list, tab_count !dragon.cell)(list !dragon.
     [ print tabs until finished ]
     @loop dragon.always = {
         [ check for more characters ]
-        dragon.integer.within_range(dragon.constant.0, tab_count, dragon.constant.0, dragon.never)(finished)
+        dragon.integer.within_range(dragon.constant.0, tab_count, dragon.constant.0)(finished, unfinished)
         dragon.jump.bottom(finished, @loop)()
 
         [ print tab ]

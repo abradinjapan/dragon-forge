@@ -1,7 +1,7 @@
 [ count how many digits in any number system ]
 dragon.cast.calculate.digit_count(base !dragon.cell, value !dragon.cell)(count !dragon.cell) = {
     [ check for zero value ]
-    dragon.integer.within_range(dragon.constant.0, value, dragon.constant.0, dragon.never)(is_zero_value)
+    dragon.integer.within_range(dragon.constant.0, value, dragon.constant.0)(is_zero_value, is_not_zero_value)
     @is_zero_value is_zero_value = {
         [ if is zero value, then character count must be 1 to account for '0' string ]
         dragon.set(dragon.integer.1)(count)
@@ -11,7 +11,7 @@ dragon.cast.calculate.digit_count(base !dragon.cell, value !dragon.cell)(count !
     }
 
     [ check for invalid denominator ]
-    dragon.integer.within_range(dragon.constant.0, base, dragon.constant.1, dragon.never)(is_zero_base)
+    dragon.integer.within_range(dragon.constant.0, base, dragon.constant.1)(is_zero_base, is_not_zero_base)
     @is_zero_base is_zero_base = {
         [ if is zero base, then character count must be 0 to account for an invalid denominator ]
         dragon.set(dragon.integer.0)(count)
@@ -28,7 +28,7 @@ dragon.cast.calculate.digit_count(base !dragon.cell, value !dragon.cell)(count !
     @loop_start
 
     [ check if value is zero ]
-    dragon.integer.within_range(dragon.constant.0, value, dragon.constant.0, dragon.never)(is_zero_value)
+    dragon.integer.within_range(dragon.constant.0, value, dragon.constant.0)(is_zero_value, is_not_zero_value)
     dragon.jump(is_zero_value, @finished)()
 
     [ calculate new amount ]
@@ -64,7 +64,7 @@ dragon.cast.cell_to_text(value !dragon.cell, base !dragon.cell, digits !dragon.b
         @lower_to_higher.loop_start
 
         [ check for valid current ]
-        dragon.current.within_range(current, dragon.always)(exit)
+        dragon.current.within_range(current)(continue, exit)
         dragon.jump(exit, @exit)()
 
         [ get digit ]
@@ -94,7 +94,7 @@ dragon.cast.cell_to_text(value !dragon.cell, base !dragon.cell, digits !dragon.b
         @higher_to_lower.loop_start
 
         [ check for valid current ]
-        dragon.current.within_range(current, dragon.always)(exit)
+        dragon.current.within_range(current)(continue, exit)
         dragon.jump(exit, @exit)()
 
         [ get digit ]
