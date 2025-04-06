@@ -37,7 +37,7 @@ dragon.print.buffer(buffer !dragon.buffer)() = {
     dragon.print.buffer_as_string(header)()
     dragon.print.integer.unsigned(buffer:start)()
     dragon.print.buffer_as_string(separator)()
-    dragon.print.integer.unsigned(buffer:start)()
+    dragon.print.integer.unsigned(buffer:end)()
     dragon.print.buffer_as_string(footer)()
 }
 
