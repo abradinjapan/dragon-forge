@@ -1,0 +1,18 @@
+[ add time ]
+dragon.time.add(a !dragon.time, b !dragon.time)(output !dragon.time) = {
+    [ setup constants ]
+    dragon.set(dragon.integer.1000000000)(second_in_nanoseconds)
+    dragon.set(dragon.integer.n1)(max)
+
+    [ add nanoseconds ]
+    dragon.integer.add(a:nanoseconds, b:nanoseconds)(total_nanoseconds)
+
+    [ check if total nanoseconds is greater than or equal to one second ]
+    dragon.integer.within_range(second_in_nanoseconds, total_nanoseconds, max, dragon.never)(has_overflowed)
+
+    [ if overflowed ]
+    @has_overflowed has_overflowed = {
+        [ calculate total seconds of nanoseconds ]
+        dragon.integer.
+    }
+}
