@@ -183,7 +183,6 @@ ANVIL__ilt ANVIL__convert__it_to_ilt(ANVIL__it instruction) {
         ANVIL__ilt__run,
         ANVIL__ilt__get_time,
         ANVIL__ilt__debug__putchar,
-        ANVIL__ilt__debug__print_cell_as_decimal,
         ANVIL__ilt__debug__fgets,
         ANVIL__ilt__debug__mark_data_section,
         ANVIL__ilt__debug__mark_code_section,
@@ -741,9 +740,6 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
     // debug putchar temps
     ANVIL__cell_ID debug__putchar__printing_cell_ID;
 
-    // debug print cell as decimal temps
-    ANVIL__cell_ID debug__print_cell_as_decimal__printing_cell_ID;
-
     // debug fgets temps
     ANVIL__cell_ID debug__fgets__buffer_address_start;
     ANVIL__cell_ID debug__fgets__buffer_address_end;
@@ -1267,15 +1263,6 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
 
         // flush stream for full update
         fflush(stdout);
-
-        break;
-    // print one cell as a decimal number
-    case ANVIL__it__debug__print_cell_as_decimal:
-        // get parameters
-        debug__print_cell_as_decimal__printing_cell_ID = ANVIL__read_next__cell_ID(execution_read_address);
-
-        // print
-        printf("%lu", (u64)(*context).cells[debug__print_cell_as_decimal__printing_cell_ID]);
 
         break;
     // read one string from stdin

@@ -382,15 +382,6 @@ void ANVIL__code__debug__putchar(ANVIL__workspace* workspace, ANVIL__cell_ID pri
     return;
 }
 
-// write debug print cell as decimal instruction
-void ANVIL__code__debug__print_cell_as_decimal(ANVIL__workspace* workspace, ANVIL__cell_ID printing_cell_ID) {
-    // write instruction
-    ANVIL__write_next__instruction_ID(workspace, ANVIL__it__debug__print_cell_as_decimal);
-    ANVIL__write_next__cell_ID(workspace, printing_cell_ID);
-
-    return;
-}
-
 // write debug fgets instruction
 void ANVIL__code__debug__fgets(ANVIL__workspace* workspace, ANVIL__cell_ID buffer_start_ID, ANVIL__cell_ID buffer_end_ID) {
     // write instruction

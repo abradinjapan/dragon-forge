@@ -96,7 +96,6 @@ typedef enum ANVIL__it {
     ANVIL__it__run, // run context (both until finished and run one instruction)
     ANVIL__it__get_time, // get time in seconds and nano seconds
     ANVIL__it__debug__putchar, // print one character to stdout
-    ANVIL__it__debug__print_cell_as_decimal, // print an entire cell as a decimal number
     ANVIL__it__debug__fgets, // read one line from stdin
     ANVIL__it__debug__mark_data_section, // mark a section of data (NOP)
     ANVIL__it__debug__mark_code_section, // mark a section of code (NOP)
@@ -128,7 +127,6 @@ typedef enum ANVIL__ilt {
     ANVIL__ilt__run = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 3),
     ANVIL__ilt__get_time = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 2),
     ANVIL__ilt__debug__putchar = sizeof(ANVIL__instruction_ID) + sizeof(ANVIL__cell_ID),
-    ANVIL__ilt__debug__print_cell_as_decimal = sizeof(ANVIL__instruction_ID) + sizeof(ANVIL__cell_ID),
     ANVIL__ilt__debug__fgets = sizeof(ANVIL__instruction_ID) + (sizeof(ANVIL__cell_ID) * 2),
     ANVIL__ilt__debug__mark_data_section = sizeof(ANVIL__instruction_ID) + sizeof(ANVIL__cell),
     ANVIL__ilt__debug__mark_code_section = sizeof(ANVIL__instruction_ID) + sizeof(ANVIL__cell),
