@@ -301,7 +301,54 @@ ANVIL__context ANVIL__setup__context(ANVIL__buffer program) {
 }
 
 /* Run Alloy Code */
+// predefined run context header
 void ANVIL__run__context(ANVIL__allocations* allocations, ANVIL__context* context, ANVIL__instruction_count instruction_count);
+
+// check compiler instruction inputs
+ANVIL__bt COMPILER__check__valid_compilation_instruction_inputs(ANVIL__allocations* allocations, ANVIL__bt catch_addresses, ANVIL__buffer input_buffer) {
+    // don't validate if catch addresses is disabled
+    if (catch_addresses == ANVIL__bt__false) {
+        // ignore validation
+        return ANVIL__bt__true;
+    }
+
+    // check for valid buffer of buffers
+    // check for allocation
+    if (ANVIL__check__valid_address_range_in_allocations(catch_addresses, allocations, input_buffer) == ANVIL__bt__false) {
+        // invalid
+        return ANVIL__bt__false;
+    }
+
+    // check for valid buffer of buffers
+    // check size
+    if ((ANVIL__calculate__buffer_length(input_buffer) % sizeof(ANVIL__buffer)) != 0) {
+        // invalid
+        return ANVIL__bt__false;
+    }
+
+    // check each user code buffer for address validity
+    // setup current
+    ANVIL__current current = input_buffer;
+
+    // for each sub buffer
+    while (ANVIL__check__current_within_range(current) == ANVIL__bt__true) {
+        // get allocation
+        ANVIL__buffer temp_buffer = *(ANVIL__buffer*)current.start;
+
+        // validate buffer
+        ANVIL__bt valid = ANVIL__check__valid_address_range_in_allocations(catch_addresses, allocations, temp_buffer);
+        if (valid == ANVIL__bt__false) {
+            // invalid buffer
+            return ANVIL__bt__false;
+        }
+
+        // next allocation
+        current.start += sizeof(ANVIL__buffer);
+    }
+
+    // no issues found, validated
+    return ANVIL__bt__true;
+}
 
 // process operation (assumes flag was checked)
 ANVIL__nit ANVIL__run__operation(ANVIL__context* context, ANVIL__ot operation_type, ANVIL__cell_ID input_0, ANVIL__cell_ID input_1, ANVIL__cell_ID input_2, ANVIL__cell_ID output_0) {
@@ -1075,21 +1122,51 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
 
         // null init error
         compile__error = COMPILER__create_null__error();
-        
-        // run compiler (WARNING, buffers are NOT checked for vality!)
-        COMPILER__compile__files(
+
+        // validate input buffers
+        // validate
+        ANVIL__bt compile__valid_inputs = COMPILER__check__valid_compilation_instruction_inputs(
+            allocations,
+            catch_addresses,
             ANVIL__create__buffer(
                 (*context).cells[compile__user_code_buffers_buffer_start],
                 (*context).cells[compile__user_code_buffers_buffer_end]
-            ),
-            (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__include_standard],
-            (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__generate_kickstarter],
-            (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__debug_enabled],
-            (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__debug_enabled],
-            &compile__output_program,
-            &compile__debug_information,
-            &compile__error
+            )
         );
+
+        // if valid
+        if (compile__valid_inputs == ANVIL__bt__true) {
+            // run compiler
+            COMPILER__compile__files(
+                ANVIL__create__buffer(
+                    (*context).cells[compile__user_code_buffers_buffer_start],
+                    (*context).cells[compile__user_code_buffers_buffer_end]
+                ),
+                (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__include_standard],
+                (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__generate_kickstarter],
+                (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__debug_enabled],
+                (ANVIL__bt)(ANVIL__cell_integer_value)(*context).cells[compile__debug_enabled],
+                &compile__output_program,
+                &compile__debug_information,
+                &compile__error
+            );
+        // invalid
+        } else {
+            // set internal error
+            ANVIL__set__error_code_cell(context, ANVIL__et__compile__invalid_input_configuration);
+
+            // zero out everything
+            (*context).cells[compile__output_start] = ANVIL__define__null_address;
+            (*context).cells[compile__output_end] = ANVIL__define__null_address;
+            (*context).cells[compile__error__occured] = (ANVIL__cell)(ANVIL__cell_integer_value)ANVIL__bt__true;
+            (*context).cells[compile__error__message_start] = ANVIL__define__null_address;
+            (*context).cells[compile__error__message_end] = ANVIL__define__null_address;
+            (*context).cells[compile__error__character_location__file_index] = (ANVIL__cell)ANVIL__define__null_file_index_ID;
+            (*context).cells[compile__error__character_location__line_number] = (ANVIL__cell)ANVIL__define__null_address;
+            (*context).cells[compile__error__character_location__character_index] = (ANVIL__cell)ANVIL__define__null_address;
+
+            break;
+        }
 
         // get temps
         compile__output_error_message = compile__error.message;

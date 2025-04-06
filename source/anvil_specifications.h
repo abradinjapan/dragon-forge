@@ -152,6 +152,7 @@ typedef enum ANVIL__et {
     ANVIL__et__invalid_address_range,
     ANVIL__et__buffer_to_buffer__buffers_are_different_sizes,
     ANVIL__et__compile__compilation_error,
+    ANVIL__et__compile__invalid_input_configuration,
     ANVIL__et__program_ran_out_of_instructions,
     ANVIL__et__program_ran_out_of_instruction_parameters,
 
