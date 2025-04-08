@@ -322,6 +322,10 @@ char* COMPILER__global__predefined_type_names[] = {
     COMPILER__define__master_namespace ".cell",
     COMPILER__define__master_namespace ".buffer",
     COMPILER__define__master_namespace ".time",
+    COMPILER__define__master_namespace ".compiler.settings",
+    COMPILER__define__master_namespace ".compiler.debug_information",
+    COMPILER__define__master_namespace ".compiler.error",
+    COMPILER__define__master_namespace ".text.location",
 };
 // predefined type's member names
 const char* COMPILER__global__predefined_type_member_names[] = {
@@ -330,6 +334,15 @@ const char* COMPILER__global__predefined_type_member_names[] = {
     "end",
     "seconds",
     "nanoseconds",
+    "include_standard",
+    "debug_enabled",
+    "generate_kickstarter",
+    "occured",
+    "message",
+    "location",
+    "file_index",
+    "line_number",
+    "character_index",
     "INTERNAL",
 };
 // predefined type member name type
@@ -339,6 +352,15 @@ typedef enum COMPILER__ptmnt {
     COMPILER__ptmnt__end,
     COMPILER__ptmnt__seconds,
     COMPILER__ptmnt__nanoseconds,
+    COMPILER__ptmnt__include_standard,
+    COMPILER__ptmnt__debug_enabled,
+    COMPILER__ptmnt__generate_kickstarter,
+    COMPILER__ptmnt__occured,
+    COMPILER__ptmnt__message,
+    COMPILER__ptmnt__location_information,
+    COMPILER__ptmnt__file_index,
+    COMPILER__ptmnt__line_number,
+    COMPILER__ptmnt__character_index,
     COMPILER__ptmnt__COUNT,
 } COMPILER__ptmnt;
 // predefined type type
@@ -350,6 +372,10 @@ typedef enum COMPILER__ptt {
     COMPILER__ptt__dragon_cell = COMPILER__ptt__START,
     COMPILER__ptt__dragon_buffer,
     COMPILER__ptt__dragon_time,
+    COMPILER__ptt__dragon_compiler__settings,
+    COMPILER__ptt__dragon_compiler__debug_information,
+    COMPILER__ptt__dragon_compiler__error,
+    COMPILER__ptt__dragon_text_location,
 
     // user defined start
     COMPILER__ptt__USER_DEFINED_START,
@@ -384,6 +410,40 @@ COMPILER__blueprintling COMPILER__global__predefined_types[] = {
             COMPILER__ptmnt__seconds, // seconds
         COMPILER__ptt__dragon_cell,
             COMPILER__ptmnt__nanoseconds, // nanoseconds
+    // compiler settings
+    COMPILER__abt__define_type,
+        COMPILER__ptt__dragon_compiler__settings,
+        3,
+        COMPILER__ptt__dragon_cell,
+            COMPILER__ptmnt__include_standard,
+        COMPILER__ptt__dragon_cell,
+            COMPILER__ptmnt__debug_enabled,
+        COMPILER__ptt__dragon_cell,
+            COMPILER__ptmnt__generate_kickstarter,
+    // compiler debug information
+    COMPILER__abt__define_type,
+        COMPILER__ptt__dragon_compiler__debug_information,
+        0,
+    // error information
+    COMPILER__abt__define_type,
+        COMPILER__ptt__dragon_compiler__error,
+        3,
+        COMPILER__ptt__dragon_cell,
+            COMPILER__ptmnt__occured,
+        COMPILER__ptt__dragon_buffer,
+            COMPILER__ptmnt__message,
+        COMPILER__ptt__dragon_text_location,
+            COMPILER__ptmnt__location_information,
+    // text location
+    COMPILER__abt__define_type,
+        COMPILER__ptt__dragon_text_location,
+        3,
+        COMPILER__ptt__dragon_cell,
+            COMPILER__ptmnt__file_index,
+        COMPILER__ptt__dragon_cell,
+            COMPILER__ptmnt__line_number,
+        COMPILER__ptt__dragon_cell,
+            COMPILER__ptmnt__character_index,
     COMPILER__abt__end_blueprint,
 };
 

@@ -153,18 +153,10 @@ dragon.json.append.lexling(list !dragon.list, lexling !dragon.json.lexling)(list
     dragon.json.append.location(list, lexling:location)(list)
 }
 
-[ lexling location ]
-!dragon.text.location
-(
-    file_index !dragon.cell,
-    line_index !dragon.cell,
-    character_index !dragon.cell
-)
-
 [ append lexling location ]
 dragon.json.append.location(list !dragon.list, location !dragon.text.location)(list !dragon.list) = {
     dragon.list.append.cell(list, location:file_index)(list)
-    dragon.list.append.cell(list, location:line_index)(list)
+    dragon.list.append.cell(list, location:line_number)(list)
     dragon.list.append.cell(list, location:character_index)(list)
 }
 
