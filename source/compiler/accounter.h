@@ -370,16 +370,10 @@ typedef struct COMPILER__accountling_statement {
 
     // compiler assorted functions
     COMPILER__accountling_variable_argument compile__user_code_buffers;
-    COMPILER__accountling_variable_argument compile__include_standard;
-    COMPILER__accountling_variable_argument compile__debug_enabled;
-    COMPILER__accountling_variable_argument compile__generate_kickstarter;
+    COMPILER__accountling_variable_argument compile__settings;
     COMPILER__accountling_variable_argument compile__anvil_code;
     COMPILER__accountling_variable_argument compile__debug_information;
-    COMPILER__accountling_variable_argument compile__error__occured;
-    COMPILER__accountling_variable_argument compile__error__message;
-    COMPILER__accountling_variable_argument compile__error__character_location__file_index;
-    COMPILER__accountling_variable_argument compile__error__character_location__line_number;
-    COMPILER__accountling_variable_argument compile__error__character_location__character_index;
+    COMPILER__accountling_variable_argument compile__error_information;
 
     // context assorted functions
     COMPILER__accountling_variable_argument context__context_buffer;
@@ -3330,7 +3324,7 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__str
 // check for compiler functions
 ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__compiler_assorted(COMPILER__accountling_structures structures, COMPILER__accountling_function* accountling_function, COMPILER__parsling_statement parsling_statement, COMPILER__accountling_statement* accountling_statement, COMPILER__error* error) {
     // if is a compiler call
-    if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__compiler__compile], parsling_statement.name.name) && parsling_statement.inputs.count == 4 && parsling_statement.outputs.count == 7) {
+    if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__compiler__compile], parsling_statement.name.name) && parsling_statement.inputs.count == 2 && parsling_statement.outputs.count == 3) {
         // check input variable type
         // get index
         ANVIL__bt is_valid_argument;
@@ -3338,60 +3332,30 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__com
         if (COMPILER__check__error_occured(error) || code_buffers_buffer_argument.type >= COMPILER__avat__COUNT) {
             goto failure;
         }
-        COMPILER__accountling_variable_argument include_standard_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || include_standard_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-        COMPILER__accountling_variable_argument debug_enabled_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 2), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || debug_enabled_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-        COMPILER__accountling_variable_argument generate_kickstarter_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 3), COMPILER__ptt__dragon_cell, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || generate_kickstarter_argument.type >= COMPILER__avat__COUNT) {
+        COMPILER__accountling_variable_argument settings_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.inputs, 1), COMPILER__ptt__dragon_compiler__settings, COMPILER__asvt__input, ANVIL__bt__false, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || settings_argument.type >= COMPILER__avat__COUNT) {
             goto failure;
         }
         COMPILER__accountling_variable_argument anvil_code_output_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 0), COMPILER__ptt__dragon_buffer, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
         if (COMPILER__check__error_occured(error) || anvil_code_output_argument.type >= COMPILER__avat__COUNT) {
             goto failure;
         }
-        COMPILER__accountling_variable_argument debug_information_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 1), COMPILER__ptt__dragon_buffer, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        COMPILER__accountling_variable_argument debug_information_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 1), COMPILER__ptt__dragon_compiler__debug_information, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
         if (COMPILER__check__error_occured(error) || debug_information_argument.type >= COMPILER__avat__COUNT) {
             goto failure;
         }
-        COMPILER__accountling_variable_argument error_occured_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 2), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || error_occured_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-        COMPILER__accountling_variable_argument error_message_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 3), COMPILER__ptt__dragon_buffer, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || error_message_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-        COMPILER__accountling_variable_argument error_location_file_index_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 4), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || error_location_file_index_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-        COMPILER__accountling_variable_argument error_location_line_number_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 5), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || error_location_line_number_argument.type >= COMPILER__avat__COUNT) {
-            goto failure;
-        }
-        COMPILER__accountling_variable_argument error_location_character_index_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 6), COMPILER__ptt__dragon_cell, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
-        if (COMPILER__check__error_occured(error) || error_location_character_index_argument.type >= COMPILER__avat__COUNT) {
+        COMPILER__accountling_variable_argument error_information_argument = COMPILER__account__functions__mark_variable(structures, accountling_function, COMPILER__get__parsling_argument_by_index(parsling_statement.outputs, 2), COMPILER__ptt__dragon_compiler__error, COMPILER__asvt__output, ANVIL__bt__true, &is_valid_argument, error);
+        if (COMPILER__check__error_occured(error) || error_information_argument.type >= COMPILER__avat__COUNT) {
             goto failure;
         }
 
         // setup output statement
         (*accountling_statement).statement_type = COMPILER__ast__predefined__compilation__compile;
         (*accountling_statement).compile__user_code_buffers = code_buffers_buffer_argument;
-        (*accountling_statement).compile__include_standard = include_standard_argument;
-        (*accountling_statement).compile__debug_enabled = debug_enabled_argument;
-        (*accountling_statement).compile__generate_kickstarter = generate_kickstarter_argument;
+        (*accountling_statement).compile__settings = settings_argument;
         (*accountling_statement).compile__anvil_code = anvil_code_output_argument;
         (*accountling_statement).compile__debug_information = debug_information_argument;
-        (*accountling_statement).compile__error__occured = error_occured_argument;
-        (*accountling_statement).compile__error__message = error_message_argument;
-        (*accountling_statement).compile__error__character_location__file_index = error_location_file_index_argument;
-        (*accountling_statement).compile__error__character_location__line_number = error_location_line_number_argument;
-        (*accountling_statement).compile__error__character_location__character_index = error_location_character_index_argument;
+        (*accountling_statement).compile__error_information = error_information_argument;
 
         // match
         goto match;

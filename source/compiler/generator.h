@@ -343,19 +343,19 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
                 anvil,
                 COMPILER__generate__use_variable(compile__user_code_buffers).cells.start,
                 COMPILER__generate__use_variable(compile__user_code_buffers).cells.end,
-                COMPILER__generate__use_variable(compile__include_standard).cells.start,
-                COMPILER__generate__use_variable(compile__debug_enabled).cells.start,
-                COMPILER__generate__use_variable(compile__generate_kickstarter).cells.start,
+                COMPILER__generate__use_variable(compile__settings).cells.start,
+                COMPILER__generate__use_variable(compile__settings).cells.start + 1,
+                COMPILER__generate__use_variable(compile__settings).cells.start + 2,
                 COMPILER__generate__use_variable(compile__anvil_code).cells.start,
                 COMPILER__generate__use_variable(compile__anvil_code).cells.end,
                 COMPILER__generate__use_variable(compile__debug_information).cells.start,
                 COMPILER__generate__use_variable(compile__debug_information).cells.end,
-                COMPILER__generate__use_variable(compile__error__occured).cells.start,
-                COMPILER__generate__use_variable(compile__error__message).cells.start,
-                COMPILER__generate__use_variable(compile__error__message).cells.end,
-                COMPILER__generate__use_variable(compile__error__character_location__file_index).cells.start,
-                COMPILER__generate__use_variable(compile__error__character_location__line_number).cells.start,
-                COMPILER__generate__use_variable(compile__error__character_location__character_index).cells.start
+                COMPILER__generate__use_variable(compile__error_information).cells.start,
+                COMPILER__generate__use_variable(compile__error_information).cells.start + 1,
+                COMPILER__generate__use_variable(compile__error_information).cells.start + 2,
+                COMPILER__generate__use_variable(compile__error_information).cells.start + 3,
+                COMPILER__generate__use_variable(compile__error_information).cells.start + 4,
+                COMPILER__generate__use_variable(compile__error_information).cells.start + 5
             );
 
             break;
