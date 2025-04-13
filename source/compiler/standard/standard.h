@@ -15,6 +15,7 @@
 #include "../../../build_temps/check.c"
 #include "../../../build_temps/error.c"
 #include "../../../build_temps/json.c"
+#include "../../../build_temps/time.c"
 
 /* Turn C Files Into Buffers */
 // bufferify any file

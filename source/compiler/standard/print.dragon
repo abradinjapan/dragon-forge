@@ -4,6 +4,22 @@ dragon.print.new_line()() = {
     dragon.print.character(new_line)()
 }
 
+[ print new line(s) ]
+dragon.print.new_line(count !dragon.cell)() = {
+    [ check remaining iterations ]
+    dragon.integer.within_range(dragon.constant.0, count, dragon.constant.0)(quit, continue)
+    dragon.jump.bottom(quit, @dragon.master_scope)()
+
+    [ print ]
+    dragon.print.new_line()()
+
+    [ subtract ]
+    dragon.integer.subtract(count, dragon.constant.1)(count)
+
+    [ to top of loop ]
+    dragon.jump.top(dragon.always, @dragon.master_scope)()
+}
+
 [ print tabs ]
 dragon.print.tabs(tab_count !dragon.cell)() = {
     [ set tab ]

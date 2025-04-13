@@ -116,10 +116,14 @@ void COMPILER__close__generation_workspace(COMPILER__generation_workspace worksp
 #define COMPILER__generate__use_variable(value) COMPILER__account__functions__get_variable_by_variable_argument(accountling_function.variables, statement.value)
 
 // generate user defined function statement
-void COMPILER__generate__user_defined_function_scope(COMPILER__generation_workspace* workspace, COMPILER__accountling_function accountling_function, COMPILER__function_index user_defined_function_index, COMPILER__accountling_scope scope, COMPILER__error* error) {
+void COMPILER__generate__user_defined_function_scope(COMPILER__generation_workspace* workspace, COMPILER__accountling_function accountling_function, COMPILER__function_index user_defined_function_index, COMPILER__accountling_scope scope, COMPILER__scope_index current_scope_index, COMPILER__error* error) {
     // setup helper variables
     COMPILER__generation_function* function = &((COMPILER__generation_function*)(*workspace).user_defined_functions.list.buffer.start)[user_defined_function_index];
+    COMPILER__accountling_scope_header* scope_header = &(((COMPILER__accountling_scope_header*)accountling_function.scope_headers.list.buffer.start)[current_scope_index]);
     ANVIL__workspace* anvil = &(*workspace).workspace;
+
+    // setup starting offset
+    (*scope_header).starting_offset = ANVIL__get__offset(anvil);
 
     // for each statement
     for (COMPILER__statement_index index = 0; index < scope.statements.count; index++) {
@@ -431,26 +435,23 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
 
             break;
         case COMPILER__ast__scope:
-            // setup statement starting offset
-            ((COMPILER__accountling_scope_header*)accountling_function.scope_headers.list.buffer.start)[statement.scope_index].starting_offset = ANVIL__get__offset(anvil);
-
             // setup conditional jump
             ANVIL__code__operate__jump__static(anvil, ANVIL__sft__always_run, ANVIL__srt__constant__false, COMPILER__generate__use_variable(scope_data.condition).cells.start, ANVIL__srt__constant__false, ANVIL__sft__never_run, ((COMPILER__accountling_scope_header*)accountling_function.scope_headers.list.buffer.start)[statement.scope_index].ending_offset);
 
             // build scope
-            COMPILER__generate__user_defined_function_scope(workspace, accountling_function, user_defined_function_index, statement.scope_data, error);
+            COMPILER__generate__user_defined_function_scope(workspace, accountling_function, user_defined_function_index, statement.scope_data, statement.scope_index, error);
             if (COMPILER__check__error_occured(error)) {
                 return;
             }
-
-            // setup statement ending offset
-            ((COMPILER__accountling_scope_header*)accountling_function.scope_headers.list.buffer.start)[statement.scope_index].ending_offset = ANVIL__get__offset(anvil);
 
             break;
         default:
             break;
         }
     }
+
+    // setup statement ending offset
+    (*scope_header).ending_offset = ANVIL__get__offset(anvil);
 
     return;
 }
@@ -487,7 +488,7 @@ void COMPILER__generate__user_defined_function(COMPILER__generation_workspace* w
     }
 
     // generate function body code
-    COMPILER__generate__user_defined_function_scope(workspace, accountling_function, user_defined_function_index, accountling_function.scope, error);
+    COMPILER__generate__user_defined_function_scope(workspace, accountling_function, user_defined_function_index, accountling_function.scope, 0, error);
     if (COMPILER__check__error_occured(error)) {
         return;
     }
