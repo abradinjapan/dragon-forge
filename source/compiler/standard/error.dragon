@@ -36,3 +36,12 @@ dragon.error.close(error !dragon.error)() = {
     [ deallocate error list ]
     dragon.list.close(error:json)()
 }
+
+[ convert compiler error to dragon error ]
+dragon.error.convert_compiler_error_to_dragon_error(compiler_error !dragon.compiler.error)(dragon_error !dragon.error) = {
+    [ copy status ]
+    dragon.copy(compiler_error:occured)(dragon_error:occured)
+
+    [ convert details ]
+    [ TODO ]
+}
