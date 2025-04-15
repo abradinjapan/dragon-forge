@@ -1,0 +1,7 @@
+[ default settings for compiler ]
+dragon.compiler.configure.default_compile()(settings !dragon.compiler.settings) = {
+    [ setup default settings ]
+    dragon.copy(dragon.true)(settings:include_standard)
+    dragon.copy(dragon.false)(settings:debug_enabled)
+    dragon.copy(dragon.true)(settings:generate_kickstarter)
+}

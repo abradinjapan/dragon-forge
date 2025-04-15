@@ -18,8 +18,4 @@ Roaring dragons sometimes slumber...
 
 ## Build
 
-> make release
-
-OR
-
-> make debug
+> make
