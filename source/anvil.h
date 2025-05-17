@@ -1415,6 +1415,7 @@ void ANVIL__run__context(ANVIL__allocations* allocations, ANVIL__context* contex
         }
     }
 
+    // execution ended without error
     return;
 }
 
