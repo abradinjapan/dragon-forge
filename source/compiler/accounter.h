@@ -3417,6 +3417,13 @@ ANVIL__bt COMPILER__account__functions__check_and_get_statement_translation__con
 
         // match
         goto match;
+    // if is an execution stop
+    } else if (COMPILER__check__namespace_against_c_string(COMPILER__global__predefined_function_call_names[COMPILER__pfcnt__execution__stop], parsling_statement.name.name) && parsling_statement.inputs.count == 0 && parsling_statement.outputs.count == 0) {
+        // setup output statement
+        (*accountling_statement).statement_type = COMPILER__ast__predefined__execution__stop;
+
+        // match
+        goto match;
     // not the right argument type
     } else {
         goto failure;

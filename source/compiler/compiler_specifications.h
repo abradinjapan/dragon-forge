@@ -208,6 +208,8 @@ typedef enum COMPILER__stt {
 // accountling statement type
 typedef enum COMPILER__ast {
     // built in calls
+    COMPILER__ast__predefined__execution__stop,
+
     // data insertion
     COMPILER__ast__predefined__set__cell,
     COMPILER__ast__predefined__set__string,
@@ -573,6 +575,9 @@ COMPILER__blueprintling COMPILER__global__predefined_variables[] = {
 
 // all predefined function call names
 char* COMPILER__global__predefined_function_call_names[] = {
+    // stop
+    COMPILER__define__master_namespace ".execution.stop",
+
     // set
     COMPILER__define__master_namespace ".set",
 
@@ -635,6 +640,9 @@ char* COMPILER__global__predefined_function_call_names[] = {
 };
 // predefined function call name type
 typedef enum COMPILER__pfcnt {
+    // execution
+    COMPILER__pfcnt__execution__stop,
+    
     // sets
     COMPILER__pfcnt__set,
 
@@ -700,6 +708,13 @@ typedef enum COMPILER__pfcnt {
 } COMPILER__pfcnt;
 // header blueprint for one off built in functions
 COMPILER__blueprintling COMPILER__global__predefined_one_off_function_calls[] = {
+    // stop program execution
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__execution__stop,
+        COMPILER__pfcnt__execution__stop,
+        0,
+        0,
+    
     // set cell
     COMPILER__abt__define_function_call,
         COMPILER__ast__predefined__set__cell,

@@ -137,6 +137,10 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
         // build statement
         // if statement is function call
         switch (statement.statement_type) {
+        case COMPILER__ast__predefined__execution__stop:
+            ANVIL__code__stop(anvil);
+            
+            break;
         case COMPILER__ast__predefined__set__cell:
             ANVIL__code__write_cell(anvil, (ANVIL__cell)statement.set_cell__raw_value, COMPILER__generate__use_variable(set_cell__variable_argument).cells.start);
 
