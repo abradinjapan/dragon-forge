@@ -3995,7 +3995,8 @@ void COMPILER__account__functions__predefined_variables(COMPILER__accountling_st
         variable.type = (COMPILER__variable_type_index)COMPILER__read_and_next__blueprintling(&current_blueprintling);
 
         // get cell range
-        variable.cells = COMPILER__create__cell_range((ANVIL__cell_ID)COMPILER__read_and_next__blueprintling(&current_blueprintling), (ANVIL__cell_ID)COMPILER__read_and_next__blueprintling(&current_blueprintling));
+        variable.cells.start = (ANVIL__cell_ID)COMPILER__read_and_next__blueprintling(&current_blueprintling);
+        variable.cells.end = (ANVIL__cell_ID)COMPILER__read_and_next__blueprintling(&current_blueprintling);
 
         // setup variable range (since predefined there is no variable range, make invalid)
         variable.members = COMPILER__create__accountling_variable_range(-1, -1);

@@ -469,8 +469,8 @@ typedef enum ANVIL__srt {
 
     // stack cells
     ANVIL__srt__stack__start_address,
-    ANVIL__srt__stack__current_address,
     ANVIL__srt__stack__end_address,
+    ANVIL__srt__stack__current_address,
 
     // control flow cells
     ANVIL__srt__return_address,

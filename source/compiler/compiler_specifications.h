@@ -159,6 +159,7 @@ typedef enum COMPILER__pvn {
     COMPILER__pvn__ascii_character_byte_size,
     COMPILER__pvn__context__input,
     COMPILER__pvn__context__output,
+    COMPILER__pvn__call_stack,
 } COMPILER__pvn;
 // all predefined variable names
 char* COMPILER__global__predefined_variable_names[] = {
@@ -185,6 +186,7 @@ char* COMPILER__global__predefined_variable_names[] = {
     COMPILER__define__master_namespace ".ascii_character.byte_size",
     COMPILER__define__master_namespace ".context.input",
     COMPILER__define__master_namespace ".context.output",
+    COMPILER__define__master_namespace ".call_stack",
 };
 
 // statement type type
@@ -323,6 +325,7 @@ typedef enum COMPILER__aat {
 char* COMPILER__global__predefined_type_names[] = {
     COMPILER__define__master_namespace ".cell",
     COMPILER__define__master_namespace ".buffer",
+    COMPILER__define__master_namespace ".current",
     COMPILER__define__master_namespace ".time",
     COMPILER__define__master_namespace ".compiler.settings",
     COMPILER__define__master_namespace ".compiler.debug_information",
@@ -334,6 +337,8 @@ const char* COMPILER__global__predefined_type_member_names[] = {
     "value",
     "start",
     "end",
+    "buffer",
+    "progress",
     "seconds",
     "nanoseconds",
     "include_standard",
@@ -353,6 +358,8 @@ typedef enum COMPILER__ptmnt {
     COMPILER__ptmnt__value,
     COMPILER__ptmnt__start,
     COMPILER__ptmnt__end,
+    COMPILER__ptmnt__buffer,
+    COMPILER__ptmnt__progress,
     COMPILER__ptmnt__seconds,
     COMPILER__ptmnt__nanoseconds,
     COMPILER__ptmnt__include_standard,
@@ -375,6 +382,7 @@ typedef enum COMPILER__ptt {
     // type definitions
     COMPILER__ptt__dragon_cell = COMPILER__ptt__START,
     COMPILER__ptt__dragon_buffer,
+    COMPILER__ptt__dragon_current,
     COMPILER__ptt__dragon_time,
     COMPILER__ptt__dragon_compiler__settings,
     COMPILER__ptt__dragon_compiler__debug_information,
@@ -406,6 +414,14 @@ COMPILER__blueprintling COMPILER__global__predefined_types[] = {
             COMPILER__ptmnt__start,
         COMPILER__ptt__dragon_cell, // end
             COMPILER__ptmnt__end,
+    // current
+    COMPILER__abt__define_type,
+        COMPILER__ptt__dragon_current,
+        2,
+        COMPILER__ptt__dragon_buffer,
+            COMPILER__ptmnt__buffer,
+        COMPILER__ptt__dragon_cell,
+            COMPILER__ptmnt__progress,
     // time
     COMPILER__abt__define_type,
         COMPILER__ptt__dragon_time,
@@ -592,6 +608,12 @@ COMPILER__blueprintling COMPILER__global__predefined_variables[] = {
         COMPILER__ptt__dragon_buffer,
         ANVIL__srt__output_buffer_start,
         ANVIL__srt__output_buffer_end,
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__call_stack,
+        COMPILER__ptt__dragon_current,
+        ANVIL__srt__stack__start_address,
+        ANVIL__srt__stack__current_address,
         
     COMPILER__abt__end_blueprint,
 };

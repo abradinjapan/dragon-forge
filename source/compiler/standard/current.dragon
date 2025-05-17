@@ -1,6 +1,3 @@
-[ current structure ]
-!dragon.current(buffer !dragon.buffer, progress !dragon.cell)
-
 [ check current within range ]
 dragon.current.within_range(current !dragon.current)(within_range !dragon.cell, outside_range !dragon.cell) = {
     [ check range ]

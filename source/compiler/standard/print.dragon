@@ -57,6 +57,23 @@ dragon.print.buffer(buffer !dragon.buffer)() = {
     dragon.print.buffer_as_string(footer)()
 }
 
+[ print a current ]
+dragon.print.current(current !dragon.current)() = {
+    [ setup strings ]
+    dragon.set("[ ")(header)
+    dragon.set(", ")(separator)
+    dragon.set(" ]")(footer)
+
+    [ print buffer ]
+    dragon.print.buffer_as_string(header)()
+    dragon.print.integer.unsigned(current:buffer:start)()
+    dragon.print.buffer_as_string(separator)()
+    dragon.print.integer.unsigned(current:buffer:end)()
+    dragon.print.buffer_as_string(separator)()
+    dragon.print.integer.unsigned(current:progress)()
+    dragon.print.buffer_as_string(footer)()
+}
+
 [ print a buffer as a string ]
 dragon.print.buffer_as_string(buffer !dragon.buffer)() = {
     [ setup current ]
