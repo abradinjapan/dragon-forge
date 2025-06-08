@@ -1,6 +1,6 @@
 # Dragon Project
 
-A programming language designed to aid compiler development by using metaprogramming.
+A programming language designed to aid programming langauge development by using metaprogramming.
 
 ## How?
 
