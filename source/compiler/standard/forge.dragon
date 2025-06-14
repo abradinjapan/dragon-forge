@@ -1,0 +1,84 @@
+[
+    Forge:
+    A library that is used for two pass binary code generation.
+]
+
+[
+    Workspace
+]
+
+[ create a workspace ]
+!dragon.forge.workspace
+(
+    do_write !dragon.cell,
+    write_to !dragon.cell,
+    length !dragon.cell,
+    program !dragon.buffer
+)
+
+[ open a workspace ]
+dragon.forge.workspace.open()(workspace !dragon.forge.workspace) = {
+    dragon.pack.null()(workspace !dragon.forge.workspace)
+}
+
+[ advance workspace ]
+dragon.forge.workspace.setup_pass(workspace !dragon.forge.workspace, do_write !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup do_write ]
+    dragon.copy(do_write)(workspace:do_write)
+
+    [ determine pass type ]
+    dragon.integer.within_range(dragon.false, workspace:do_write, dragon.false)(measure_pass, not_measure_pass)
+    dragon.integer.within_range(dragon.true, workspace:do_write, dragon.true)(write_pass, not_write_pass)
+
+    [ if is starting a measure pass ]
+    @measure_pass measure_pass = {
+        [ setup length ]
+        dragon.copy(dragon.constant.0)(workspace:length)
+    }
+
+    [ if is starting a write pass ]
+    @write_pass write_pass = {
+        [ allocate buffer based on length ]
+        dragon.buffer.request(workspace:length)(workspace:program)
+
+        [ setup write to ]
+        dragon.copy(workspace:program:start)(workspace:write_to)
+
+        [ reset length ]
+        dragon.copy(dragon.constant.0)(workspace:length)
+    }
+}
+
+[ write cell data to workspace ]
+dragon.forge.workspace.write.cell(workspace !dragon.forge.workspace, data !dragon.cell, count !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ if is write pass, do write and advancement ]
+    @do_write workspace:do_write = {
+        [ write data & advance ]
+        dragon.cell_to_address(data, count, workspace:write_to)(workspace:write_to)
+    }
+
+    [ advance length ]
+    dragon.integer.add(workspace:length, count)(workspace:length)
+}
+
+[ write buffer to workspace ]
+dragon.forge.workspace.write.buffer(workspace !dragon.forge.workspace, data !dragon.buffer)(workspace !dragon.forge.workspace) = {
+    [ calculate buffer length ]
+    dragon.buffer.calculate.length(data)(data.length)
+
+    [ if is write pass, do write and advancement ]
+    @do_write workspace:do_write = {
+        [ calculate destination buffer ]
+        dragon.buffer.calculate.end_address(workspace:write_to, data.length)(destination.end)
+        dragon.pack(workspace:write_to, destination.end)(destination !dragon.buffer)
+
+        [ write data ]
+        dragon.buffer.copy.low_to_high(data, destination)()
+
+        [ advance current ]
+        dragon.integer.add(workspace:write_to, data.length)(workspace:write_to)
+    }
+
+    [ advance length ]
+    dragon.integer.add(workspace:length, data.length)(workspace:length)
+}

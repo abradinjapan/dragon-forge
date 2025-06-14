@@ -160,8 +160,11 @@ typedef enum ANVIL__et {
 
 // operation types
 typedef enum ANVIL__ot {
+    // start
+    ANVIL__ot__START = 0,
+
     // copy
-    ANVIL__ot__cell_to_cell, // copies one cell to another without transformation
+    ANVIL__ot__cell_to_cell = ANVIL__ot__START, // copies one cell to another without transformation
 
     // binary operations
     ANVIL__ot__bits_or,
@@ -190,8 +193,11 @@ typedef enum ANVIL__ot {
     ANVIL__ot__flag_get,
     ANVIL__ot__flag_set,
 
+    // end
+    ANVIL__ot__END = ANVIL__ot__flag_set,
+
     // count
-    ANVIL__ot__COUNT,
+    ANVIL__ot__COUNT = ANVIL__ot__END - ANVIL__ot__START + 1,
 } ANVIL__ot;
 
 // should the next instruction process

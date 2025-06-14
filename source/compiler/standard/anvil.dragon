@@ -1,0 +1,65 @@
+[
+    Anvil:
+    A library for writing anvil instructions.
+]
+
+[
+    Scraplets
+]
+
+[ write instruction ID scraplet ]
+dragon.anvil.write.scraplet.instruction_ID(workspace !dragon.forge.workspace, instruction_ID !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ write instruction ID ]
+    dragon.forge.workspace.write.cell(workspace, instruction_ID, dragon.anvil.instruction_ID.byte_size)(workspace)
+}
+
+[ write flag ID scraplet ]
+dragon.anvil.write.scraplet.flag_ID(workspace !dragon.forge.workspace, flag_ID !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ write instruction ID ]
+    dragon.forge.workspace.write.cell(workspace, flag_ID, dragon.anvil.flag_ID.byte_size)(workspace)
+}
+
+[ write operation ID scraplet ]
+dragon.anvil.write.scraplet.operation_ID(workspace !dragon.forge.workspace, operation_ID !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ write instruction ID ]
+    dragon.forge.workspace.write.cell(workspace, operation_ID, dragon.anvil.operation_ID.byte_size)(workspace)
+}
+
+[ write cell ID scraplet ]
+dragon.anvil.write.scraplet.cell_ID(workspace !dragon.forge.workspace, cell_ID !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ write instruction ID ]
+    dragon.forge.workspace.write.cell(workspace, cell_ID, dragon.anvil.cell_ID.byte_size)(workspace)
+}
+
+[ write cell scraplet ]
+dragon.anvil.write.scraplet.cell(workspace !dragon.forge.workspace, cell !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ write instruction ID ]
+    dragon.forge.workspace.write.cell(workspace, cell, dragon.anvil.cell.byte_size)(workspace)
+}
+
+[
+    Instructions
+]
+[ write stop instruction ]
+dragon.anvil.write.instruction.stop(workspace !dragon.forge.workspace)(workspace !dragon.forge.workspace) = {
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, dragon.constant.0[ FIX LATER ])(workspace)
+}
+
+[ write write_cell instruction ]
+dragon.anvil.write.instruction.write_cell(workspace !dragon.forge.workspace, value !dragon.cell, destination_cell_ID !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, dragon.constant.1[ FIX LATER ])(workspace)
+    dragon.anvil.write.scraplet.cell(workspace, value)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, destination_cell_ID)(workspace)
+}
+
+[ write debug__putchar ]
+dragon.anvil.write.instruction.debug__putchar(workspace !dragon.forge.workspace, source_cell_ID !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup temp instruction ID ]
+    dragon.set(dragon.integer.15)(instruction_ID)
+    
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID[ FIX LATER ])(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, source_cell_ID)(workspace)
+}

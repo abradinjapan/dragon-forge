@@ -136,6 +136,7 @@ typedef enum COMPILER__palt {
 
 // predefined variable names
 typedef enum COMPILER__pvn {
+    // generic
     COMPILER__pvn__always,
     COMPILER__pvn__never,
     COMPILER__pvn__true,
@@ -160,9 +161,37 @@ typedef enum COMPILER__pvn {
     COMPILER__pvn__context__input,
     COMPILER__pvn__context__output,
     COMPILER__pvn__call_stack,
+
+    // anvil scraplets
+    COMPILER__pvn__constant__anvil__instruction_ID__byte_size,
+    COMPILER__pvn__constant__anvil__flag_ID__byte_size,
+    COMPILER__pvn__constant__anvil__operation_ID__byte_size,
+    COMPILER__pvn__constant__anvil__cell_ID__byte_size,
+    COMPILER__pvn__constant__anvil__cell__byte_size,
+    COMPILER__pvn__constant__anvil__operation_ID__cell_to_cell,
+    COMPILER__pvn__constant__anvil__operation_ID__bits_or,
+    COMPILER__pvn__constant__anvil__operation_ID__bits_invert,
+    COMPILER__pvn__constant__anvil__operation_ID__bits_and,
+    COMPILER__pvn__constant__anvil__operation_ID__bits_xor,
+    COMPILER__pvn__constant__anvil__operation_ID__bits_shift_higher,
+    COMPILER__pvn__constant__anvil__operation_ID__bits_shift_lower,
+    COMPILER__pvn__constant__anvil__operation_ID__bits_overwrite,
+    COMPILER__pvn__constant__anvil__operation_ID__integer_add,
+    COMPILER__pvn__constant__anvil__operation_ID__integer_subtract,
+    COMPILER__pvn__constant__anvil__operation_ID__integer_multiply,
+    COMPILER__pvn__constant__anvil__operation_ID__integer_division,
+    COMPILER__pvn__constant__anvil__operation_ID__integer_modulous,
+    COMPILER__pvn__constant__anvil__operation_ID__integer_within_range,
+    COMPILER__pvn__constant__anvil__operation_ID__flag_or,
+    COMPILER__pvn__constant__anvil__operation_ID__flag_invert,
+    COMPILER__pvn__constant__anvil__operation_ID__flag_and,
+    COMPILER__pvn__constant__anvil__operation_ID__flag_xor,
+    COMPILER__pvn__constant__anvil__operation_ID__flag_get,
+    COMPILER__pvn__constant__anvil__operation_ID__flag_set,
 } COMPILER__pvn;
 // all predefined variable names
 char* COMPILER__global__predefined_variable_names[] = {
+    // generic
     COMPILER__define__master_namespace ".always",
     COMPILER__define__master_namespace ".never",
     COMPILER__define__master_namespace ".true",
@@ -187,6 +216,33 @@ char* COMPILER__global__predefined_variable_names[] = {
     COMPILER__define__master_namespace ".context.input",
     COMPILER__define__master_namespace ".context.output",
     COMPILER__define__master_namespace ".call_stack",
+
+    // anvil scraplets
+    COMPILER__define__master_namespace ".anvil.instruction_ID.byte_size",
+    COMPILER__define__master_namespace ".anvil.flag_ID.byte_size",
+    COMPILER__define__master_namespace ".anvil.operation_ID.byte_size",
+    COMPILER__define__master_namespace ".anvil.cell_ID.byte_size",
+    COMPILER__define__master_namespace ".anvil.cell.byte_size",
+    COMPILER__define__master_namespace ".anvil.operation_ID.cell_to_cell",
+    COMPILER__define__master_namespace ".anvil.operation_ID.bits_or",
+    COMPILER__define__master_namespace ".anvil.operation_ID.bits_invert",
+    COMPILER__define__master_namespace ".anvil.operation_ID.bits_and",
+    COMPILER__define__master_namespace ".anvil.operation_ID.bits_xor",
+    COMPILER__define__master_namespace ".anvil.operation_ID.bits_shift_higher",
+    COMPILER__define__master_namespace ".anvil.operation_ID.bits_shift_lower",
+    COMPILER__define__master_namespace ".anvil.operation_ID.bits_overwrite",
+    COMPILER__define__master_namespace ".anvil.operation_ID.integer_add",
+    COMPILER__define__master_namespace ".anvil.operation_ID.integer_subtract",
+    COMPILER__define__master_namespace ".anvil.operation_ID.integer_multiply",
+    COMPILER__define__master_namespace ".anvil.operation_ID.integer_division",
+    COMPILER__define__master_namespace ".anvil.operation_ID.integer_modulous",
+    COMPILER__define__master_namespace ".anvil.operation_ID.integer_within_range",
+    COMPILER__define__master_namespace ".anvil.operation_ID.flag_or",
+    COMPILER__define__master_namespace ".anvil.operation_ID.flag_invert",
+    COMPILER__define__master_namespace ".anvil.operation_ID.flag_and",
+    COMPILER__define__master_namespace ".anvil.operation_ID.flag_xor",
+    COMPILER__define__master_namespace ".anvil.operation_ID.flag_get",
+    COMPILER__define__master_namespace ".anvil.operation_ID.flag_set",
 };
 
 // statement type type
@@ -614,6 +670,160 @@ COMPILER__blueprintling COMPILER__global__predefined_variables[] = {
         COMPILER__ptt__dragon_current,
         ANVIL__srt__stack__start_address,
         ANVIL__srt__stack__current_address,
+    
+    // start of anvil scraplet data
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__instruction_ID__byte_size,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__instruction_ID__byte_size,
+        ANVIL__srt__anvil_scraplet__instruction_ID__byte_size,
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__flag_ID__byte_size,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__flag_ID__byte_size,
+        ANVIL__srt__anvil_scraplet__flag_ID__byte_size,
+        
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__byte_size,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID__byte_size,
+        ANVIL__srt__anvil_scraplet__operation_ID__byte_size,
+    
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__cell_ID__byte_size,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__cell_ID__byte_size,
+        ANVIL__srt__anvil_scraplet__cell_ID__byte_size,
+    
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__cell__byte_size,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__cell__byte_size,
+        ANVIL__srt__anvil_scraplet__cell__byte_size,
+
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__cell_to_cell,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__cell_to_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__cell_to_cell,
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__bits_or,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__bits_or,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__bits_or,
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__bits_invert,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__bits_invert,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__bits_invert,
+
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__bits_and,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__bits_and,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__bits_and,
+
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__bits_xor,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__bits_xor,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__bits_xor,
+
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__bits_shift_higher,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__bits_shift_higher,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__bits_shift_higher,
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__bits_shift_lower,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__bits_shift_lower,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__bits_shift_lower,
+
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__bits_overwrite,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__bits_overwrite,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__bits_overwrite,
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__integer_add,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__integer_add,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__integer_add,
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__integer_subtract,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__integer_subtract,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__integer_subtract,
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__integer_multiply,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__integer_multiply,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__integer_multiply,
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__integer_division,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__integer_division,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__integer_division,
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__integer_modulous,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__integer_modulous,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__integer_modulous,
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__integer_within_range,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__integer_within_range,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__integer_within_range,
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__flag_or,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__flag_or,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__flag_or,
+
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__flag_invert,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__flag_invert,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__flag_invert,
+    
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__flag_and,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__flag_and,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__flag_and,
+
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__flag_xor,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__flag_xor,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__flag_xor,
+
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__flag_get,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__flag_get,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__flag_get,
+
+    COMPILER__abt__define_type,
+        COMPILER__pvn__constant__anvil__operation_ID__flag_set,
+        COMPILER__ptt__dragon_cell,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__flag_set,
+        ANVIL__srt__anvil_scraplet__operation_ID_value__START + ANVIL__ot__flag_set,
         
     COMPILER__abt__end_blueprint,
 };

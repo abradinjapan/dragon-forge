@@ -16,6 +16,8 @@
 #include "../../../build_temps/error.c"
 #include "../../../build_temps/json.c"
 #include "../../../build_temps/time.c"
+#include "../../../build_temps/forge.c"
+#include "../../../build_temps/anvil.c"
 #include "../../../build_temps/compile.c"
 
 /* Turn C Files Into Buffers */
