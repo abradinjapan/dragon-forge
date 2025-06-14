@@ -15,6 +15,7 @@ typedef ANVIL__u16 ANVIL__cell_ID;
 typedef ANVIL__u64 ANVIL__instruction_count;
 #define ANVIL__define__run_forever (ANVIL__u64)-1
 #define ANVIL__define__input_string_max_length 256 // is part of fgets instruction and nothing else
+#define ANVIL__define__max_allocation_size 0x100000000
 
 // cell related types
 typedef ANVIL__u64 ANVIL__cell_count;
@@ -147,6 +148,7 @@ typedef enum ANVIL__et {
     ANVIL__et__invalid_address__cell_to_address,
     ANVIL__et__internal_allocation_tracking_error__could_not_record_buffer,
     ANVIL__et__invalid_allocation__allocation_does_not_exist,
+    ANVIL__et__invalid_allocation__requested_memory_too_large,
     ANVIL__et__invalid_address_range,
     ANVIL__et__buffer_to_buffer__buffers_are_different_sizes,
     ANVIL__et__compile__compilation_error,

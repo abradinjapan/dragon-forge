@@ -848,7 +848,16 @@ ANVIL__nit ANVIL__run__instruction(ANVIL__allocations* allocations, ANVIL__conte
         request_memory__allocation_end = ANVIL__read_next__cell_ID(execution_read_address);
 
         // do action
-        request_memory__allocation = ANVIL__open__buffer((ANVIL__length)(*context).cells[request_memory__allocation_size]);
+        if ((ANVIL__length)(*context).cells[request_memory__allocation_size] <= ANVIL__define__max_allocation_size) {
+            // allocate
+            request_memory__allocation = ANVIL__open__buffer((ANVIL__length)(*context).cells[request_memory__allocation_size]);
+        } else {
+            // set buffer
+            request_memory__allocation = ANVIL__create_null__buffer();
+            
+            // set internal error
+            ANVIL__set__error_code_cell(context, ANVIL__et__invalid_allocation__requested_memory_too_large);
+        }
 
         // add allocation if successful
         if (ANVIL__check__empty_buffer(request_memory__allocation) == ANVIL__bt__false) {
