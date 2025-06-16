@@ -2,6 +2,57 @@
     Anvil:
     A library for writing anvil instructions.
 ]
+[ define byte sizes ]
+dragon.anvil.define.byte_size.instruction_ID()(byte_size !dragon.cell) = { dragon.set(dragon.integer.1)(byte_size) }
+dragon.anvil.define.byte_size.flag_ID()(byte_size !dragon.cell) = { dragon.set(dragon.integer.1)(byte_size) }
+dragon.anvil.define.byte_size.operation_ID()(byte_size !dragon.cell) = { dragon.set(dragon.integer.1)(byte_size) }
+dragon.anvil.define.byte_size.cell_ID()(byte_size !dragon.cell) = { dragon.set(dragon.integer.2)(byte_size) }
+dragon.anvil.define.byte_size.cell()(byte_size !dragon.cell) = { dragon.copy(dragon.cell.byte_size)(byte_size) }
+
+[ define instruction IDs ]
+dragon.anvil.define.instruction_ID.stop()(ID !dragon.cell) = { dragon.set(dragon.integer.0)(ID) }
+dragon.anvil.define.instruction_ID.write_cell()(ID !dragon.cell) = { dragon.set(dragon.integer.1)(ID) }
+dragon.anvil.define.instruction_ID.operate()(ID !dragon.cell) = { dragon.set(dragon.integer.2)(ID) }
+dragon.anvil.define.instruction_ID.request_memory()(ID !dragon.cell) = { dragon.set(dragon.integer.3)(ID) }
+dragon.anvil.define.instruction_ID.return_memory()(ID !dragon.cell) = { dragon.set(dragon.integer.4)(ID) }
+dragon.anvil.define.instruction_ID.address_to_cell()(ID !dragon.cell) = { dragon.set(dragon.integer.5)(ID) }
+dragon.anvil.define.instruction_ID.cell_to_address()(ID !dragon.cell) = { dragon.set(dragon.integer.6)(ID) }
+dragon.anvil.define.instruction_ID.file_to_buffer()(ID !dragon.cell) = { dragon.set(dragon.integer.7)(ID) }
+dragon.anvil.define.instruction_ID.buffer_to_file()(ID !dragon.cell) = { dragon.set(dragon.integer.8)(ID) }
+dragon.anvil.define.instruction_ID.delete_file()(ID !dragon.cell) = { dragon.set(dragon.integer.9)(ID) }
+dragon.anvil.define.instruction_ID.buffer_to_buffer.low_to_high()(ID !dragon.cell) = { dragon.set(dragon.integer.10)(ID) }
+dragon.anvil.define.instruction_ID.buffer_to_buffer.high_to_low()(ID !dragon.cell) = { dragon.set(dragon.integer.11)(ID) }
+dragon.anvil.define.instruction_ID.compile()(ID !dragon.cell) = { dragon.set(dragon.integer.12)(ID) }
+dragon.anvil.define.instruction_ID.run()(ID !dragon.cell) = { dragon.set(dragon.integer.13)(ID) }
+dragon.anvil.define.instruction_ID.get_time()(ID !dragon.cell) = { dragon.set(dragon.integer.14)(ID) }
+dragon.anvil.define.instruction_ID.debug.putchar()(ID !dragon.cell) = { dragon.set(dragon.integer.15)(ID) }
+dragon.anvil.define.instruction_ID.debug.fgets()(ID !dragon.cell) = { dragon.set(dragon.integer.16)(ID) }
+dragon.anvil.define.instruction_ID.debug.mark_data_section()(ID !dragon.cell) = { dragon.set(dragon.integer.17)(ID) }
+dragon.anvil.define.instruction_ID.debug.mark_code_section()(ID !dragon.cell) = { dragon.set(dragon.integer.18)(ID) }
+dragon.anvil.define.instruction_ID.debug.get_current_context()(ID !dragon.cell) = { dragon.set(dragon.integer.19)(ID) }
+dragon.anvil.define.instruction_ID.debug.search_for_allocation()(ID !dragon.cell) = { dragon.set(dragon.integer.20)(ID) }
+
+[ define operation IDs ]
+dragon.anvil.define.operation_ID.cell_to_cell()(ID !dragon.cell) = { dragon.set(dragon.integer.0)(ID) }
+dragon.anvil.define.operation_ID.bits_or()(ID !dragon.cell) = { dragon.set(dragon.integer.1)(ID) }
+dragon.anvil.define.operation_ID.bits_invert()(ID !dragon.cell) = { dragon.set(dragon.integer.2)(ID) }
+dragon.anvil.define.operation_ID.bits_and()(ID !dragon.cell) = { dragon.set(dragon.integer.3)(ID) }
+dragon.anvil.define.operation_ID.bits_xor()(ID !dragon.cell) = { dragon.set(dragon.integer.4)(ID) }
+dragon.anvil.define.operation_ID.bits_shift_higher()(ID !dragon.cell) = { dragon.set(dragon.integer.5)(ID) }
+dragon.anvil.define.operation_ID.bits_shift_lower()(ID !dragon.cell) = { dragon.set(dragon.integer.6)(ID) }
+dragon.anvil.define.operation_ID.bits_overwrite()(ID !dragon.cell) = { dragon.set(dragon.integer.7)(ID) }
+dragon.anvil.define.operation_ID.integer_add()(ID !dragon.cell) = { dragon.set(dragon.integer.8)(ID) }
+dragon.anvil.define.operation_ID.integer_subtract()(ID !dragon.cell) = { dragon.set(dragon.integer.9)(ID) }
+dragon.anvil.define.operation_ID.integer_multiply()(ID !dragon.cell) = { dragon.set(dragon.integer.10)(ID) }
+dragon.anvil.define.operation_ID.integer_division()(ID !dragon.cell) = { dragon.set(dragon.integer.11)(ID) }
+dragon.anvil.define.operation_ID.integer_modulous()(ID !dragon.cell) = { dragon.set(dragon.integer.12)(ID) }
+dragon.anvil.define.operation_ID.integer_within_range()(ID !dragon.cell) = { dragon.set(dragon.integer.13)(ID) }
+dragon.anvil.define.operation_ID.flag_or()(ID !dragon.cell) = { dragon.set(dragon.integer.14)(ID) }
+dragon.anvil.define.operation_ID.flag_invert()(ID !dragon.cell) = { dragon.set(dragon.integer.15)(ID) }
+dragon.anvil.define.operation_ID.flag_and()(ID !dragon.cell) = { dragon.set(dragon.integer.16)(ID) }
+dragon.anvil.define.operation_ID.flag_xor()(ID !dragon.cell) = { dragon.set(dragon.integer.17)(ID) }
+dragon.anvil.define.operation_ID.flag_get()(ID !dragon.cell) = { dragon.set(dragon.integer.18)(ID) }
+dragon.anvil.define.operation_ID.flag_set()(ID !dragon.cell) = { dragon.set(dragon.integer.19)(ID) }
 
 [
     Scraplets
@@ -9,32 +60,47 @@
 
 [ write instruction ID scraplet ]
 dragon.anvil.write.scraplet.instruction_ID(workspace !dragon.forge.workspace, instruction_ID !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.byte_size.instruction_ID()(byte_size)
+    
     [ write instruction ID ]
-    dragon.forge.workspace.write.cell(workspace, instruction_ID, dragon.anvil.instruction_ID.byte_size)(workspace)
+    dragon.forge.workspace.write.cell(workspace, instruction_ID, byte_size)(workspace)
 }
 
 [ write flag ID scraplet ]
 dragon.anvil.write.scraplet.flag_ID(workspace !dragon.forge.workspace, flag_ID !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.byte_size.flag_ID()(byte_size)
+
     [ write instruction ID ]
-    dragon.forge.workspace.write.cell(workspace, flag_ID, dragon.anvil.flag_ID.byte_size)(workspace)
+    dragon.forge.workspace.write.cell(workspace, flag_ID, byte_size)(workspace)
 }
 
 [ write operation ID scraplet ]
 dragon.anvil.write.scraplet.operation_ID(workspace !dragon.forge.workspace, operation_ID !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.byte_size.operation_ID()(byte_size)
+
     [ write instruction ID ]
-    dragon.forge.workspace.write.cell(workspace, operation_ID, dragon.anvil.operation_ID.byte_size)(workspace)
+    dragon.forge.workspace.write.cell(workspace, operation_ID, byte_size)(workspace)
 }
 
 [ write cell ID scraplet ]
 dragon.anvil.write.scraplet.cell_ID(workspace !dragon.forge.workspace, cell_ID !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.byte_size.cell_ID()(byte_size)
+
     [ write instruction ID ]
-    dragon.forge.workspace.write.cell(workspace, cell_ID, dragon.anvil.cell_ID.byte_size)(workspace)
+    dragon.forge.workspace.write.cell(workspace, cell_ID, byte_size)(workspace)
 }
 
 [ write cell scraplet ]
 dragon.anvil.write.scraplet.cell(workspace !dragon.forge.workspace, cell !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.byte_size.cell()(byte_size)
+
     [ write instruction ID ]
-    dragon.forge.workspace.write.cell(workspace, cell, dragon.anvil.cell.byte_size)(workspace)
+    dragon.forge.workspace.write.cell(workspace, cell, byte_size)(workspace)
 }
 
 [
@@ -42,24 +108,30 @@ dragon.anvil.write.scraplet.cell(workspace !dragon.forge.workspace, cell !dragon
 ]
 [ write stop instruction ]
 dragon.anvil.write.instruction.stop(workspace !dragon.forge.workspace)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.stop()(instruction_ID)
+
     [ write scraplets ]
-    dragon.anvil.write.scraplet.instruction_ID(workspace, dragon.constant.0[ FIX LATER ])(workspace)
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
 }
 
 [ write write_cell instruction ]
 dragon.anvil.write.instruction.write_cell(workspace !dragon.forge.workspace, value !dragon.cell, destination_cell_ID !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.write_cell()(instruction_ID)
+
     [ write scraplets ]
-    dragon.anvil.write.scraplet.instruction_ID(workspace, dragon.constant.1[ FIX LATER ])(workspace)
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
     dragon.anvil.write.scraplet.cell(workspace, value)(workspace)
     dragon.anvil.write.scraplet.cell_ID(workspace, destination_cell_ID)(workspace)
 }
 
 [ write debug__putchar ]
-dragon.anvil.write.instruction.debug__putchar(workspace !dragon.forge.workspace, source_cell_ID !dragon.cell)(workspace !dragon.forge.workspace) = {
-    [ setup temp instruction ID ]
-    dragon.set(dragon.integer.15)(instruction_ID)
+dragon.anvil.write.instruction.debug.putchar(workspace !dragon.forge.workspace, source_cell_ID !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.debug.putchar()(instruction_ID)
     
     [ write scraplets ]
-    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID[ FIX LATER ])(workspace)
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
     dragon.anvil.write.scraplet.cell_ID(workspace, source_cell_ID)(workspace)
 }
