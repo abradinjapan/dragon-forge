@@ -126,12 +126,242 @@ dragon.anvil.write.instruction.write_cell(workspace !dragon.forge.workspace, val
     dragon.anvil.write.scraplet.cell_ID(workspace, destination_cell_ID)(workspace)
 }
 
-[ write debug__putchar ]
-dragon.anvil.write.instruction.debug.putchar(workspace !dragon.forge.workspace, source_cell_ID !dragon.cell)(workspace !dragon.forge.workspace) = {
+[ write operate instruction ]
+dragon.anvil.write.instruction.operate(workspace !dragon.forge.workspace, flag_ID !dragon.cell, operation_ID !dragon.cell, input_0 !dragon.cell, input_1 !dragon.cell, input_2 !dragon.cell, output_0 !dragon.cell)(workspace !dragon.forge.workspace) = {
     [ setup variables ]
-    dragon.anvil.define.instruction_ID.debug.putchar()(instruction_ID)
-    
+    dragon.anvil.define.instruction_ID.operate()(instruction_ID)
+
     [ write scraplets ]
     dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
-    dragon.anvil.write.scraplet.cell_ID(workspace, source_cell_ID)(workspace)
+    dragon.anvil.write.scraplet.flag_ID(workspace, flag_ID)(workspace)
+    dragon.anvil.write.scraplet.operation_ID(workspace, operation_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, input_0)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, input_1)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, input_2)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, output_0)(workspace)
+}
+
+[ write request memory instruction ]
+dragon.anvil.write.instruction.request_memory(workspace !dragon.forge.workspace, allocation_size !dragon.cell, allocation_start !dragon.cell, allocation_end !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.request_memory()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, allocation_size)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, allocation_start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, allocation_end)(workspace)
+}
+
+[ write return memory instruction ]
+dragon.anvil.write.instruction.return_memory(workspace !dragon.forge.workspace, allocation_start !dragon.cell, allocation_end !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.return_memory()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, allocation_start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, allocation_end)(workspace)
+}
+
+[ write address to cell instruction ]
+dragon.anvil.write.instruction.address_to_cell(workspace !dragon.forge.workspace, flag_ID !dragon.cell, source_address !dragon.cell, byte_size !dragon.cell, destination_cell !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.address_to_cell()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.flag_ID(workspace, flag_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, source_address)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, byte_size)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, destination_cell)(workspace)
+}
+
+[ write cell to address instruction ]
+dragon.anvil.write.instruction.cell_to_address(workspace !dragon.forge.workspace, flag_ID !dragon.cell, source_cell !dragon.cell, byte_size !dragon.cell, destination_address !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.cell_to_address()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.flag_ID(workspace, flag_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, source_cell)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, byte_size)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, destination_address)(workspace)
+}
+
+[ write file to buffer instruction ]
+dragon.anvil.write.instruction.file_to_buffer(workspace !dragon.forge.workspace, file_path.start !dragon.cell, file_path.end !dragon.cell, file_data.start !dragon.cell, file_data.end !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.file_to_buffer()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, file_path.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, file_path.end)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, file_data.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, file_data.end)(workspace)
+}
+
+[ write buffer to file instruction ]
+dragon.anvil.write.instruction.buffer_to_file(workspace !dragon.forge.workspace, file_data.start !dragon.cell, file_data.end !dragon.cell, file_path.start !dragon.cell, file_path.end !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.buffer_to_file()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, file_data.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, file_data.end)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, file_path.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, file_path.end)(workspace)
+}
+
+[ write delete file instruction ]
+dragon.anvil.write.instruction.delete_file(workspace !dragon.forge.workspace, file_path.start !dragon.cell, file_path.end !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.delete_file()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, file_path.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, file_path.end)(workspace)
+}
+
+[ write buffer to buffer low to high instruction ]
+dragon.anvil.write.instruction.buffer_to_buffer.low_to_high(workspace !dragon.forge.workspace, source.start !dragon.cell, source.end !dragon.cell, destination.start !dragon.cell, destination.end !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.buffer_to_buffer.low_to_high()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, source.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, source.end)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, destination.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, destination.end)(workspace)
+}
+
+[ write buffer to buffer high to low instruction ]
+dragon.anvil.write.instruction.buffer_to_buffer.high_to_low(workspace !dragon.forge.workspace, source.start !dragon.cell, source.end !dragon.cell, destination.start !dragon.cell, destination.end !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.buffer_to_buffer.high_to_low()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, source.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, source.end)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, destination.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, destination.end)(workspace)
+}
+
+[ write compile instruction ]
+dragon.anvil.write.instruction.compile(workspace !dragon.forge.workspace, user_codes_buffers_buffer.start !dragon.cell, user_codes_buffers_buffer.end !dragon.cell, include_standard !dragon.cell, debug_enabled !dragon.cell, generate_kickstarter !dragon.cell, output_program.start !dragon.cell, output_program.end !dragon.cell, output_debug.start !dragon.cell, output_debug.end !dragon.cell, error.error_occured !dragon.cell, error.message.start !dragon.cell, error.message.end !dragon.cell, error.character_location.file_index !dragon.cell, error.character_location.line_number !dragon.cell, error.character_location.character_index !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.compile()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, user_codes_buffers_buffer.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, user_codes_buffers_buffer.end)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, include_standard)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, debug_enabled)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, generate_kickstarter)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, output_program.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, output_program.end)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, output_debug.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, output_debug.end)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, error.error_occured)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, error.message.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, error.message.end)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, error.character_location.file_index)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, error.character_location.line_number)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, error.character_location.character_index)(workspace)
+}
+
+[ write run instruction ]
+dragon.anvil.write.instruction.run(workspace !dragon.forge.workspace, context_buffer.start !dragon.cell, context_buffer.end !dragon.cell, instruction_count !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.run()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, context_buffer.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, context_buffer.end)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, instruction_count)(workspace)
+}
+
+[ write get time instruction ]
+dragon.anvil.write.instruction.get_time(workspace !dragon.forge.workspace, seconds !dragon.cell, nanoseconds !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.get_time()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, seconds)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, nanoseconds)(workspace)
+}
+
+[ write debug putchar instruction ]
+dragon.anvil.write.instruction.debug.putchar(workspace !dragon.forge.workspace, character_cell_ID !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.debug.putchar()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, character_cell_ID)(workspace)
+}
+
+[ write debug fgets instruction ]
+dragon.anvil.write.instruction.debug.fgets(workspace !dragon.forge.workspace, input.start !dragon.cell, input.end !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.debug.fgets()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, input.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, input.end)(workspace)
+}
+
+[ write debug mark data section instruction ]
+dragon.anvil.write.instruction.debug.mark_data_section(workspace !dragon.forge.workspace, section_length[ directly embedded as a cell, not a cell ID ]!dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.debug.mark_data_section()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell(workspace, section_length)(workspace)
+}
+
+[ write debug mark code section instruction ]
+dragon.anvil.write.instruction.debug.mark_code_section(workspace !dragon.forge.workspace, section_length[ directly embedded as a cell, not a cell ID ]!dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.debug.mark_code_section()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, section_length)(workspace)
+}
+
+[ write debug get current context instruction ]
+dragon.anvil.write.instruction.debug.get_current_context(workspace !dragon.forge.workspace, context.start !dragon.cell, context.end !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.debug.get_current_context()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, context.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, context.end)(workspace)
+}
+
+[ write debug search for allocation instruction ]
+dragon.anvil.write.instruction.debug.search_for_allocation(workspace !dragon.forge.workspace, buffer_inside_allocation.start !dragon.cell, buffer_inside_allocation.end !dragon.cell, was_found !dragon.cell, found_buffer.start !dragon.cell, found_buffer.end !dragon.cell)(workspace !dragon.forge.workspace) = {
+    [ setup variables ]
+    dragon.anvil.define.instruction_ID.debug.search_for_allocation()(instruction_ID)
+
+    [ write scraplets ]
+    dragon.anvil.write.scraplet.instruction_ID(workspace, instruction_ID)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, buffer_inside_allocation.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, buffer_inside_allocation.end)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, was_found)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, found_buffer.start)(workspace)
+    dragon.anvil.write.scraplet.cell_ID(workspace, found_buffer.end)(workspace)
 }
