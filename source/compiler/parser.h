@@ -641,27 +641,25 @@ COMPILER__parsling_argument COMPILER__parse__statement_argument(ANVIL__current* 
         }
 
         // check for tag
-        if (argument_location == COMPILER__palt__structure_declaration) {
-            // check for hashtag
-            if (COMPILER__read__lexling_from_current(*current).type == COMPILER__lt__hashtag) {
-                // advance current
-                COMPILER__advance__lexling_current(current, 1);
+        // check for hashtag
+        if (COMPILER__read__lexling_from_current(*current).type == COMPILER__lt__hashtag) {
+            // advance current
+            COMPILER__advance__lexling_current(current, 1);
 
-                // check for name
-                // found tag name
-                if (COMPILER__read__lexling_from_current(*current).type == COMPILER__lt__name) {
-                    // add tag
-                    output.tag = COMPILER__parse__namespace__one_name_only(current, error);
-                    if (COMPILER__check__error_occured(error)) {
-                        return output;
-                    }
-                // error
-                } else {
-                    // set error
-                    *error = COMPILER__open__error("Parsing Error: Missing tag name after tag marker '#' in structure declaration.", COMPILER__read__lexling_from_current(*current).location);
-
+            // check for name
+            // found tag name
+            if (COMPILER__read__lexling_from_current(*current).type == COMPILER__lt__name) {
+                // add tag
+                output.tag = COMPILER__parse__namespace__one_name_only(current, error);
+                if (COMPILER__check__error_occured(error)) {
                     return output;
                 }
+            // error
+            } else {
+                // set error
+                *error = COMPILER__open__error("Parsing Error: Missing tag name after tag marker '#'.", COMPILER__read__lexling_from_current(*current).location);
+
+                return output;
             }
         }
     // offset

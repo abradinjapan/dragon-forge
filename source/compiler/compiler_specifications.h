@@ -51,30 +51,6 @@ typedef enum COMPILER__avat {
     COMPILER__avat__COUNT,
 } COMPILER__avat;
 
-// accountling member json format
-typedef enum COMPILER__amjf {
-    COMPILER__amjf__default,
-    COMPILER__amjf__buffer__addresses,
-    COMPILER__amjf__buffer__byte_array,
-    COMPILER__amjf__buffer__string,
-    COMPILER__amjf__integer__decimal,
-    COMPILER__amjf__integer__hexadecimal,
-    COMPILER__amjf__integer__binary,
-    COMPILER__amjf__boolean,
-    COMPILER__amjf__COUNT,
-} COMPILER__amjf;
-char* COMPILER__global__predefined_tag_names[] = {
-    COMPILER__define__master_namespace ".json.default",
-    COMPILER__define__master_namespace ".json.buffer.addresses",
-    COMPILER__define__master_namespace ".json.buffer.byte_array",
-    COMPILER__define__master_namespace ".json.buffer.string",
-    COMPILER__define__master_namespace ".json.integer.decimal",
-    COMPILER__define__master_namespace ".json.integer.hexadecimal",
-    COMPILER__define__master_namespace ".json.integer.binary",
-    COMPILER__define__master_namespace ".json.boolean",
-    COMPILER__define__master_namespace ".INTERNAL",
-};
-
 // accounting blueprintling types
 typedef enum COMPILER__abt {
     COMPILER__abt__end_blueprint,
