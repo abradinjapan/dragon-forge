@@ -2,6 +2,10 @@
     Anvil:
     A library for writing anvil instructions.
 ]
+
+[
+    Defines
+]
 [ define byte sizes ]
 dragon.anvil.define.byte_size.instruction_ID()(byte_size !dragon.cell) = { dragon.set(dragon.integer.1)(byte_size) }
 dragon.anvil.define.byte_size.flag_ID()(byte_size !dragon.cell) = { dragon.set(dragon.integer.1)(byte_size) }
