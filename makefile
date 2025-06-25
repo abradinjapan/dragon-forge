@@ -13,6 +13,7 @@ all:
 	xxd -i ./source/compiler/standard/forge.dragon > ./build_temps/forge.c
 	xxd -i ./source/compiler/standard/anvil.dragon > ./build_temps/anvil.c
 	xxd -i ./source/compiler/standard/compile.dragon > ./build_temps/compile.c
+	xxd -i ./source/compiler/standard/just_run.dragon > ./build_temps/just_run.c
 
 	# compile executables
 	gcc ./source/main.c -Wall -Wextra -fsanitize=address -g -o ./../dragon-forge-debug.elf

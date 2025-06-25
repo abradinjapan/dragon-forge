@@ -1,0 +1,61 @@
+[ compile, install and run program ]
+dragon.just_run(sources !dragon.list)() = {
+    [ get buffer of buffers ]
+    dragon.list.calculate.content_buffer(sources)(sources.buffer)
+
+    [ compile ]
+    dragon.compiler.configure.default_compile()(settings)
+    dragon.compiler.compile(sources.buffer, settings)(byte_code, debug_information, error)
+
+    [ check for compilation error ]
+    @print_compilation_error error:occured = {
+        dragon.print.buffer_as_string(error:message)()
+        dragon.print.new_line()()
+        dragon.print.integer.unsigned(error:location:file_index)()
+        dragon.print.new_line()()
+        dragon.print.integer.unsigned(error:location:line_number)()
+        dragon.print.new_line()()
+        dragon.print.integer.unsigned(error:location:character_index)()
+        dragon.print.new_line()()
+        dragon.jump(dragon.always, @exit)()
+    }
+
+    [ open new context & install ]
+    dragon.context.open()(context)
+    dragon.context.install_program(context, byte_code)()
+
+    [ run context ]
+    dragon.set(dragon.integer.n1)(instruction_count)
+    dragon.context.run(context, instruction_count)()
+
+    [ clean up context ]
+    dragon.buffer.return(context)()
+
+    [ clean up program ]
+    dragon.buffer.return(byte_code)()
+
+    [ exit ]
+    @exit
+}
+
+[ test one file ]
+dragon.just_run.one_file(file_path !dragon.buffer)() = {
+    [ load file ]
+    dragon.file_to_buffer(file_path)(user_code)
+
+    [ open list ]
+    dragon.structure.byte_size(user_code)(files.byte_size)
+    dragon.list.open(files.byte_size)(files)
+
+    [ append buffer ]
+    dragon.list.append.buffer(files, user_code)(files)
+
+    [ run test ]
+    dragon.just_run(files)()
+
+    [ clean up file ]
+    dragon.buffer.return(user_code)()
+
+    [ clean up files ]
+    dragon.list.close(files)()
+}

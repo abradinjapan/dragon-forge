@@ -19,6 +19,7 @@
 #include "../../../build_temps/forge.c"
 #include "../../../build_temps/anvil.c"
 #include "../../../build_temps/compile.c"
+#include "../../../build_temps/just_run.c"
 
 /* Turn C Files Into Buffers */
 // bufferify any file
