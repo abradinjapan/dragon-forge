@@ -172,6 +172,14 @@ dragon.list.append.list(list !dragon.list, data !dragon.list)(list !dragon.list)
     dragon.list.append.cell(list, data:increase)(list)
 }
 
+[ append text location structure to list ]
+dragon.list.append.text.location(list !dragon.list, data !dragon.text.location)(list !dragon.list) = {
+    [ append members ]
+    dragon.list.append.cell(list, data:file_index)(list)
+    dragon.list.append.cell(list, data:line_number)(list)
+    dragon.list.append.cell(list, data:character_index)(list)
+}
+
 [ copy content to new buffer ]
 dragon.list.duplicate_content(list !dragon.list)(new_allocation !dragon.buffer) = {
     [ calculate content buffer and size ]

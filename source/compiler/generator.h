@@ -3,6 +3,7 @@
 
 /* Include */
 #include "accounter.h"
+#include "compiler_specifications.h"
 
 /* Generation */
 // one function
@@ -187,6 +188,20 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             for (ANVIL__cell_index cell_index = COMPILER__generate__use_variable(pack__output).cells.start; cell_index <= COMPILER__generate__use_variable(pack__output).cells.end; cell_index++) {
                 // pass one cell
                 ANVIL__code__cell_to_cell(anvil, ANVIL__sft__always_run, ANVIL__srt__constant__0, cell_index);
+            }
+
+            break;
+        case COMPILER__ast__predefined__pack_increment__anything:
+            // setup starting value
+            ANVIL__code__cell_to_cell(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(pack_increment_start).cells.start, ANVIL__srt__temp__write);
+
+            // pack cells
+            for (ANVIL__cell_index cell_index = COMPILER__generate__use_variable(pack__output).cells.start; cell_index <= COMPILER__generate__use_variable(pack__output).cells.end; cell_index++) {
+                // write one cell
+                ANVIL__code__cell_to_cell(anvil, ANVIL__sft__always_run, ANVIL__srt__temp__write, cell_index);
+
+                // increment write value
+                ANVIL__code__operate(anvil, ANVIL__sft__always_run, ANVIL__ot__integer_add, ANVIL__srt__temp__write, COMPILER__generate__use_variable(pack_increment_by).cells.start, ANVIL__unused_cell_ID, ANVIL__srt__temp__write);
             }
 
             break;

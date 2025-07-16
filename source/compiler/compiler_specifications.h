@@ -228,6 +228,7 @@ typedef enum COMPILER__ast {
     COMPILER__ast__predefined__copy__anything,
     COMPILER__ast__predefined__pack__anything,
     COMPILER__ast__predefined__pack_null__anything,
+    COMPILER__ast__predefined__pack_increment__anything,
 
     // jumps
     COMPILER__ast__predefined__jump__top,
@@ -638,6 +639,7 @@ char* COMPILER__global__predefined_function_call_names[] = {
     COMPILER__define__master_namespace ".copy",
     COMPILER__define__master_namespace ".pack",
     COMPILER__define__master_namespace ".pack.null",
+    COMPILER__define__master_namespace ".pack.increment",
 
     // jumps
     COMPILER__define__master_namespace ".jump.top",
@@ -703,6 +705,7 @@ typedef enum COMPILER__pfcnt {
     COMPILER__pfcnt__copy,
     COMPILER__pfcnt__pack,
     COMPILER__pfcnt__pack_null,
+    COMPILER__pfcnt__pack_increment,
 
     // jumps
     COMPILER__pfcnt__jump__top,

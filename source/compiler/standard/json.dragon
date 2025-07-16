@@ -1154,7 +1154,6 @@ dragon.json.compile.print.parsling(workspace !dragon.json.workspace, parsling !d
 
     [ print name if has name ]
     dragon.integer.within_range(dragon.constant.0, parsling:name:raw:start, dragon.constant.0)(has_no_name, has_a_name)
-    dragon.bits.xor(has_no_name, dragon.constant.1)(has_a_name)
     @has_a_name has_a_name = {
         [ print name ]
         dragon.print.buffer_as_string(parsling:name:raw)()
