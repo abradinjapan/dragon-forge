@@ -242,7 +242,7 @@ ANVIL__buffer COMPILER__generate__debug_information(COMPILER__compilation_unit u
     }
 
     // turn list into new buffer and return
-    bufferify:
+    bufferify: json = json;
     ANVIL__buffer json_buffer_temp = ANVIL__calculate__list_current_buffer(json);
     ANVIL__buffer output = ANVIL__open__buffer(ANVIL__calculate__buffer_length(json_buffer_temp));
     ANVIL__copy__buffer(json_buffer_temp, output, &(*error).memory_error_occured);

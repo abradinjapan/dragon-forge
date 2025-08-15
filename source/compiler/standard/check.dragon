@@ -1,18 +1,12 @@
 [ check if two buffer's contents are equivalent ]
-dragon.check.buffer_contents_are_equal(a !dragon.buffer, b !dragon.buffer)(equivalent !dragon.cell) = {
+dragon.check.buffer_contents_are_equal(a !dragon.buffer, b !dragon.buffer)(valid !dragon.cell, invalid !dragon.cell) = {
     [ calculate lengths ]
     dragon.buffer.calculate.length(a)(a.length)
     dragon.buffer.calculate.length(b)(b.length)
 
     [ check length equivalency ]
     dragon.integer.within_range(a.length, b.length, a.length)(valid, invalid)
-    @invalid_lengths invalid = {
-        [ set equivalent ]
-        dragon.copy(dragon.false)(equivalent)
-
-        [ return ]
-        dragon.jump(dragon.always, @exit)()
-    }
+    dragon.jump.bottom(invalid, @dragon.master_scope)()
 
     [ check content equivalency ]
     [ setup currents ]
@@ -20,35 +14,34 @@ dragon.check.buffer_contents_are_equal(a !dragon.buffer, b !dragon.buffer)(equiv
     dragon.pack(b, b:start)(b.current !dragon.current)
 
     [ setup loop start ]
-    @check_loop_start
+    @check_loop.start dragon.always = {
+        [ check currents ]
+        dragon.current.within_range(a.current)(a.current.valid, a.current.invalid)
+        @check_currents a.current.invalid = {
+            [ not an error, only reachable by equivalent string ]
+            dragon.copy(dragon.true)(valid)
+            dragon.copy(dragon.false)(invalid)
 
-    [ check currents ]
-    dragon.current.within_range(a.current)(a.current.valid, a.current.invalid)
-    @check_currents a.current.invalid = {
-        [ not an error, only reachable by equivalent string ]
-        dragon.copy(dragon.true)(equivalent)
+            [ return ]
+            dragon.jump.bottom(dragon.always, @dragon.master_scope)()
+        }
 
-        [ return ]
-        dragon.jump(dragon.always, @exit)()
+        [ get characters from current ]
+        dragon.address_to_cell(a.current:progress, dragon.ascii_character.byte_size)(a.character, a.current:progress)
+        dragon.address_to_cell(b.current:progress, dragon.ascii_character.byte_size)(b.character, b.current:progress)
+
+        [ check for character equivalency ]
+        dragon.integer.within_range(a.character, b.character, a.character)(match, not_a_match)
+        @not_a_match not_a_match = {
+            [ set not equivalent ]
+            dragon.copy(dragon.false)(valid)
+            dragon.copy(dragon.true)(invalid)
+
+            [ return ]
+            dragon.jump.bottom(dragon.always, @dragon.master_scope)()
+        }
+
+        [ jump to loop start ]
+        dragon.jump.top(dragon.always, @check_loop.start)()
     }
-
-    [ get characters from current ]
-    dragon.address_to_cell(a.current:progress, dragon.ascii_character.byte_size)(a.character, a.current:progress)
-    dragon.address_to_cell(b.current:progress, dragon.ascii_character.byte_size)(b.character, b.current:progress)
-
-    [ check for character equivalency ]
-    dragon.integer.within_range(a.character, b.character, a.character)(match, not_a_match)
-    @not_a_match not_a_match = {
-        [ set not equivalent ]
-        dragon.copy(dragon.false)(equivalent)
-
-        [ return ]
-        dragon.jump(dragon.always, @exit)()
-    }
-
-    [ jump to loop start ]
-    dragon.jump(dragon.always, @check_loop_start)()
-
-    [ exit offset ]
-    @exit
 }
