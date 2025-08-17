@@ -7,7 +7,7 @@
 #include "parser.h"
 #include "accounter.h"
 #include "generator.h"
-#include "./standard/standard.h"
+#include "standard.h"
 
 /* Compilation Unit */
 // one compiled object across multiple stages
@@ -286,20 +286,19 @@ void COMPILER__compile__files(ANVIL__buffer user_codes, ANVIL__bt include_standa
         }
 
         // append files
-        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_print_dragon, __source_compiler_standard_print_dragon_len), &(*error).memory_error_occured);
-        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_cast_dragon, __source_compiler_standard_cast_dragon_len), &(*error).memory_error_occured);
-        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_buffer_dragon, __source_compiler_standard_buffer_dragon_len), &(*error).memory_error_occured);
-        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_current_dragon, __source_compiler_standard_current_dragon_len), &(*error).memory_error_occured);
-        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_list_dragon, __source_compiler_standard_list_dragon_len), &(*error).memory_error_occured);
-        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_context_dragon, __source_compiler_standard_context_dragon_len), &(*error).memory_error_occured);
-        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_check_dragon, __source_compiler_standard_check_dragon_len), &(*error).memory_error_occured);
-        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_error_dragon, __source_compiler_standard_error_dragon_len), &(*error).memory_error_occured);
-        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_json_dragon, __source_compiler_standard_json_dragon_len), &(*error).memory_error_occured);
-        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_time_dragon, __source_compiler_standard_time_dragon_len), &(*error).memory_error_occured);
-        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_forge_dragon, __source_compiler_standard_forge_dragon_len), &(*error).memory_error_occured);
-        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_anvil_dragon, __source_compiler_standard_anvil_dragon_len), &(*error).memory_error_occured);
-        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_compile_dragon, __source_compiler_standard_compile_dragon_len), &(*error).memory_error_occured);
-        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_compiler_standard_just_run_dragon, __source_compiler_standard_just_run_dragon_len), &(*error).memory_error_occured);
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_dragon_standard_print_dragon, __source_dragon_standard_print_dragon_len), &(*error).memory_error_occured);
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_dragon_standard_cast_dragon, __source_dragon_standard_cast_dragon_len), &(*error).memory_error_occured);
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_dragon_standard_buffer_dragon, __source_dragon_standard_buffer_dragon_len), &(*error).memory_error_occured);
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_dragon_standard_current_dragon, __source_dragon_standard_current_dragon_len), &(*error).memory_error_occured);
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_dragon_standard_list_dragon, __source_dragon_standard_list_dragon_len), &(*error).memory_error_occured);
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_dragon_standard_context_dragon, __source_dragon_standard_context_dragon_len), &(*error).memory_error_occured);
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_dragon_standard_check_dragon, __source_dragon_standard_check_dragon_len), &(*error).memory_error_occured);
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_dragon_standard_error_dragon, __source_dragon_standard_error_dragon_len), &(*error).memory_error_occured);
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_dragon_standard_json_dragon, __source_dragon_standard_json_dragon_len), &(*error).memory_error_occured);
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_dragon_standard_time_dragon, __source_dragon_standard_time_dragon_len), &(*error).memory_error_occured);
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_dragon_standard_anvil_dragon, __source_dragon_standard_anvil_dragon_len), &(*error).memory_error_occured);
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_dragon_standard_compile_dragon, __source_dragon_standard_compile_dragon_len), &(*error).memory_error_occured);
+        ANVIL__list__append__buffer(&compilation_unit.standard_files, STANDARD__bufferify__any_file(__source_dragon_standard_just_run_dragon, __source_dragon_standard_just_run_dragon_len), &(*error).memory_error_occured);
 
         // create content buffer
         standard_files = ANVIL__calculate__list_current_buffer(&compilation_unit.standard_files);
