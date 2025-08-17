@@ -695,7 +695,7 @@ void ANVIL__code__create_return_address__directly_after_jump(ANVIL__workspace* w
 }
 
 // call function explicitly
-void ANVIL__code__call__explicit(ANVIL__workspace* workspace, ANVIL__flag_ID flag, ANVIL__cell_ID address) {
+void ANVIL__code__inner_call__explicit(ANVIL__workspace* workspace, ANVIL__flag_ID flag, ANVIL__cell_ID address) {
     // preserve return address
     ANVIL__code__push_cell(workspace, flag, ANVIL__srt__return_address);
 
@@ -712,12 +712,12 @@ void ANVIL__code__call__explicit(ANVIL__workspace* workspace, ANVIL__flag_ID fla
 }
 
 // call function statically
-void ANVIL__code__call__static(ANVIL__workspace* workspace, ANVIL__flag_ID flag, ANVIL__offset offset) {
+void ANVIL__code__inner_call__static(ANVIL__workspace* workspace, ANVIL__flag_ID flag, ANVIL__offset offset) {
     // calculate address
     ANVIL__code__calculate_statically__offset_address(workspace, flag, offset, ANVIL__srt__temp__address);
 
     // call function with offset set
-    ANVIL__code__call__explicit(workspace, flag, ANVIL__srt__temp__address);
+    ANVIL__code__inner_call__explicit(workspace, flag, ANVIL__srt__temp__address);
 
     return;
 }
@@ -781,7 +781,7 @@ void ANVIL__code__start(ANVIL__workspace* workspace, ANVIL__stack_size stack_siz
     ANVIL__code__cell_to_cell(workspace, (ANVIL__flag_ID)ANVIL__sft__always_run, ANVIL__srt__stack__start_address, ANVIL__srt__stack__current_address);
 
     // jump to main
-    ANVIL__code__call__static(workspace, ANVIL__sft__always_run, jump_to);
+    ANVIL__code__inner_call__static(workspace, ANVIL__sft__always_run, jump_to);
 
     // deallocate stack
     ANVIL__code__return_memory(workspace, ANVIL__srt__stack__start_address, ANVIL__srt__stack__end_address);

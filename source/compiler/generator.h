@@ -427,7 +427,7 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             }
 
             // call function
-            ANVIL__code__call__static(anvil, ANVIL__sft__always_run, ((COMPILER__generation_function*)(*workspace).user_defined_functions.list.buffer.start)[statement.function_call__calling_function_header_index].offset__function_start);
+            ANVIL__code__inner_call__static(anvil, ANVIL__sft__always_run, ((COMPILER__generation_function*)(*workspace).user_defined_functions.list.buffer.start)[statement.function_call__calling_function_header_index].offset__function_start);
 
             // setup counter
             user_defined_function_call__current_function_io_register = ANVIL__srt__start__function_io;
