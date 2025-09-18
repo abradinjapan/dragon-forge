@@ -1,21 +1,21 @@
 [ compile, install and run program ]
-dragon.just_run(sources !dragon.list)() = {
+dragon.just_run(sources !dragon.list, input !dragon.buffer)(result !dragon.buffer, error !dragon.buffer) = {
     [ get buffer of buffers ]
     dragon.list.calculate.content_buffer(sources)(sources.buffer)
 
     [ compile ]
     dragon.compiler.configure.default_compile()(settings)
-    dragon.compiler.compile(sources.buffer, settings)(byte_code, debug_information, error)
+    dragon.compiler.compile(sources.buffer, settings)(byte_code, debug_information, compilation_error)
 
     [ check for compilation error ]
-    @print_compilation_error error:occured = {
-        dragon.print.buffer_as_string(error:message)()
+    @print_compilation_error compilation_error:occured = {
+        dragon.print.buffer_as_string(compilation_error:message)()
         dragon.print.new_line()()
-        dragon.print.integer.unsigned(error:location:file_index)()
+        dragon.print.integer.unsigned(compilation_error:location:file_index)()
         dragon.print.new_line()()
-        dragon.print.integer.unsigned(error:location:line_number)()
+        dragon.print.integer.unsigned(compilation_error:location:line_number)()
         dragon.print.new_line()()
-        dragon.print.integer.unsigned(error:location:character_index)()
+        dragon.print.integer.unsigned(compilation_error:location:character_index)()
         dragon.print.new_line()()
         dragon.jump(dragon.always, @exit)()
     }
@@ -23,6 +23,9 @@ dragon.just_run(sources !dragon.list)() = {
     [ open new context & install ]
     dragon.context.open()(context)
     dragon.context.install_program(context, byte_code)()
+
+    [ pass input ]
+    dragon.context.set.context_input(context, input)()
 
     [ run context ]
     dragon.set(dragon.integer.n1)(instruction_count)
@@ -39,7 +42,7 @@ dragon.just_run(sources !dragon.list)() = {
 }
 
 [ test one file ]
-dragon.just_run.one_file(file_path !dragon.buffer)() = {
+dragon.just_run.one_file(file_path !dragon.buffer, input !dragon.buffer)(result !dragon.buffer, error !dragon.buffer) = {
     [ load file ]
     dragon.file_to_buffer(file_path)(user_code)
 
@@ -51,7 +54,7 @@ dragon.just_run.one_file(file_path !dragon.buffer)() = {
     dragon.list.append.buffer(files, user_code)(files)
 
     [ run test ]
-    dragon.just_run(files)()
+    dragon.just_run(files, input)(result, error)
 
     [ clean up file ]
     dragon.buffer.return(user_code)()

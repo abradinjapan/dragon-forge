@@ -282,8 +282,6 @@ typedef enum COMPILER__ast {
 
     // context
     COMPILER__ast__predefined__context__install_program,
-    //COMPILER__ast__predefined__context__retrieve_result,
-    //COMPILER__ast__predefined__context__retrieve_error,
     COMPILER__ast__predefined__context__run,
 
     // time
@@ -695,8 +693,6 @@ char* COMPILER__global__predefined_function_call_names[] = {
 
     // context operations
     COMPILER__define__master_namespace ".context.install_program",
-    //COMPILER__define__master_namespace ".context.retrieve_result",
-    //COMPILER__define__master_namespace ".context.retrieve_error",
     COMPILER__define__master_namespace ".context.run",
 
     // time operations
@@ -763,8 +759,6 @@ typedef enum COMPILER__pfcnt {
 
     // context options
     COMPILER__pfcnt__context__install_program,
-    //COMPILER__pfcnt__context__retrieve_result,
-    //COMPILER__pfcnt__context__retrieve_error,
     COMPILER__pfcnt__context__run,
 
     // time
@@ -1033,18 +1027,6 @@ COMPILER__blueprintling COMPILER__global__predefined_one_off_function_calls[] = 
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
         0,
-    /*COMPILER__abt__define_function_call,
-        COMPILER__ast__predefined__context__retrieve_result,
-        COMPILER__pfcnt__context__retrieve_result,
-        0,
-        1,
-        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
-    COMPILER__abt__define_function_call,
-        COMPILER__ast__predefined__context__retrieve_error,
-        COMPILER__pfcnt__context__retrieve_error,
-        0,
-        1,
-        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,*/
     COMPILER__abt__define_function_call,
         COMPILER__ast__predefined__context__run,
         COMPILER__pfcnt__context__run,

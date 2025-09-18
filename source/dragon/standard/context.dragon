@@ -3,3 +3,36 @@ dragon.context.open()(context !dragon.buffer) = {
     [ allocate ]
     dragon.buffer.request(dragon.context.byte_size)(context)
 }
+
+[ calculate cell offset ]
+dragon.context.calculate.context_cell_offset(cell_ID !dragon.cell)(offset !dragon.cell) = {
+    [ calculate offset ]
+    dragon.integer.multiply(cell_ID, dragon.cell.byte_size)(offset)
+}
+
+[ calculate cell address within context ]
+dragon.context.calculate.context_cell_address(context !dragon.buffer, cell_ID !dragon.cell)(address !dragon.cell) = {
+    [ calculate cell address ]
+    dragon.context.calculate.context_cell_offset(cell_ID)(offset)
+    dragon.integer.add(context:start, offset)(address)
+}
+
+[ write context cell ]
+dragon.context.write.cell(context !dragon.buffer, cell_ID !dragon.cell, value !dragon.cell)() = {
+    [ calculate address ]
+    dragon.context.calculate.context_cell_address(context, cell_ID)(address)
+
+    [ perform write ]
+    dragon.cell_to_address(value, dragon.cell.byte_size, address)(advancement)
+}
+
+[ write context input ]
+dragon.context.set.context_input(context !dragon.buffer, input !dragon.buffer)() = {
+    [ setup variable IDs ]
+    dragon.set(dragon.integer.24)(context.input.start)
+    dragon.set(dragon.integer.25)(context.input.end)
+
+    [ write to context ]
+    dragon.context.write.cell(context, context.input.start, input:start)()
+    dragon.context.write.cell(context, context.input.end, input:end)()
+}
