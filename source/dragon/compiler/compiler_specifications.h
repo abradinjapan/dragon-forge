@@ -135,7 +135,8 @@ typedef enum COMPILER__pvn {
     COMPILER__pvn__context_byte_size,
     COMPILER__pvn__ascii_character_byte_size,
     COMPILER__pvn__context__input,
-    COMPILER__pvn__context__output,
+    COMPILER__pvn__context__output__result,
+    COMPILER__pvn__context__output__error,
     COMPILER__pvn__call_stack,
 
     // anvil scraplets
@@ -190,7 +191,8 @@ char* COMPILER__global__predefined_variable_names[] = {
     COMPILER__define__master_namespace ".context.byte_size",
     COMPILER__define__master_namespace ".ascii_character.byte_size",
     COMPILER__define__master_namespace ".context.input",
-    COMPILER__define__master_namespace ".context.output",
+    COMPILER__define__master_namespace ".context.output.result",
+    COMPILER__define__master_namespace ".context.output.error",
     COMPILER__define__master_namespace ".call_stack",
 };
 
@@ -280,6 +282,8 @@ typedef enum COMPILER__ast {
 
     // context
     COMPILER__ast__predefined__context__install_program,
+    //COMPILER__ast__predefined__context__retrieve_result,
+    //COMPILER__ast__predefined__context__retrieve_error,
     COMPILER__ast__predefined__context__run,
 
     // time
@@ -610,10 +614,16 @@ COMPILER__blueprintling COMPILER__global__predefined_variables[] = {
         ANVIL__srt__input_buffer_end,
 
     COMPILER__abt__define_type,
-        COMPILER__pvn__context__output,
+        COMPILER__pvn__context__output__result,
         COMPILER__ptt__dragon_buffer,
-        ANVIL__srt__output_buffer_start,
-        ANVIL__srt__output_buffer_end,
+        ANVIL__srt__output_result_buffer_start,
+        ANVIL__srt__output_result_buffer_end,
+
+    COMPILER__abt__define_type,
+        COMPILER__pvn__context__output__error,
+        COMPILER__ptt__dragon_buffer,
+        ANVIL__srt__output_error_buffer_start,
+        ANVIL__srt__output_error_buffer_end,
     
     COMPILER__abt__define_type,
         COMPILER__pvn__call_stack,
@@ -685,6 +695,8 @@ char* COMPILER__global__predefined_function_call_names[] = {
 
     // context operations
     COMPILER__define__master_namespace ".context.install_program",
+    //COMPILER__define__master_namespace ".context.retrieve_result",
+    //COMPILER__define__master_namespace ".context.retrieve_error",
     COMPILER__define__master_namespace ".context.run",
 
     // time operations
@@ -751,6 +763,8 @@ typedef enum COMPILER__pfcnt {
 
     // context options
     COMPILER__pfcnt__context__install_program,
+    //COMPILER__pfcnt__context__retrieve_result,
+    //COMPILER__pfcnt__context__retrieve_error,
     COMPILER__pfcnt__context__run,
 
     // time
@@ -1019,6 +1033,18 @@ COMPILER__blueprintling COMPILER__global__predefined_one_off_function_calls[] = 
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
         COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
         0,
+    /*COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__context__retrieve_result,
+        COMPILER__pfcnt__context__retrieve_result,
+        0,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,
+    COMPILER__abt__define_function_call,
+        COMPILER__ast__predefined__context__retrieve_error,
+        COMPILER__pfcnt__context__retrieve_error,
+        0,
+        1,
+        COMPILER__aat__COUNT + COMPILER__ptt__dragon_buffer,*/
     COMPILER__abt__define_function_call,
         COMPILER__ast__predefined__context__run,
         COMPILER__pfcnt__context__run,

@@ -379,6 +379,8 @@ typedef struct COMPILER__accountling_statement {
     // context assorted functions
     COMPILER__accountling_variable_argument context__context_buffer;
     COMPILER__accountling_variable_argument context__program_buffer;
+    COMPILER__accountling_variable_argument context__result_buffer;
+    COMPILER__accountling_variable_argument context__error_buffer;
     COMPILER__accountling_variable_argument context__instruction_count;
 
     // time functions

@@ -464,8 +464,10 @@ typedef enum ANVIL__srt {
     // context io cells
     ANVIL__srt__input_buffer_start,
     ANVIL__srt__input_buffer_end,
-    ANVIL__srt__output_buffer_start,
-    ANVIL__srt__output_buffer_end,
+    ANVIL__srt__output_result_buffer_start,
+    ANVIL__srt__output_result_buffer_end,
+    ANVIL__srt__output_error_buffer_start,
+    ANVIL__srt__output_error_buffer_end,
 
     // stack cells
     ANVIL__srt__stack__start_address,
@@ -771,9 +773,11 @@ void ANVIL__code__start(ANVIL__workspace* workspace, ANVIL__stack_size stack_siz
         ANVIL__code__write_cell(workspace, (ANVIL__cell)(ANVIL__ot__START + operation_ID_list_start), operation_ID_list_start);
     }
 
-    // setup output
-    ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, ANVIL__srt__constant__0, ANVIL__srt__output_buffer_start);
-    ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, ANVIL__srt__constant__0, ANVIL__srt__output_buffer_end);
+    // setup outputs
+    ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, ANVIL__srt__constant__0, ANVIL__srt__output_result_buffer_start);
+    ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, ANVIL__srt__constant__0, ANVIL__srt__output_result_buffer_end);
+    ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, ANVIL__srt__constant__0, ANVIL__srt__output_error_buffer_start);
+    ANVIL__code__cell_to_cell(workspace, ANVIL__sft__always_run, ANVIL__srt__constant__0, ANVIL__srt__output_error_buffer_end);
 
     // setup stack
     ANVIL__code__write_cell(workspace, (ANVIL__cell)stack_size, ANVIL__srt__temp__write);

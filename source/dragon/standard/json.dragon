@@ -1275,7 +1275,7 @@ dragon.json.traverse.retrieve_parsling.by_index(source_parsling !dragon.json.par
     dragon.pack.null()(found_parsling !dragon.json.parsling)
 
     [ calculate list metadata ]
-    dragon.json.traverse.calculate.parsling_list_metadata(source_parsling)(parsling_members_content, parsling_byte_size, member_count)
+    dragon.json.traverse.calculate.parsling_list_metadata(source_parsling)(parsling_members_current, parsling_byte_size, member_count)
 
     [ check if the index is valid ]
     [ if member count is zero ]
@@ -1290,7 +1290,7 @@ dragon.json.traverse.retrieve_parsling.by_index(source_parsling !dragon.json.par
     @valid_index valid_index = {
         [ calculate structure ]
         dragon.integer.multiply(index, parsling_byte_size)(member_offset)
-        dragon.integer.add(member_offset, parsling_members_content:start)(parsling.start)
+        dragon.integer.add(member_offset, parsling_members_current:buffer:start)(parsling.start)
         dragon.buffer.calculate.end_address(parsling.start, parsling_byte_size)(parsling.end)
         dragon.pack(parsling.start, parsling.end)(parsling.buffer !dragon.buffer)
 
@@ -1303,12 +1303,13 @@ dragon.json.traverse.retrieve_parsling.by_index(source_parsling !dragon.json.par
 }
 
 [ calculate length ]
-dragon.json.traverse.calculate.parsling_list_metadata(parsling !dragon.json.parsling)(content !dragon.buffer, parsling_byte_size !dragon.cell, parsling_count !dragon.cell) = {
+dragon.json.traverse.calculate.parsling_list_metadata(parsling !dragon.json.parsling)(current !dragon.current, parsling_byte_size !dragon.cell, parsling_count !dragon.cell) = {
     [ setup metadata ]
     dragon.structure.byte_size(parsling)(parsling_byte_size)
 
     [ calculate content length, content buffer and member count ]
     dragon.list.calculate.content_buffer(parsling:value.members)(content)
+    dragon.pack(content, content:start)(current !dragon.current)
     dragon.buffer.calculate.length(content)(content.byte_length)
     dragon.integer.divide(content.byte_length, parsling_byte_size)(parsling_count)
 }

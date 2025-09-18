@@ -399,6 +399,13 @@ void COMPILER__generate__user_defined_function_scope(COMPILER__generation_worksp
             ANVIL__code__cell_to_address(anvil, ANVIL__sft__always_run, COMPILER__generate__use_variable(context__program_buffer).cells.start + 1, ANVIL__srt__constant__cell_byte_size, ANVIL__srt__temp__address);
 
             break;
+        /*case COMPILER__ast__predefined__context__retrieve_result:
+            // copy data
+            //ANVIL__code__cell_to_cell(anvil, ANVIL__sft__always_run, ANVIL__srt__output_result_buffer_end, COMPILER__generate__use_variable(context__program_buffer).cells.start + 1);
+
+            break;
+        case COMPILER__ast__predefined__context__retrieve_error:
+            break;*/
         case COMPILER__ast__predefined__context__run:
             ANVIL__code__run(anvil, COMPILER__generate__use_variable(context__context_buffer).cells.start, COMPILER__generate__use_variable(context__context_buffer).cells.start + 1, COMPILER__generate__use_variable(context__instruction_count).cells.start);
 
