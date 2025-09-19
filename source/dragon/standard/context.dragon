@@ -26,6 +26,15 @@ dragon.context.write.cell(context !dragon.buffer, cell_ID !dragon.cell, value !d
     dragon.cell_to_address(value, dragon.cell.byte_size, address)(advancement)
 }
 
+[ read context cell ]
+dragon.context.read.cell(context !dragon.buffer, cell_ID !dragon.cell)(value !dragon.cell) = {
+    [ calculate address ]
+    dragon.context.calculate.context_cell_address(context, cell_ID)(address)
+
+    [ perform write ]
+    dragon.address_to_cell(address, dragon.cell.byte_size)(value, advancement)
+}
+
 [ write context input ]
 dragon.context.set.context_input(context !dragon.buffer, input !dragon.buffer)() = {
     [ setup variable IDs ]
@@ -35,4 +44,26 @@ dragon.context.set.context_input(context !dragon.buffer, input !dragon.buffer)()
     [ write to context ]
     dragon.context.write.cell(context, context.input.start, input:start)()
     dragon.context.write.cell(context, context.input.end, input:end)()
+}
+
+[ read context result ]
+dragon.context.get.context_result(context !dragon.buffer)(result !dragon.buffer) = {
+    [ setup variable IDs ]
+    dragon.set(dragon.integer.26)(context.result.start)
+    dragon.set(dragon.integer.27)(context.result.end)
+
+    [ read into variables ]
+    dragon.context.read.cell(context, context.result.start)(result:start)
+    dragon.context.read.cell(context, context.result.end)(result:end)
+}
+
+[ read context result ]
+dragon.context.get.context_error(context !dragon.buffer)(error !dragon.buffer) = {
+    [ setup variable IDs ]
+    dragon.set(dragon.integer.28)(context.error.start)
+    dragon.set(dragon.integer.29)(context.error.end)
+
+    [ read into variables ]
+    dragon.context.read.cell(context, context.error.start)(error:start)
+    dragon.context.read.cell(context, context.error.end)(error:end)
 }

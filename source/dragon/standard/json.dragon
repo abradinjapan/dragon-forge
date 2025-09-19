@@ -942,6 +942,25 @@ dragon.json.compile.parse.array(workspace !dragon.json.workspace)(workspace !dra
         dragon.jump(dragon.always, @check_for_members.loop_start)()
     }
 
+    [ detect array ]
+    dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:left_square_bracket, dragon.false)(workspace, recent_lexling, valid, invalid)
+    @found_new_array valid = {
+        [ parse sub-array ]
+        dragon.json.compile.parse.array(workspace)(workspace, temp_parsling)
+
+        [ check for error ]
+        dragon.jump.bottom(workspace:error:occured, @dragon.master_scope)()
+
+        [ setup object name ]
+        dragon.copy(pushing_parsling:name)(temp_parsling:name)
+
+        [ append object ]
+        dragon.json.append.parsling(output:value.members, temp_parsling)(output:value.members)
+
+        [ next iteration ]
+        dragon.jump(dragon.always, @check_for_members.loop_start)()
+    }
+
     [ detect number ]
     dragon.json.compile.parse.check_current_lexling.by_type(workspace, workspace:lexling.types:integer, dragon.true)(workspace, recent_lexling, valid, invalid)
     @found_new_number valid = {

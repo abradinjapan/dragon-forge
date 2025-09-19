@@ -31,6 +31,10 @@ dragon.just_run(sources !dragon.list, input !dragon.buffer)(result !dragon.buffe
     dragon.set(dragon.integer.n1)(instruction_count)
     dragon.context.run(context, instruction_count)()
 
+    [ get outputs and results ]
+    dragon.context.get.context_result(context)(result)
+    dragon.context.get.context_error(context)(error)
+
     [ clean up context ]
     dragon.buffer.return(context)()
 
