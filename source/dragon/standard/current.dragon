@@ -3,3 +3,10 @@ dragon.current.within_range(current !dragon.current)(within_range !dragon.cell, 
     [ check range ]
     dragon.integer.within_range(current:buffer:start, current:progress, current:buffer:end)(within_range, outside_range)
 }
+
+[ calculate current from list ]
+dragon.current.calculate.current_from_list(list !dragon.list)(current !dragon.current) = {
+    [ calculate content buffer ]
+    dragon.list.calculate.content_buffer(list)(buffer)
+    dragon.pack(buffer, buffer:start)(current !dragon.current)
+}
