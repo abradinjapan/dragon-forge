@@ -131,3 +131,20 @@ dragon.print.binary.higher_to_lower(value !dragon.cell)() = {
     [ return string ]
     dragon.buffer.return(string)()
 }
+
+[ print a text location ]
+dragon.print.text.location(location !dragon.text.location)() = {
+    [ setup strings ]
+    dragon.set("[ ")(header)
+    dragon.set(", ")(separator)
+    dragon.set(" ]")(footer)
+
+    [ print buffer ]
+    dragon.print.buffer_as_string(header)()
+    dragon.print.integer.unsigned(location:file_index)()
+    dragon.print.buffer_as_string(separator)()
+    dragon.print.integer.unsigned(location:line_number)()
+    dragon.print.buffer_as_string(separator)()
+    dragon.print.integer.unsigned(location:character_index)()
+    dragon.print.buffer_as_string(footer)()
+}

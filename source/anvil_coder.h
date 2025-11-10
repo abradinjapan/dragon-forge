@@ -931,11 +931,11 @@ void ANVIL__code__setup__context(ANVIL__workspace* workspace, ANVIL__cell_ID pro
 
     // setup current address
     ANVIL__code__operate(workspace, ANVIL__sft__always_run, ANVIL__ot__integer_add, ANVIL__srt__temp__address, ANVIL__srt__constant__cell_byte_size, ANVIL__unused_cell_ID, ANVIL__srt__temp__address);
-    ANVIL__code__cell_to_address(workspace, ANVIL__sft__always_run, program_buffer_start, ANVIL__srt__constant__cell_byte_size, ANVIL__srt__temp__address);
+    ANVIL__code__cell_to_address(workspace, ANVIL__sft__always_run, program_buffer_end, ANVIL__srt__constant__cell_byte_size, ANVIL__srt__temp__address);
 
     // setup end address
     ANVIL__code__operate(workspace, ANVIL__sft__always_run, ANVIL__ot__integer_add, ANVIL__srt__temp__address, ANVIL__srt__constant__cell_byte_size, ANVIL__unused_cell_ID, ANVIL__srt__temp__address);
-    ANVIL__code__cell_to_address(workspace, ANVIL__sft__always_run, program_buffer_end, ANVIL__srt__constant__cell_byte_size, ANVIL__srt__temp__address);
+    ANVIL__code__cell_to_address(workspace, ANVIL__sft__always_run, program_buffer_start, ANVIL__srt__constant__cell_byte_size, ANVIL__srt__temp__address);
     
     return;
 }
