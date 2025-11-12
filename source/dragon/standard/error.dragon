@@ -37,11 +37,40 @@ dragon.error.close(error !dragon.error)() = {
     dragon.list.close(error:json)()
 }
 
-[ convert compiler error to dragon error ]
-dragon.error.convert_compiler_error_to_dragon_error(compiler_error !dragon.compiler.error)(dragon_error !dragon.error) = {
-    [ copy status ]
-    dragon.copy(compiler_error:occured)(dragon_error:occured)
+[ generate error ]
+dragon.error.generate(message !dragon.buffer, character.location !dragon.text.location)(error !dragon.error) = {
+    [ setup strings ]
+    dragon.set("%22;error%22;: {%0A;%09;%22;occured%22;: true,%0A;%09;%22;message%22;: %22;")(message.part.1)
+    dragon.set("%22;,%0A;%09;%22;location%22;: {%0A;%09;%09;%22;file_index%22;: ")(message.part.2)
+    dragon.set(",%0A;%09;%09;%22;line_number%22;: ")(message.part.3)
+    dragon.set(",%0A;%09;%09;%22;character_index%22;: ")(message.part.4)
+    dragon.set("%0A;%09;}%0A;}%0A;")(message.part.5)
 
-    [ convert details ]
-    [ TODO ]
+    [ setup condition ]
+    dragon.copy(dragon.true)(error:occured)
+
+    [ setup list ]
+    dragon.set(dragon.integer.1024)(increase)
+    dragon.list.open(increase)(error:json)
+
+    [ convert numbers to string buffers ]
+    dragon.cast.cell_to_decimal_string.higher_to_lower(character.location:file_index)(string.file_index)
+    dragon.cast.cell_to_decimal_string.higher_to_lower(character.location:line_number)(string.line_number)
+    dragon.cast.cell_to_decimal_string.higher_to_lower(character.location:character_index)(string.character_index)
+
+    [ generate message ]
+    dragon.list.append.buffer_data(error:json, message.part.1)(error:json)
+    dragon.list.append.buffer_data(error:json, message)(error:json)
+    dragon.list.append.buffer_data(error:json, message.part.2)(error:json)
+    dragon.list.append.buffer_data(error:json, string.file_index)(error:json)
+    dragon.list.append.buffer_data(error:json, message.part.3)(error:json)
+    dragon.list.append.buffer_data(error:json, string.line_number)(error:json)
+    dragon.list.append.buffer_data(error:json, message.part.4)(error:json)
+    dragon.list.append.buffer_data(error:json, string.character_index)(error:json)
+    dragon.list.append.buffer_data(error:json, message.part.5)(error:json)
+
+    [ delete conversion strings ]
+    dragon.buffer.return(string.file_index)()
+    dragon.buffer.return(string.line_number)()
+    dragon.buffer.return(string.character_index)()
 }

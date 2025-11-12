@@ -1,23 +1,19 @@
 [ compile, install and run program ]
-dragon.just_run(sources !dragon.list, input !dragon.buffer)(result !dragon.buffer, error !dragon.buffer) = {
+dragon.just_run(program.sources !dragon.list, program.input !dragon.buffer)(compilation.error !dragon.error, program.result !dragon.buffer, program.error !dragon.buffer) = {
     [ get buffer of buffers ]
-    dragon.list.calculate.content_buffer(sources)(sources.buffer)
+    dragon.list.calculate.content_buffer(program.sources)(sources.buffer)
 
     [ compile ]
     dragon.compiler.configure.default_compile()(settings)
-    dragon.compiler.compile(sources.buffer, settings)(byte_code, debug_information, compilation_error)
+    dragon.compiler.compile(sources.buffer, settings)(byte_code, debug_information, built_in_compilation_error)
 
     [ check for compilation error ]
-    @print_compilation_error compilation_error:occured = {
-        dragon.print.buffer_as_string(compilation_error:message)()
-        dragon.print.new_line()()
-        dragon.print.integer.unsigned(compilation_error:location:file_index)()
-        dragon.print.new_line()()
-        dragon.print.integer.unsigned(compilation_error:location:line_number)()
-        dragon.print.new_line()()
-        dragon.print.integer.unsigned(compilation_error:location:character_index)()
-        dragon.print.new_line()()
-        dragon.jump(dragon.always, @exit)()
+    @print_compilation_error built_in_compilation_error:occured = {
+        [ generate error ]
+        dragon.error.generate(built_in_compilation_error:message, built_in_compilation_error:location)(compilation.error)
+
+        [ skip program instalation and execution ]
+        dragon.jump.bottom(dragon.always, @dragon.master_scope)()
     }
 
     [ open new context & install ]
@@ -25,28 +21,25 @@ dragon.just_run(sources !dragon.list, input !dragon.buffer)(result !dragon.buffe
     dragon.context.install_program(context, byte_code)()
 
     [ pass input ]
-    dragon.context.set.context_input(context, input)()
+    dragon.context.set.context_input(context, program.input)()
 
     [ run context ]
     dragon.set(dragon.integer.n1)(instruction_count)
     dragon.context.run(context, instruction_count)()
 
     [ get outputs and results ]
-    dragon.context.get.context_result(context)(result)
-    dragon.context.get.context_error(context)(error)
+    dragon.context.get.context_result(context)(program.result)
+    dragon.context.get.context_error(context)(program.error)
 
     [ clean up context ]
     dragon.buffer.return(context)()
 
     [ clean up program ]
     dragon.buffer.return(byte_code)()
-
-    [ exit ]
-    @exit
 }
 
 [ test one file ]
-dragon.just_run.one_file(file_path !dragon.buffer, input !dragon.buffer)(result !dragon.buffer, error !dragon.buffer) = {
+dragon.just_run.one_file(file_path !dragon.buffer, program.input !dragon.buffer)(compilation.error !dragon.error, program.result !dragon.buffer, program.error !dragon.buffer) = {
     [ load file ]
     dragon.file_to_buffer(file_path)(user_code)
 
@@ -58,7 +51,7 @@ dragon.just_run.one_file(file_path !dragon.buffer, input !dragon.buffer)(result 
     dragon.list.append.buffer(files, user_code)(files)
 
     [ run test ]
-    dragon.just_run(files, input)(result, error)
+    dragon.just_run(files, program.input)(compilation.error, program.result, program.error)
 
     [ clean up file ]
     dragon.buffer.return(user_code)()
