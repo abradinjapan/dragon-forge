@@ -26,9 +26,15 @@ dragon.error.print_if_occured(error !dragon.error)() = {
     [ check occurence ]
     @print error:occured = {
         [ print message ]
-        dragon.list.calculate.content_buffer(error:json)(message)
-        dragon.print.buffer_as_string(message)()
+        dragon.error.print(error)()
     }
+}
+
+[ print if occured ]
+dragon.error.print(error !dragon.error)() = {
+    [ print message ]
+    dragon.list.calculate.content_buffer(error:json)(message)
+    dragon.print.buffer_as_string(message)()
 }
 
 [ close error ]
